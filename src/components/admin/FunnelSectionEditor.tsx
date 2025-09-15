@@ -122,66 +122,6 @@ export const FunnelSectionEditor = ({ data, onChange, onPricingChange }: FunnelS
         </CardContent>
       </Card>
 
-      {/* Pricing Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Pricing Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="retail_price">List Price</Label>
-            <Input
-              id="retail_price"
-              value={data.retail_price || ""}
-              onChange={(e) => onPricingChange ? onPricingChange('retail_price', e.target.value) : handleBasicInfoChange('retail_price', e.target.value)}
-              placeholder="$99/month"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="pro_price">Pro Price</Label>
-            <Input
-              id="pro_price"
-              value={data.pro_price || ""}
-              onChange={(e) => onPricingChange ? onPricingChange('pro_price', e.target.value) : handleBasicInfoChange('pro_price', e.target.value)}
-              placeholder="$89/month"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="price_duration">Price Duration</Label>
-            <Select value={data.price_duration || ""} onValueChange={(value) => handleBasicInfoChange('price_duration', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select duration" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="one-time">One-time</SelectItem>
-                <SelectItem value="monthly">Monthly</SelectItem>
-                <SelectItem value="annual">Annual</SelectItem>
-                <SelectItem value="per-use">Per-use</SelectItem>
-                <SelectItem value="custom">Custom</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="pricing_mode">Pricing Mode</Label>
-            <Select value={data.pricing_mode || "auto"} onValueChange={(value) => handleBasicInfoChange('pricing_mode', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select pricing mode" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="auto">Auto-detect</SelectItem>
-                <SelectItem value="fixed">Fixed Pricing</SelectItem>
-                <SelectItem value="features_only">Features Only</SelectItem>
-                <SelectItem value="custom_quote">Custom Quote</SelectItem>
-                <SelectItem value="external_link">External Link</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-        </CardContent>
-      </Card>
 
       {/* Hero Section */}
       <Card>

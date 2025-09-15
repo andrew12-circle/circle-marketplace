@@ -511,18 +511,10 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
             data={{
               ...service,
               ...funnelData,
-              // Use local pricing state for accurate display
-              retail_price: localPricing.retail_price ?? service.retail_price,
-              pro_price: localPricing.pro_price ?? service.pro_price,
-              co_pay_price: localPricing.co_pay_price ?? service.co_pay_price,
-              // Ensure price_duration and pricing_mode are always current
-              price_duration: service.price_duration,
-              pricing_mode: localPricing.pricing_mode ?? service.pricing_mode,
             }}
-            onPricingChange={handlePricingFieldChange}
             onChange={(data) => {
               // Extract funnel-specific fields
-              const { id, title, description, website_url, duration, setup_time, image_url, logo_url, retail_price, pro_price, price_duration, pricing_tiers, pricing_mode, ...funnelContent } = data;
+              const { id, title, description, website_url, duration, setup_time, image_url, logo_url, ...funnelContent } = data;
               
               // Update funnel content
               setFunnelData(funnelContent);
@@ -550,40 +542,8 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
                 }, 100);
               }
               
-              // Update pricing if changed
-              if (retail_price !== localPricing.retail_price || pro_price !== localPricing.pro_price || 
-                  price_duration !== service.price_duration || pricing_mode !== localPricing.pricing_mode) {
-                
-                // Handle pricing fields through the pricing change handler
-                if (retail_price !== localPricing.retail_price) {
-                  handlePricingFieldChange('retail_price', retail_price);
-                }
-                if (pro_price !== localPricing.pro_price) {
-                  handlePricingFieldChange('pro_price', pro_price);
-                }
-                if (pricing_mode !== localPricing.pricing_mode) {
-                  handlePricingFieldChange('pricing_mode', pricing_mode);
-                }
-                
-                // Update service with price duration directly and trigger save
-                if (price_duration !== service.price_duration) {
-                  onUpdate({
-                    ...service,
-                    price_duration: price_duration
-                  });
-                  
-                  // Trigger debounced save for price_duration change
-                  setTimeout(() => {
-                    const payload = prepareSavePayload();
-                    debouncedSave(service.id, payload, 'price-duration-change');
-                  }, 100);
-                }
-              }
-              
-              // Update pricing tiers if changed
-              if (pricing_tiers !== pricingTiers) {
-                setPricingTiers(pricing_tiers || []);
-              }
+              // Update pricing tiers if changed (this shouldn't happen from content tab anymore)
+              // All pricing is now handled in the dedicated pricing tab
               
               setHasChanges(true);
             }}
