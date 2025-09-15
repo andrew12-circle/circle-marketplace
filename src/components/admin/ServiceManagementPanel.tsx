@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Package, Search, Edit, Globe, MapPin, Star, DollarSign, Eye, Building, Tag, ShoppingCart, CheckCircle, Clock } from 'lucide-react';
+import { Package, Search, Edit, Globe, MapPin, Star, DollarSign, Eye, Building, Tag, ShoppingCart, CheckCircle, Clock, Mail } from 'lucide-react';
 import { ServiceFunnelEditor } from './ServiceFunnelEditor';
 import { ServicePricingTiersEditor } from '@/components/marketplace/ServicePricingTiersEditor';
 import { ServiceFunnelModal } from '@/components/marketplace/ServiceFunnelModal';
@@ -1161,12 +1161,16 @@ export const ServiceManagementPanel = () => {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-6">
+              <TabsList className="grid w-full grid-cols-7">
                 <TabsTrigger value="details">Service Details</TabsTrigger>
                 <TabsTrigger value="disclaimer">Disclaimer</TabsTrigger>
                 <TabsTrigger value="ai-research">AI Research</TabsTrigger>
                 <TabsTrigger value="pricing-mirror">Pricing Mirror</TabsTrigger>
                 <TabsTrigger value="compliance">Compliance</TabsTrigger>
+                <TabsTrigger value="notifications">
+                  <Mail className="w-4 h-4 mr-2" />
+                  Notifications
+                </TabsTrigger>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -1632,12 +1636,7 @@ export const ServiceManagementPanel = () => {
                              Official website or direct purchase/booking link. Used for "View Website" and "Buy Now" buttons.
                            </p>
                          </div>
-                      </div>}
-
-                    {/* Consultation Email Alerts */}
-                    <div className="border-t pt-6">
-                      <ServiceConsultationEmails serviceId={selectedService.id} serviceName={selectedService.title} initialEmails={(selectedService as any).consultation_emails || []} />
-                    </div>
+                       </div>}
 
                     <div className="flex gap-2">
                       <Button 
@@ -1798,6 +1797,10 @@ export const ServiceManagementPanel = () => {
 
               <TabsContent value="compliance" className="space-y-4">
                 <ServiceComplianceTracker serviceId={selectedService.id} serviceName={selectedService.title} />
+              </TabsContent>
+
+              <TabsContent value="notifications" className="space-y-4">
+                <ServiceConsultationEmails serviceId={selectedService.id} serviceName={selectedService.title} initialEmails={(selectedService as any).consultation_emails || []} />
               </TabsContent>
             </Tabs>
           </CardContent>
