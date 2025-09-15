@@ -42,7 +42,7 @@ interface Service {
   image_url?: string;
   logo_url?: string;
   website_url?: string;
-  time_to_results?: string;
+  duration?: string;
   setup_time?: string;
   price_duration?: string;
   funnel_content?: any;
@@ -308,7 +308,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       title: service.title,
       description: service.description,
       website_url: service.website_url,
-      time_to_results: service.time_to_results,
+      duration: service.duration,
       setup_time: service.setup_time,
       image_url: service.image_url,
       logo_url: service.logo_url,
@@ -514,14 +514,14 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
             }}
             onChange={(data) => {
               // Extract funnel-specific fields
-              const { id, title, description, website_url, time_to_results, setup_time, image_url, logo_url, retail_price, pro_price, price_duration, pricing_tiers, pricing_mode, ...funnelContent } = data;
+              const { id, title, description, website_url, duration, setup_time, image_url, logo_url, retail_price, pro_price, price_duration, pricing_tiers, pricing_mode, ...funnelContent } = data;
               
               // Update funnel content
               setFunnelData(funnelContent);
               
               // Update service-level fields if they changed
               if (title !== service.title || description !== service.description || website_url !== service.website_url || 
-                  time_to_results !== service.time_to_results || setup_time !== service.setup_time ||
+                  duration !== service.duration || setup_time !== service.setup_time ||
                   image_url !== service.image_url || logo_url !== service.logo_url) {
                 // Update the service directly via parent
                 onUpdate({
@@ -529,7 +529,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
                   title: title || service.title,
                   description: description || service.description,
                   website_url: website_url || service.website_url,
-                  time_to_results: time_to_results || service.time_to_results,
+                  duration: duration || service.duration,
                   setup_time: setup_time || service.setup_time,
                   image_url: image_url || service.image_url,
                   logo_url: logo_url || service.logo_url

@@ -58,8 +58,8 @@ export const FunnelSectionEditor = ({ data, onChange }: FunnelSectionEditorProps
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="time_to_results">Time to Results</Label>
-            <Select value={data.time_to_results || ""} onValueChange={(value) => handleBasicInfoChange('time_to_results', value)}>
+            <Label htmlFor="duration">Time to Results</Label>
+            <Select value={data.duration || ""} onValueChange={(value) => handleBasicInfoChange('duration', value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select timeframe" />
               </SelectTrigger>
