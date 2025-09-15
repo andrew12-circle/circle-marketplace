@@ -60,9 +60,15 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
       console.log('🔧 EditMode: Blocked - not admin', { isAdmin });
       return;
     }
+    
     console.log('🔧 EditMode: About to call setIsEditMode', { enabled });
-    setIsEditMode(enabled);
-    console.log('🔧 EditMode: setIsEditMode called with', enabled);
+    
+    // Force React state update with callback
+    setIsEditMode(prev => {
+      console.log('🔧 EditMode: setIsEditMode callback', { prev, enabled, willChange: prev !== enabled });
+      return enabled;
+    });
+    
     // Update URL
     const url = new URL(window.location.href);
     if (enabled) {

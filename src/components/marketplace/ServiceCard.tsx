@@ -31,7 +31,7 @@ import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useABTest } from "@/hooks/useABTest";
 import { SponsoredLabel } from "./SponsoredLabel";
 import { ServiceBadges } from "./ServiceBadges";
-import { Editable } from "@/components/admin/Editable";
+import { EditableText } from "@/components/inline/EditableText";
 import { extractNumericPrice, computeDiscountPercentage, getDealDisplayPrice, getSavingsInfo } from '@/utils/dealPricing';
 import { getPackagePrices } from '@/utils/pricingResolver';
 import { getNormalizedPackages, getActivePackage, getPricesForPackage } from '@/utils/packagePricing';
@@ -521,20 +521,19 @@ export const ServiceCard = ({
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <Editable 
-                entity="services" 
-                id={service.id} 
-                field="title" 
-                value={service.title}
-                type="text"
-                onApply={(updatedService) => {
-                  console.log('Service title updated:', updatedService);
-                }}
-              >
-                <h3 className="font-semibold text-foreground leading-tight text-base line-clamp-2 mb-1">
-                  {getLocalizedTitle().split(' - ').pop() || getLocalizedTitle().split(': ').pop() || getLocalizedTitle()}
-                </h3>
-              </Editable>
+              <h3 className="font-semibold text-foreground leading-tight text-base line-clamp-2 mb-1">
+                <EditableText
+                  entity="services"
+                  id={service.id}
+                  field="title"
+                  value={service.title}
+                  onSaved={(updatedService) => {
+                    console.log('Service title updated:', updatedService);
+                    // Optionally update the service in parent state
+                  }}
+                  className="inline-block"
+                />
+              </h3>
               {/* Sponsored label right underneath the name, like Facebook */}
               {isSponsored && (
                 <div className="mb-1">
@@ -607,20 +606,19 @@ export const ServiceCard = ({
 
           {/* Description with dynamic height for expansion */}
           <div className={`px-4 py-3 flex flex-col transition-all duration-300 ${isDescriptionExpanded ? '' : 'h-[5.5rem]'}`}>
-            <Editable
-              entity="services"
-              id={service.id}
-              field="description"
-              value={service.description}
-              type="textarea"
-              onApply={(updatedService) => {
-                console.log('Service description updated:', updatedService);
-              }}
-            >
-              <p className={`text-sm text-muted-foreground leading-tight whitespace-pre-line transition-all duration-300 ${isDescriptionExpanded ? 'overflow-visible' : 'line-clamp-2 overflow-hidden'}`}>
-                {getLocalizedDescription()}
-              </p>
-            </Editable>
+            <p className={`text-sm text-muted-foreground leading-tight whitespace-pre-line transition-all duration-300 ${isDescriptionExpanded ? 'overflow-visible' : 'line-clamp-2 overflow-hidden'}`}>
+              <EditableText
+                entity="services"
+                id={service.id}
+                field="description"
+                value={service.description}
+                onSaved={(updatedService) => {
+                  console.log('Service description updated:', updatedService);
+                }}
+                className="inline-block"
+                multiline={true}
+              />
+            </p>
             {getLocalizedDescription() && getLocalizedDescription().length > 100 && (
               <button
                 className="text-sm text-primary hover:text-primary/80 font-medium mt-2 transition-colors self-start"
