@@ -28,6 +28,7 @@ import { useDebouncedCommit } from '@/hooks/useDebouncedCommit';
 import { diffPatch } from '@/lib/diff';
 import { dlog, dwarn } from '@/utils/debugLogger';
 import { AIServiceUpdater } from './AIServiceUpdater';
+import { updateServiceResilient } from '@/lib/resilientServiceUpdate';
 import { ServicePricingMirror } from './ServicePricingMirror';
 import { ServiceComplianceTracker } from './ServiceComplianceTracker';
 import ServiceCard from './ServiceCard';
@@ -258,7 +259,6 @@ export const ServiceManagementPanel = () => {
   // Bulletproof service saver with success/error callbacks
   const { save: saveService } = useServiceSaver(
     async (id: string, patch: any, signal: AbortSignal) => {
-      const { updateServiceResilient } = await import('@/lib/resilientServiceUpdate');
       return await updateServiceResilient(id, patch, signal);
     },
     {
