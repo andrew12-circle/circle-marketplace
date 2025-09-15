@@ -247,7 +247,7 @@ export const ServiceManagementPanel = () => {
   const {
     toast
   } = useToast();
-  const invalidateCache = useInvalidateMarketplace();
+  const { invalidateAll: invalidateCache } = useInvalidateMarketplace();
   const queryClient = useQueryClient();
   const [services, setServices] = useState<Service[]>([]);
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
