@@ -18,6 +18,7 @@ import { useAdminStatus } from "@/hooks/useAdminStatus";
 import { supabase } from "@/integrations/supabase/client";
 import { User, ShoppingBag, Crown, LogOut, Loader2, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase, Package, Brain, Command } from "lucide-react";
 import { CustomerPortalButton } from "@/components/marketplace/CustomerPortalButton";
+import { EditModeToggle } from "@/components/admin/EditModeToggle";
 
 
 interface VendorInfo {
@@ -187,6 +188,11 @@ export const UserMenu = () => {
                 <Shield className="mr-2 h-4 w-4" />
                 <span>Admin Dashboard</span>
               </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <div className="w-full">
+                <EditModeToggle />
+              </div>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
           </>
