@@ -22,8 +22,7 @@ import { ServiceConsultationEmails } from './ServiceConsultationEmails';
 import { ServiceDisclaimerSection } from './ServiceDisclaimerSection';
 import { ServiceAIResearchEditor } from './ServiceAIResearchEditor';
 import { ServiceImageUploader } from './ServiceImageUploader';
-import { useServiceSaver } from '@/hooks/useServiceSaver';
-import { useDebouncedCommit } from '@/hooks/useDebouncedCommit';
+import { useUnifiedServiceSave } from '@/hooks/useUnifiedServiceSave';
 import { diffPatch } from '@/lib/diff';
 import { dlog, dwarn } from '@/utils/debugLogger';
 import { AIServiceUpdater } from './AIServiceUpdater';
@@ -253,46 +252,35 @@ export const ServiceManagementPanel = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveInProgress, setSaveInProgress] = useState(false);
-  
-  // Bulletproof service saver with success/error callbacks
-  const { save: saveService } = useServiceSaver(
-    async (id: string, patch: any, signal: AbortSignal) => {
-      return await updateServiceResilient(id, patch, signal);
-    },
-    {
-      onSuccess: async (id: string, updatedService: any) => {
-        console.log('[ServicePanel] Save successful', { id, updatedService });
-        
-        // Update local state with fresh data
-        setServices(prev => prev.map(s => s.id === id ? { ...s, ...updatedService } : s));
-        if (selectedService?.id === id) {
-          setSelectedService(prev => prev ? { ...prev, ...updatedService } : null);
-          setEditForm(prev => ({ ...prev, ...updatedService }));
-        }
-        
-        // Clear saving state
-        setSaving(false);
-        
-        // Invalidate cache to ensure consistency
-        await invalidateCache();
-        
-        toast({
-          title: 'Changes saved successfully',
-          description: 'Your service updates have been saved.',
-        });
-      },
-      onError: (id: string, error: any) => {
-        console.error('[ServicePanel] Save failed', { id, error });
-        setSaving(false);
-        
-        toast({
-          title: 'Failed to save changes',
-          description: error?.message || 'An error occurred while saving. Please try again.',
-          variant: 'destructive',
-        });
+  // Unified save system
+  const {
+    save: saveService,
+    isSaving,
+    saveState
+  } = useUnifiedServiceSave({
+    onSaveSuccess: async (id: string, result: any) => {
+      console.log('[ServicePanel] Save successful', { id, result });
+      
+      // Update local state - get fresh data from the result
+      setServices(prev => prev.map(s => s.id === id ? { ...s, ...result } : s));
+      if (selectedService?.id === id) {
+        setSelectedService(prev => prev ? { ...prev, ...result } : null);
+        setEditForm(prev => ({ ...prev, ...result }));
       }
-    }
-  );
+      
+      // Clear saving state
+      setSaving(false);
+      
+      // Invalidate cache to ensure consistency
+      await invalidateCache();
+    },
+    onSaveError: (id: string, error: any) => {
+      console.error('[ServicePanel] Save failed', { id, error });
+      setSaving(false);
+    },
+    showToasts: true,
+    autoInvalidateCache: true
+  });
   
   // Memoize service lookup for performance
   const serviceById = useMemo(() => new Map(services.map(s => [s.id, s])), [services]);
@@ -1650,20 +1638,20 @@ export const ServiceManagementPanel = () => {
                             return;
                           }
                           
-                          // Start bulletproof save with loading state
+                          // Start unified save with loading state
                           setSaving(true);
                           setIsEditingDetails(false);
-                          console.log('[ServicePanel] Starting bulletproof save');
+                          console.log('[ServicePanel] Starting unified save');
                           
-                          toast({
-                            title: 'Saving changes...',
-                            description: 'Your updates are being processed.'
-                          });
-                          
-                          // The actual save and success/error handling is now in useServiceSaver callbacks
-                          saveService(selectedService.id, patch);
+                          try {
+                            await saveService(selectedService.id, patch);
+                          } catch (error) {
+                            console.error('[ServicePanel] Unified save failed:', error);
+                          } finally {
+                            setSaving(false);
+                          }
                         }}
-                        disabled={!isDetailsDirty || !selectedService || saving}
+                        disabled={!isDetailsDirty || !selectedService || isSaving}
                       >
                         Save Changes
                       </Button>

@@ -13,9 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useInvalidateMarketplace, QUERY_KEYS } from "@/hooks/useMarketplaceData";
 import { useQueryClient } from "@tanstack/react-query";
-import { useResilientSave } from "@/hooks/useResilientSave";
-import { useAutosave } from "@/hooks/useAutosave";
-import { useDraft } from "@/hooks/useDraft";
+import { useDebouncedServiceSave } from "@/hooks/useDebouncedServiceSave";
 import { useNavigationGuard } from "@/hooks/useNavigationGuard";
 import { FunnelSectionEditor } from "./FunnelSectionEditor";
 import { FunnelMediaEditor } from "./FunnelMediaEditor";
@@ -86,36 +84,29 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
   const { invalidateServices } = useInvalidateMarketplace();
   const queryClient = useQueryClient();
   
-  const { save: resilientSave, isSaving } = useResilientSave({
-    maxRetries: 3,
-    retryDelay: 1500,
-    timeout: 90000
-  });
-
-  // Draft management
-  const { saveDraft, clearDraft, hasDraft } = useDraft({
-    key: `service-funnel-${service.id}`,
-    initialData: { funnelData, pricingTiers },
-    enabled: true
+  // Unified save system with debouncing and coordination
+  const {
+    debouncedSave,
+    saveImmediately,
+    isSaving,
+    hasUnsavedChanges,
+    lastSaved
+  } = useDebouncedServiceSave({
+    debounceMs: 3000,
+    autoSave: true,
+    onSaveSuccess: (serviceId, result) => {
+      setLastSavedAt(new Date().toISOString());
+      setHasChanges(false);
+      onUpdate(service); // Trigger parent update
+    },
+    onSaveError: (serviceId, error) => {
+      console.error('[ServiceFunnelEditor] Save failed:', error);
+    }
   });
   
   // Navigation guard
   useNavigationGuard({
-    hasUnsavedChanges: hasChanges || isSaving
-  });
-  
-  // Autosave integration with "Saved" feedback
-  const { triggerAutosave } = useAutosave({
-    onSave: async (data) => {
-      await resilientSave(data, performSave);
-      saveDraft(data);
-    },
-    onSaved: () => {
-      setLastSavedAt(new Date().toISOString());
-      setHasChanges(false);
-    },
-    delay: 6000,
-    enabled: hasChanges
+    hasUnsavedChanges: hasChanges || hasUnsavedChanges || isSaving
   });
 
   // Initialize default funnel content if none exists
@@ -289,18 +280,10 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     setSelectedDefaultPackageId((service as any).default_package_id || null);
   }, [service]);
 
-  const performSave = useCallback(async (data: { funnelData: any; pricingTiers: any[] }) => {
-    console.log("[Admin ServiceFunnelEditor] Resilient save started", {
-      serviceId: service.id,
-      currentPricingFields: {
-        retail_price: localPricing.retail_price,
-        pro_price: localPricing.pro_price,
-        co_pay_price: localPricing.co_pay_price
-      }
-    });
-    
-    const sanitizedFunnel = sanitizeFunnel(data.funnelData);
-    const sanitizedPricing = JSON.parse(JSON.stringify(data.pricingTiers || []));
+  // Prepare save payload with current service and local pricing data
+  const prepareSavePayload = useCallback(() => {
+    const sanitizedFunnel = sanitizeFunnel(funnelData);
+    const sanitizedPricing = JSON.parse(JSON.stringify(pricingTiers || []));
     
     // Normalize pricing fields to prevent NaN errors
     const normalizedRetailPrice = normalizePrice(localPricing.retail_price);
@@ -320,80 +303,40 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       co_pay_price: normalizePrice(p.co_pay_price),
     }));
     
-    console.log("[Admin ServiceFunnelEditor] Starting database update with normalized pricing data...");
-    
-    // CRITICAL: Use .select().single() to get fresh row back from database
-    const { data: updatedService, error } = await supabase
-      .from('services')
-      .update({
-        // Service-level fields that can be edited in funnel
-        title: service.title,
-        description: service.description,
-        website_url: service.website_url,
-        time_to_results: service.time_to_results,
-        setup_time: service.setup_time,
-        image_url: service.image_url,
-        logo_url: service.logo_url,
-        price_duration: service.price_duration,
-        // Funnel content
-        funnel_content: sanitizedFunnel,
-        pricing_tiers: updatedPackages,
-        // Use normalized pricing values to prevent NaN database errors
-        retail_price: normalizedRetailPrice,
-        pro_price: normalizedProPrice,
-        co_pay_price: normalizedCoPayPrice,
-        default_package_id: selectedDefaultPackageId || null,
-        pricing_mode: localPricing.pricing_mode,
-        pricing_external_url: localPricing.pricing_external_url,
-        pricing_cta_label: localPricing.pricing_cta_label,
-        pricing_cta_type: localPricing.pricing_cta_type,
-        pricing_note: localPricing.pricing_note,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', service.id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error("[Admin ServiceFunnelEditor] Database error:", error);
-      console.error("[Admin ServiceFunnelEditor] Failed pricing values:", {
-        retail_price: normalizedRetailPrice,
-        pro_price: normalizedProPrice,
-        co_pay_price: normalizedCoPayPrice
-      });
-      throw new Error(`Save failed: ${error.message}`);
-    }
-
-    if (!updatedService) {
-      console.error("[Admin ServiceFunnelEditor] No service data returned from database");
-      throw new Error("Save failed: No data returned from database");
-    }
-
-    console.log("[Admin ServiceFunnelEditor] Database updated successfully, fresh row returned:", {
-      id: updatedService.id,
-      retail_price: updatedService.retail_price,
-      pro_price: updatedService.pro_price,
-      co_pay_price: updatedService.co_pay_price
-    });
-    
-    // CRITICAL: Pass the fresh DB row to parent, not a constructed object
-    onUpdate(updatedService);
-    
-    console.log("[Admin ServiceFunnelEditor] Calling onUpdate with fresh service data from database");
-    
-    // Only do scoped invalidation during autosave - no heavy operations
-    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.serviceById(service.id) });
-    
-    return true;
-  }, [service, localPricing, onUpdate, invalidateServices, selectedDefaultPackageId]);
+    return {
+      // Service-level fields that can be edited in funnel
+      title: service.title,
+      description: service.description,
+      website_url: service.website_url,
+      time_to_results: service.time_to_results,
+      setup_time: service.setup_time,
+      image_url: service.image_url,
+      logo_url: service.logo_url,
+      price_duration: service.price_duration,
+      // Funnel content
+      funnel_content: sanitizedFunnel,
+      pricing_tiers: updatedPackages,
+      // Use normalized pricing values to prevent NaN database errors
+      retail_price: normalizedRetailPrice,
+      pro_price: normalizedProPrice,
+      co_pay_price: normalizedCoPayPrice,
+      default_package_id: selectedDefaultPackageId || null,
+      pricing_mode: localPricing.pricing_mode,
+      pricing_external_url: localPricing.pricing_external_url,
+      pricing_cta_label: localPricing.pricing_cta_label,
+      pricing_cta_type: localPricing.pricing_cta_type,
+      pricing_note: localPricing.pricing_note,
+      updated_at: new Date().toISOString()
+    };
+  }, [service, localPricing, funnelData, pricingTiers, selectedDefaultPackageId]);
 
   const handleSave = async () => {
     if (isSaving) return;
     
     try {
-      await resilientSave({ funnelData, pricingTiers }, performSave);
+      const payload = prepareSavePayload();
+      await saveImmediately(service.id, payload);
       setHasChanges(false);
-      clearDraft(); // Clear localStorage draft on successful explicit save
       
       // Only run heavy operations on explicit save
       setTimeout(() => {
@@ -420,7 +363,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
         })();
       }, 100);
     } catch (error: any) {
-      // Error handling is managed by useResilientSave
+      // Error handling is managed by unified save system
       console.error('[Admin ServiceFunnelEditor] Save operation failed:', error);
     }
   };
@@ -431,11 +374,19 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       [section]: data
     }));
     setHasChanges(true);
+    
+    // Trigger debounced auto-save
+    const payload = prepareSavePayload();
+    debouncedSave(service.id, payload, 'funnel-data-change');
   };
 
   const handlePricingChange = (tiers: any[]) => {
     setPricingTiers(tiers);
     setHasChanges(true);
+    
+    // Trigger debounced auto-save
+    const payload = prepareSavePayload();
+    debouncedSave(service.id, payload, 'pricing-tiers-change');
   };
 
   // Handle pricing field changes (retail_price, pro_price, etc.)
@@ -446,13 +397,18 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       [field]: value
     }));
     setHasChanges(true);
+    
+    // Trigger debounced auto-save
+    setTimeout(() => {
+      const payload = prepareSavePayload();
+      debouncedSave(service.id, payload, 'pricing-field-change');
+    }, 100); // Small delay to ensure state is updated
   };
 
   const handleReset = () => {
     setFunnelData(service.funnel_content || {});
     setPricingTiers(service.pricing_tiers || []);
     setHasChanges(false);
-    clearDraft();
     setLastSavedAt(null);
   };
 
