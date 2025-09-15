@@ -22,7 +22,7 @@ import { ServiceConsultationEmails } from './ServiceConsultationEmails';
 import { ServiceDisclaimerSection } from './ServiceDisclaimerSection';
 import { ServiceAIResearchEditor } from './ServiceAIResearchEditor';
 import { ServiceImageUploader } from './ServiceImageUploader';
-import { useUnifiedServiceSave } from '@/hooks/useUnifiedServiceSave';
+import { useDebouncedServiceSave } from '@/hooks/useDebouncedServiceSave';
 import { diffPatch } from '@/lib/diff';
 import { dlog, dwarn } from '@/utils/debugLogger';
 import { AIServiceUpdater } from './AIServiceUpdater';
@@ -252,12 +252,8 @@ export const ServiceManagementPanel = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveInProgress, setSaveInProgress] = useState(false);
-  // Unified save system
-  const {
-    save: saveService,
-    isSaving,
-    saveState
-  } = useUnifiedServiceSave({
+  // Auto-save system for marketplace settings
+  const { debouncedSave, isSaving: isDebouncedSaving } = useDebouncedServiceSave({
     onSaveSuccess: async (id: string, result: any) => {
       console.log('[ServicePanel] Save successful', { id, result });
       
@@ -277,9 +273,7 @@ export const ServiceManagementPanel = () => {
     onSaveError: (id: string, error: any) => {
       console.error('[ServicePanel] Save failed', { id, error });
       setSaving(false);
-    },
-    showToasts: true,
-    autoInvalidateCache: true
+    }
   });
   
   // Memoize service lookup for performance
@@ -1247,10 +1241,16 @@ export const ServiceManagementPanel = () => {
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-green-900">Primary Category</label>
                             <p className="text-xs text-muted-foreground">Main category for filtering (shown prominently on cards)</p>
-                            <Input value={editForm.category || ''} onChange={e => setEditForm({
-                      ...editForm,
-                      category: e.target.value
-                    })} placeholder="e.g., Marketing, CRM, Lead Generation" className="bg-white" />
+                            <Input value={editForm.category || ''} onChange={e => {
+                              const newForm = { ...editForm, category: e.target.value };
+                              setEditForm(newForm);
+                              if (selectedService) {
+                                const patch = diffPatch(selectedService, newForm);
+                                if (Object.keys(patch).length > 0) {
+                                  debouncedSave(selectedService.id, patch);
+                                }
+                              }
+                            }} placeholder="e.g., Marketing, CRM, Lead Generation" className="bg-white" />
                           </div>
                           
                           <div className="space-y-2">
@@ -1288,10 +1288,16 @@ export const ServiceManagementPanel = () => {
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Sort Order</label>
-                        <Input type="number" value={editForm.sort_order || ''} onChange={e => setEditForm({
-                    ...editForm,
-                    sort_order: Number(e.target.value)
-                  })} />
+                        <Input type="number" value={editForm.sort_order || ''} onChange={e => {
+                          const newForm = { ...editForm, sort_order: Number(e.target.value) };
+                          setEditForm(newForm);
+                          if (selectedService) {
+                            const patch = diffPatch(selectedService, newForm);
+                            if (Object.keys(patch).length > 0) {
+                              debouncedSave(selectedService.id, patch);
+                            }
+                          }
+                        }} />
                       </div>
                     </div>
 
@@ -1525,10 +1531,16 @@ export const ServiceManagementPanel = () => {
                          {/* Website/Purchase URL Field - Only shown when direct purchase is enabled */}
                          <div className="space-y-2">
                            <label className="text-sm font-medium text-blue-900">Website / Purchase URL</label>
-                           <Input value={editForm.website_url || ''} onChange={e => setEditForm({
-                    ...editForm,
-                    website_url: e.target.value
-                  })} placeholder="https://example.com/checkout or https://calendly.com/yourlink" className="bg-white" />
+                            <Input value={editForm.website_url || ''} onChange={e => {
+                              const newForm = { ...editForm, website_url: e.target.value };
+                              setEditForm(newForm);
+                              if (selectedService) {
+                                const patch = diffPatch(selectedService, newForm);
+                                if (Object.keys(patch).length > 0) {
+                                  debouncedSave(selectedService.id, patch);
+                                }
+                              }
+                            }} placeholder="https://example.com/checkout or https://calendly.com/yourlink" className="bg-white" />
                            <p className="text-xs text-blue-600">
                              Official website or direct purchase/booking link. Used for "View Website" and "Buy Now" buttons.
                            </p>
@@ -1536,79 +1548,20 @@ export const ServiceManagementPanel = () => {
                        </div>}
 
                     <div className="flex gap-2">
-                      <Button 
-                        onClick={async () => {
-                          console.log('[ServicePanel] Save button clicked', {
-                            hasSelectedService: !!selectedService,
-                            isDetailsDirty,
-                            selectedServiceId: selectedService?.id
-                          });
-                          
-                          if (!selectedService || !isDetailsDirty) {
-                            console.log('[ServicePanel] Save blocked - no service or not dirty', {
-                              hasService: !!selectedService,
-                              isDirty: isDetailsDirty
-                            });
-                            return;
-                          }
-                          
-                          // Validate required fields
-                          if (!editForm.title || !editForm.category) {
-                            console.log('[ServicePanel] Save blocked - missing required fields', {
-                              title: editForm.title,
-                              category: editForm.category
-                            });
-                            toast({
-                              title: 'Missing required fields',
-                              description: 'Please provide both Title and Category before saving.',
-                              variant: 'destructive'
-                            });
-                            return;
-                          }
-                          
-                          // Generate diff-only patch
-                          const patch = diffPatch(selectedService, editForm);
-                          console.log('[ServicePanel] Generated patch', {
-                            patchKeys: Object.keys(patch),
-                            patchSize: Object.keys(patch).length,
-                            patch
-                          });
-                          
-                          if (Object.keys(patch).length === 0) {
-                            console.log('[ServicePanel] No changes detected - patch is empty');
-                            toast({
-                              title: 'No changes detected',
-                              description: 'No modifications found to save.',
-                              variant: 'destructive'
-                            });
-                            return;
-                          }
-                          
-                          // Start unified save with loading state
-                          setSaving(true);
-                          setIsEditingDetails(false);
-                          console.log('[ServicePanel] Starting unified save');
-                          
-                          try {
-                            await saveService(selectedService.id, patch);
-                          } catch (error) {
-                            console.error('[ServicePanel] Unified save failed:', error);
-                          } finally {
-                            setSaving(false);
-                          }
-                        }}
-                        disabled={!isDetailsDirty || !selectedService || isSaving}
-                      >
-                        Save Changes
-                      </Button>
                       <Button variant="outline" onClick={() => {
-                  if (selectedService) {
-                    setEditForm(selectedService);
-                    setIsEditingDetails(false);
-                  }
-                }}>
+                        if (selectedService) {
+                          setEditForm(selectedService);
+                          setIsEditingDetails(false);
+                        }
+                      }}>
                         Cancel
                       </Button>
+                      {(isSaving || isDebouncedSaving) && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
+                          Auto-saving...
+                        </div>
+                      )}
                     </div>
                   </div> : <div className="space-y-4">
                     <div className="flex justify-between items-center">
