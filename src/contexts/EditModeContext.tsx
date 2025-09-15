@@ -17,6 +17,11 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
   const { data: isAdmin } = useAdminStatus();
   const [isEditMode, setIsEditMode] = useState(false);
 
+  // Debug logging when state changes
+  useEffect(() => {
+    console.log('🔧 EditMode: State changed', { isEditMode, isAdmin });
+  }, [isEditMode, isAdmin]);
+
   useEffect(() => {
     const qp = new URL(window.location.href).searchParams.get('edit');
     const newEditMode = !!isAdmin && qp === '1';
@@ -52,8 +57,9 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
       console.log('🔧 EditMode: Blocked - not admin', { isAdmin });
       return;
     }
-    console.log('🔧 EditMode: Manual toggle', { enabled, isAdmin });
+    console.log('🔧 EditMode: Manual toggle START', { enabled, isAdmin, currentEditMode: isEditMode });
     setIsEditMode(enabled);
+    console.log('🔧 EditMode: setIsEditMode called with', enabled);
     // Update URL
     const url = new URL(window.location.href);
     if (enabled) {
@@ -62,6 +68,7 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
       url.searchParams.delete('edit');
     }
     window.history.replaceState({}, '', url.toString());
+    console.log('🔧 EditMode: URL updated', { url: url.toString() });
   };
 
   const value = useMemo(() => ({ 
