@@ -191,7 +191,10 @@ export const UserMenu = () => {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem 
-              onClick={() => setEditMode(!isEditMode)}
+              onClick={() => {
+                console.log('🔧 Edit Mode toggle clicked!', { currentEditMode: isEditMode, isAdmin });
+                setEditMode(!isEditMode);
+              }}
               className="flex items-center cursor-pointer"
             >
               {isEditMode ? (
