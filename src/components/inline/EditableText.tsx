@@ -28,14 +28,14 @@ export function EditableText({
   inputClassName = "",
   multiline = false
 }: EditableTextProps) {
-  const { isEditMode } = useEditMode();
+  const { isEdit } = useEditMode();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value ?? "");
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
   // View mode - just show the text
-  if (!isEditMode) {
+  if (!isEdit) {
     return <span className={className}>{value}</span>;
   }
 

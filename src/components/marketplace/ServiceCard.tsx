@@ -717,19 +717,17 @@ export const ServiceCard = ({
                       
                       {/* Show retail price as fallback */}
                       {effectivePricing.retail > 0 && (
-                        <div className="text-xl font-bold text-foreground">
-                          <EditableText
-                            entity="services"
-                            id={service.id}
-                            field="retail_price"
-                            value={service.retail_price}
-                            onSaved={(updatedService) => {
-                              console.log('Retail price updated:', updatedService);
-                            }}
-                          />
-                          {!service.retail_price && (
-                            <span>{formatPrice(effectivePricing.retail, service.price_duration || 'mo')}</span>
-                          )}
+                        <div 
+                          className="text-xl font-bold text-foreground"
+                          data-editable
+                          data-entity="services"
+                          data-id={service.id}
+                          data-field="retail_price"
+                          data-type="text"
+                          data-label="Retail Price"
+                          data-value={service.retail_price}
+                        >
+                          {formatPrice(effectivePricing.retail, service.price_duration || 'mo')}
                         </div>
                       )}
                     </div>
@@ -746,19 +744,16 @@ export const ServiceCard = ({
                           )}
                           <div className="flex items-center justify-center gap-2 text-xl font-bold text-blue-600">
                             <Crown className="w-4 h-4" />
-                            <span>
-                              <EditableText
-                                entity="services"
-                                id={service.id}
-                                field="pro_price"
-                                value={service.pro_price}
-                                onSaved={(updatedService) => {
-                                  console.log('Pro price updated:', updatedService);
-                                }}
-                              />
-                              {!service.pro_price && (
-                                <span>{formatPrice(effectivePricing.pro, service.price_duration || 'mo')}</span>
-                              )}
+                            <span
+                              data-editable
+                              data-entity="services"
+                              data-id={service.id}
+                              data-field="pro_price"
+                              data-type="text"
+                              data-label="Pro Price"
+                              data-value={service.pro_price}
+                            >
+                              {formatPrice(effectivePricing.pro, service.price_duration || 'mo')}
                             </span>
                           </div>
                           <div className="text-xs text-blue-600 font-medium">Circle Pro Price</div>
@@ -836,12 +831,18 @@ export const ServiceCard = ({
                   ) : effectivePricing.retail > 0 ? (
                     <div className="flex items-center justify-between mt-4">
                       <span className="text-sm text-muted-foreground">{t('serviceCard.listPrice')}</span>
-                       <EditableText entity="services" id={service.id} field="retail_price" value={service.retail_price} />
-                       {!service.retail_price && (
-                         <span className="text-xl font-bold text-foreground">
-                            {formatPrice(effectivePricing.retail, service.price_duration || 'month')}
-                         </span>
-                       )}
+                       <span 
+                         className="text-xl font-bold text-foreground"
+                         data-editable
+                         data-entity="services"
+                         data-id={service.id}
+                         data-field="retail_price"
+                         data-type="text"
+                         data-label="Retail Price"
+                         data-value={service.retail_price}
+                       >
+                         {formatPrice(effectivePricing.retail, service.price_duration || 'month')}
+                       </span>
                     </div>
                    ) : null}
                     
@@ -856,12 +857,18 @@ export const ServiceCard = ({
                               <span className="text-sm font-medium text-circle-primary">{t('serviceCard.circleProPrice')}</span>
                               <Crown className="w-4 h-4 text-circle-primary" />
                             </div>
-                             <EditableText entity="services" id={service.id} field="pro_price" value={service.pro_price} />
-                             {!service.pro_price && (
-                               <span className="text-lg font-bold text-circle-primary">
-                                  {formatPrice(effectivePricing.pro, service.price_duration || 'month')}
-                               </span>
-                             )}
+                             <span 
+                               className="text-lg font-bold text-circle-primary"
+                               data-editable
+                               data-entity="services"
+                               data-id={service.id}
+                               data-field="pro_price"
+                               data-type="text"
+                               data-label="Pro Price"
+                               data-value={service.pro_price}
+                             >
+                               {formatPrice(effectivePricing.pro, service.price_duration || 'month')}
+                             </span>
                           </div>
                         </TooltipTrigger>
                         <TooltipContent className="w-40 sm:w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>

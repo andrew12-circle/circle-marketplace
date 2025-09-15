@@ -31,7 +31,7 @@ export const UserMenu = () => {
   const { user, profile, signOut } = useAuth();
   const { toast } = useToast();
   const { data: isAdmin } = useAdminStatus();
-  const { isEditMode, setEditMode } = useEditMode();
+  const { isEdit, setEdit } = useEditMode();
   
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [vendorInfo, setVendorInfo] = useState<VendorInfo | null>(null);
@@ -191,13 +191,14 @@ export const UserMenu = () => {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem 
-              onClick={() => {
-                console.log('🔧 Edit Mode toggle clicked!', { currentEditMode: isEditMode, isAdmin });
-                setEditMode(!isEditMode);
+              onClick={(e) => { 
+                e.preventDefault(); 
+                e.stopPropagation(); 
+                setEdit(!isEdit); 
               }}
               className="flex items-center cursor-pointer"
             >
-              {isEditMode ? (
+              {isEdit ? (
                 <>
                   <Eye className="mr-2 h-4 w-4" />
                   <span>Exit Edit Mode</span>

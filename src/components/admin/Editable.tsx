@@ -30,13 +30,13 @@ export function Editable({
   children: React.ReactNode; 
   onApply?: (row: any) => void;
 }) {
-  const { isEditMode } = useEditMode();
+  const { isEdit } = useEditMode();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [val, setVal] = useState(initial ?? '');
   const [saving, setSaving] = useState(false);
 
-  if (!isEditMode) return <>{children}</>;
+  if (!isEdit) return <>{children}</>;
 
   return (
     <span className="relative group inline-block">

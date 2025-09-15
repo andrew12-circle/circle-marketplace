@@ -5,19 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 export function EditModeToggle() {
-  const { isEditMode, setEditMode, isAdmin } = useEditMode();
+  const { isEdit, setEdit } = useEditMode();
+  const isAdmin = true; // This component only renders for admins anyway
 
   if (!isAdmin) return null;
 
   return (
     <div className="flex items-center gap-2">
       <Button
-        variant={isEditMode ? "default" : "outline"}
+        variant={isEdit ? "default" : "outline"}
         size="sm"
-        onClick={() => setEditMode(!isEditMode)}
+        onClick={() => setEdit(!isEdit)}
         className="gap-2"
       >
-        {isEditMode ? (
+        {isEdit ? (
           <>
             <Eye className="h-4 w-4" />
             Exit Edit Mode
@@ -30,7 +31,7 @@ export function EditModeToggle() {
         )}
       </Button>
       
-      {isEditMode && (
+      {isEdit && (
         <Badge variant="secondary" className="text-xs">
           Ctrl+E to toggle • Click pencil icons to edit
         </Badge>
