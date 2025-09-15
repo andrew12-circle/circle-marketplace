@@ -8,7 +8,6 @@ import { LocationSwitcher } from "@/components/LocationSwitcher";
 import { TourDiscoveryButton } from "@/components/marketplace/TourDiscoveryButton";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-
 const circleLogoUrl = "/circle-logo-updated.png";
 
 interface HeaderProps {

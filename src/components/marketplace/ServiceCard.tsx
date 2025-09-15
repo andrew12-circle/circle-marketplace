@@ -31,7 +31,6 @@ import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useABTest } from "@/hooks/useABTest";
 import { SponsoredLabel } from "./SponsoredLabel";
 import { ServiceBadges } from "./ServiceBadges";
-import { EditableText } from "@/components/inline/EditableText";
 import { extractNumericPrice, computeDiscountPercentage, getDealDisplayPrice, getSavingsInfo } from '@/utils/dealPricing';
 import { getPackagePrices } from '@/utils/pricingResolver';
 import { getNormalizedPackages, getActivePackage, getPricesForPackage } from '@/utils/packagePricing';
@@ -522,17 +521,7 @@ export const ServiceCard = ({
             )}
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-foreground leading-tight text-base line-clamp-2 mb-1">
-                <EditableText
-                  entity="services"
-                  id={service.id}
-                  field="title"
-                  value={service.title}
-                  onSaved={(updatedService) => {
-                    console.log('Service title updated:', updatedService);
-                    // Optionally update the service in parent state
-                  }}
-                  className="inline-block"
-                />
+                {getLocalizedTitle().split(' - ').pop() || getLocalizedTitle().split(': ').pop() || getLocalizedTitle()}
               </h3>
               {/* Sponsored label right underneath the name, like Facebook */}
               {isSponsored && (
@@ -607,17 +596,7 @@ export const ServiceCard = ({
           {/* Description with dynamic height for expansion */}
           <div className={`px-4 py-3 flex flex-col transition-all duration-300 ${isDescriptionExpanded ? '' : 'h-[5.5rem]'}`}>
             <p className={`text-sm text-muted-foreground leading-tight whitespace-pre-line transition-all duration-300 ${isDescriptionExpanded ? 'overflow-visible' : 'line-clamp-2 overflow-hidden'}`}>
-              <EditableText
-                entity="services"
-                id={service.id}
-                field="description"
-                value={service.description}
-                onSaved={(updatedService) => {
-                  console.log('Service description updated:', updatedService);
-                }}
-                className="inline-block"
-                multiline={true}
-              />
+              {getLocalizedDescription()}
             </p>
             {getLocalizedDescription() && getLocalizedDescription().length > 100 && (
               <button
@@ -717,16 +696,7 @@ export const ServiceCard = ({
                       
                       {/* Show retail price as fallback */}
                       {effectivePricing.retail > 0 && (
-                        <div 
-                          className="text-xl font-bold text-foreground"
-                          data-editable
-                          data-entity="services"
-                          data-id={service.id}
-                          data-field="retail_price"
-                          data-type="text"
-                          data-label="Retail Price"
-                          data-value={service.retail_price}
-                        >
+                        <div className="text-xl font-bold text-foreground">
                           {formatPrice(effectivePricing.retail, service.price_duration || 'mo')}
                         </div>
                       )}
@@ -744,17 +714,7 @@ export const ServiceCard = ({
                           )}
                           <div className="flex items-center justify-center gap-2 text-xl font-bold text-blue-600">
                             <Crown className="w-4 h-4" />
-                            <span
-                              data-editable
-                              data-entity="services"
-                              data-id={service.id}
-                              data-field="pro_price"
-                              data-type="text"
-                              data-label="Pro Price"
-                              data-value={service.pro_price}
-                            >
-                              {formatPrice(effectivePricing.pro, service.price_duration || 'mo')}
-                            </span>
+                            <span>{formatPrice(effectivePricing.pro, service.price_duration || 'mo')}</span>
                           </div>
                           <div className="text-xs text-blue-600 font-medium">Circle Pro Price</div>
                         </>
@@ -831,18 +791,9 @@ export const ServiceCard = ({
                   ) : effectivePricing.retail > 0 ? (
                     <div className="flex items-center justify-between mt-4">
                       <span className="text-sm text-muted-foreground">{t('serviceCard.listPrice')}</span>
-                       <span 
-                         className="text-xl font-bold text-foreground"
-                         data-editable
-                         data-entity="services"
-                         data-id={service.id}
-                         data-field="retail_price"
-                         data-type="text"
-                         data-label="Retail Price"
-                         data-value={service.retail_price}
-                       >
+                      <span className="text-xl font-bold text-foreground">
                          {formatPrice(effectivePricing.retail, service.price_duration || 'month')}
-                       </span>
+                      </span>
                     </div>
                    ) : null}
                     
@@ -857,18 +808,9 @@ export const ServiceCard = ({
                               <span className="text-sm font-medium text-circle-primary">{t('serviceCard.circleProPrice')}</span>
                               <Crown className="w-4 h-4 text-circle-primary" />
                             </div>
-                             <span 
-                               className="text-lg font-bold text-circle-primary"
-                               data-editable
-                               data-entity="services"
-                               data-id={service.id}
-                               data-field="pro_price"
-                               data-type="text"
-                               data-label="Pro Price"
-                               data-value={service.pro_price}
-                             >
+                            <span className="text-lg font-bold text-circle-primary">
                                {formatPrice(effectivePricing.pro, service.price_duration || 'month')}
-                             </span>
+                            </span>
                           </div>
                         </TooltipTrigger>
                         <TooltipContent className="w-40 sm:w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>

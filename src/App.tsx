@@ -6,9 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { WebAnalyticsTracker } from "@/components/analytics/WebAnalyticsTracker";
-import { EditModeProvider } from "@/contexts/EditModeContext";
-import { InlineInspector } from "@/components/inline/InlineInspector";
-import { useAdminStatus } from "@/hooks/useAdminStatus";
 
 // Lazy load pages for better performance
 import { lazy, Suspense } from "react";
@@ -30,14 +27,11 @@ const queryClient = new QueryClient({
 });
 
 function App() {
-  const { data: isAdmin } = useAdminStatus();
-  
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <TooltipProvider>
-          <EditModeProvider isAdmin={!!isAdmin}>
-            <Router>
+          <Router>
             <WebAnalyticsTracker />
             <Suspense
               fallback={
@@ -61,11 +55,9 @@ function App() {
                 />
               </Routes>
             </Suspense>
-            </Router>
-            <Toaster />
-            <Sonner />
-            <InlineInspector />
-          </EditModeProvider>
+          </Router>
+          <Toaster />
+          <Sonner />
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

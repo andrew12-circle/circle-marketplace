@@ -16,9 +16,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
 
 import { supabase } from "@/integrations/supabase/client";
-import { User, ShoppingBag, Crown, LogOut, Loader2, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase, Package, Brain, Command, Edit3, Eye } from "lucide-react";
+import { User, ShoppingBag, Crown, LogOut, Loader2, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase, Package, Brain, Command } from "lucide-react";
 import { CustomerPortalButton } from "@/components/marketplace/CustomerPortalButton";
-import { useEditMode } from '@/contexts/EditModeContext';
 
 
 interface VendorInfo {
@@ -31,7 +30,6 @@ export const UserMenu = () => {
   const { user, profile, signOut } = useAuth();
   const { toast } = useToast();
   const { data: isAdmin } = useAdminStatus();
-  const { isEdit, setEdit } = useEditMode();
   
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [vendorInfo, setVendorInfo] = useState<VendorInfo | null>(null);
@@ -189,26 +187,6 @@ export const UserMenu = () => {
                 <Shield className="mr-2 h-4 w-4" />
                 <span>Admin Dashboard</span>
               </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={(e) => { 
-                e.preventDefault(); 
-                e.stopPropagation(); 
-                setEdit(!isEdit); 
-              }}
-              className="flex items-center cursor-pointer"
-            >
-              {isEdit ? (
-                <>
-                  <Eye className="mr-2 h-4 w-4" />
-                  <span>Exit Edit Mode</span>
-                </>
-              ) : (
-                <>
-                  <Edit3 className="mr-2 h-4 w-4" />
-                  <span>Edit Mode</span>
-                </>
-              )}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
           </>
