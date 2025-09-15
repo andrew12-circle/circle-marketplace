@@ -99,25 +99,111 @@ export const FunnelSectionEditor = ({ data, onChange, onPricingChange }: FunnelS
         <CardHeader>
           <CardTitle>Service Images</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="image_url">Main Image URL</Label>
-            <Input
-              id="image_url"
-              value={data.image_url || ""}
-              onChange={(e) => handleBasicInfoChange('image_url', e.target.value)}
-              placeholder="https://example.com/image.jpg"
-            />
+        <CardContent className="space-y-6">
+          {/* Main Image Section */}
+          <div className="space-y-3">
+            <Label className="text-base font-medium">Main Service Image</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="image_url">Image URL</Label>
+                <Input
+                  id="image_url"
+                  value={data.image_url || ""}
+                  onChange={(e) => handleBasicInfoChange('image_url', e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+              <div>
+                <Label htmlFor="image_upload">Or Upload Image</Label>
+                <Input
+                  id="image_upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      // Create a preview URL and handle upload
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        const result = event.target?.result as string;
+                        handleBasicInfoChange('image_url', result);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="cursor-pointer"
+                />
+              </div>
+            </div>
+            {/* Image Preview */}
+            {data.image_url && (
+              <div className="mt-3">
+                <Label className="text-sm text-muted-foreground">Preview:</Label>
+                <div className="mt-2 border rounded-lg p-2 bg-gray-50">
+                  <img 
+                    src={data.image_url} 
+                    alt="Service preview" 
+                    className="max-w-full h-32 object-cover rounded"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
           
-          <div>
-            <Label htmlFor="logo_url">Logo URL</Label>
-            <Input
-              id="logo_url"
-              value={data.logo_url || ""}
-              onChange={(e) => handleBasicInfoChange('logo_url', e.target.value)}
-              placeholder="https://example.com/logo.jpg"
-            />
+          {/* Logo Section */}
+          <div className="space-y-3">
+            <Label className="text-base font-medium">Company Logo</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="logo_url">Logo URL</Label>
+                <Input
+                  id="logo_url"
+                  value={data.logo_url || ""}
+                  onChange={(e) => handleBasicInfoChange('logo_url', e.target.value)}
+                  placeholder="https://example.com/logo.jpg"
+                />
+              </div>
+              <div>
+                <Label htmlFor="logo_upload">Or Upload Logo</Label>
+                <Input
+                  id="logo_upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      // Create a preview URL and handle upload
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        const result = event.target?.result as string;
+                        handleBasicInfoChange('logo_url', result);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="cursor-pointer"
+                />
+              </div>
+            </div>
+            {/* Logo Preview */}
+            {data.logo_url && (
+              <div className="mt-3">
+                <Label className="text-sm text-muted-foreground">Preview:</Label>
+                <div className="mt-2 border rounded-lg p-2 bg-gray-50">
+                  <img 
+                    src={data.logo_url} 
+                    alt="Logo preview" 
+                    className="max-w-full h-16 object-contain rounded"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
