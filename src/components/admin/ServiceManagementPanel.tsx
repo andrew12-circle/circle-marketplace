@@ -28,7 +28,6 @@ import { diffPatch } from '@/lib/diff';
 import { dlog, dwarn } from '@/utils/debugLogger';
 import { AIServiceUpdater } from './AIServiceUpdater';
 import { updateServiceResilient } from '@/lib/resilientServiceUpdate';
-import { ServicePricingMirror } from './ServicePricingMirror';
 import { ServiceComplianceTracker } from './ServiceComplianceTracker';
 import ServiceCard from './ServiceCard';
 interface PricingFeature {
@@ -1161,11 +1160,10 @@ export const ServiceManagementPanel = () => {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-7">
+              <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="details">Service Details</TabsTrigger>
                 <TabsTrigger value="disclaimer">Disclaimer</TabsTrigger>
                 <TabsTrigger value="ai-research">AI Research</TabsTrigger>
-                <TabsTrigger value="pricing-mirror">Pricing Mirror</TabsTrigger>
                 <TabsTrigger value="compliance">Compliance</TabsTrigger>
                 <TabsTrigger value="notifications">
                   <Mail className="w-4 h-4 mr-2" />
@@ -1763,10 +1761,6 @@ export const ServiceManagementPanel = () => {
 
               <TabsContent value="ai-research" className="space-y-4">
                 <ServiceAIResearchEditor serviceId={selectedService.id} serviceName={selectedService.title} />
-              </TabsContent>
-
-              <TabsContent value="pricing-mirror" className="space-y-4">
-                <ServicePricingMirror serviceId={selectedService.id} serviceName={selectedService.title} currentScreenshotUrl={selectedService.pricing_screenshot_url} currentPricingUrl={selectedService.pricing_page_url} lastCapturedAt={selectedService.pricing_screenshot_captured_at} serviceWebsiteUrl={selectedService.website_url} />
               </TabsContent>
 
               <TabsContent value="funnel" className="space-y-4">
