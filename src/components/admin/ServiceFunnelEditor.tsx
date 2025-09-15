@@ -512,6 +512,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
               ...service,
               ...funnelData
             }}
+            onPricingChange={handlePricingFieldChange}
             onChange={(data) => {
               // Extract funnel-specific fields
               const { id, title, description, website_url, duration, setup_time, image_url, logo_url, retail_price, pro_price, price_duration, pricing_tiers, pricing_mode, ...funnelContent } = data;

@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 interface FunnelSectionEditorProps {
   data: any;
   onChange: (data: any) => void;
+  onPricingChange?: (field: string, value: string | number | null) => void;
 }
 
-export const FunnelSectionEditor = ({ data, onChange }: FunnelSectionEditorProps) => {
+export const FunnelSectionEditor = ({ data, onChange, onPricingChange }: FunnelSectionEditorProps) => {
   const handleBasicInfoChange = (field: string, value: any) => {
     onChange({
       ...data,
@@ -132,7 +133,7 @@ export const FunnelSectionEditor = ({ data, onChange }: FunnelSectionEditorProps
             <Input
               id="retail_price"
               value={data.retail_price || ""}
-              onChange={(e) => handleBasicInfoChange('retail_price', e.target.value)}
+              onChange={(e) => onPricingChange ? onPricingChange('retail_price', e.target.value) : handleBasicInfoChange('retail_price', e.target.value)}
               placeholder="$99/month"
             />
           </div>
@@ -142,7 +143,7 @@ export const FunnelSectionEditor = ({ data, onChange }: FunnelSectionEditorProps
             <Input
               id="pro_price"
               value={data.pro_price || ""}
-              onChange={(e) => handleBasicInfoChange('pro_price', e.target.value)}
+              onChange={(e) => onPricingChange ? onPricingChange('pro_price', e.target.value) : handleBasicInfoChange('pro_price', e.target.value)}
               placeholder="$89/month"
             />
           </div>
