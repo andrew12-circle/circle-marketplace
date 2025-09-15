@@ -41,6 +41,7 @@ interface Service {
   description: string;
   image_url?: string;
   logo_url?: string;
+  profile_image_url?: string;
   website_url?: string;
   duration?: string;
   setup_time?: string;

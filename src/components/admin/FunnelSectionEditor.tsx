@@ -205,6 +205,61 @@ export const FunnelSectionEditor = ({ data, onChange, onPricingChange }: FunnelS
               </div>
             )}
           </div>
+          
+          {/* Profile Image Section */}
+          <div className="space-y-3">
+            <Label className="text-base font-medium">Profile Image</Label>
+            <p className="text-sm text-muted-foreground">Small circular image shown on service cards (appears next to service title)</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="profile_image_url">Profile Image URL</Label>
+                <Input
+                  id="profile_image_url"
+                  value={data.profile_image_url || ""}
+                  onChange={(e) => handleBasicInfoChange('profile_image_url', e.target.value)}
+                  placeholder="https://example.com/profile.jpg"
+                />
+              </div>
+              <div>
+                <Label htmlFor="profile_upload">Or Upload Profile Image</Label>
+                <Input
+                  id="profile_upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      // Create a preview URL and handle upload
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        const result = event.target?.result as string;
+                        handleBasicInfoChange('profile_image_url', result);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="cursor-pointer"
+                />
+              </div>
+            </div>
+            {/* Profile Image Preview */}
+            {data.profile_image_url && (
+              <div className="mt-3">
+                <Label className="text-sm text-muted-foreground">Preview (as it appears on service cards):</Label>
+                <div className="mt-2 border rounded-lg p-2 bg-gray-50 flex items-center gap-3">
+                  <img 
+                    src={data.profile_image_url} 
+                    alt="Profile preview" 
+                    className="w-8 h-8 rounded-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                  <span className="text-sm text-gray-600">This appears on service cards</span>
+                </div>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
