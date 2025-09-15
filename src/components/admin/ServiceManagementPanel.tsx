@@ -19,7 +19,6 @@ import { formatDistanceToNow } from 'date-fns';
 import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ServiceConsultationEmails } from './ServiceConsultationEmails';
-import { AdminNotes } from './AdminNotes';
 import { ServiceDisclaimerSection } from './ServiceDisclaimerSection';
 import { ServiceAIResearchEditor } from './ServiceAIResearchEditor';
 import { ServiceImageUploader } from './ServiceImageUploader';
@@ -1638,11 +1637,6 @@ export const ServiceManagementPanel = () => {
                     {/* Consultation Email Alerts */}
                     <div className="border-t pt-6">
                       <ServiceConsultationEmails serviceId={selectedService.id} serviceName={selectedService.title} initialEmails={(selectedService as any).consultation_emails || []} />
-                    </div>
-
-                    {/* Service Notes */}
-                    <div className="border-t pt-6">
-                      <AdminNotes serviceId={selectedService.id} serviceName={selectedService.title} />
                     </div>
 
                     <div className="flex gap-2">
