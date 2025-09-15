@@ -7,6 +7,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LocationSwitcher } from "@/components/LocationSwitcher";
 import { TourDiscoveryButton } from "@/components/marketplace/TourDiscoveryButton";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { EditModeToggle } from "@/components/admin/EditModeToggle";
 
 const circleLogoUrl = "/circle-logo-updated.png";
 
@@ -46,6 +47,7 @@ export const Header = ({ showCart = false, showTourButton = false }: HeaderProps
               </div>
               
               <div className="flex items-center gap-2">
+                <EditModeToggle />
                 {showCart && <CartDrawer />}
                 
                 {user && profile && (
@@ -96,6 +98,7 @@ export const Header = ({ showCart = false, showTourButton = false }: HeaderProps
               
               {/* User Actions */}
               <div className="flex items-center gap-2">
+                <EditModeToggle />
                 {showCart && <CartDrawer />}
                 
                 {user && profile && (

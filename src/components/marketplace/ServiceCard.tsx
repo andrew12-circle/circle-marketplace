@@ -31,6 +31,7 @@ import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useABTest } from "@/hooks/useABTest";
 import { SponsoredLabel } from "./SponsoredLabel";
 import { ServiceBadges } from "./ServiceBadges";
+import { Editable } from "@/components/admin/Editable";
 import { extractNumericPrice, computeDiscountPercentage, getDealDisplayPrice, getSavingsInfo } from '@/utils/dealPricing';
 import { getPackagePrices } from '@/utils/pricingResolver';
 import { getNormalizedPackages, getActivePackage, getPricesForPackage } from '@/utils/packagePricing';
@@ -520,9 +521,11 @@ export const ServiceCard = ({
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-foreground leading-tight text-base line-clamp-2 mb-1">
-                {getLocalizedTitle().split(' - ').pop() || getLocalizedTitle().split(': ').pop() || getLocalizedTitle()}
-              </h3>
+              <Editable entity="services" entityId={service.id} field="title" value={service.title}>
+                <h3 className="font-semibold text-foreground leading-tight text-base line-clamp-2 mb-1">
+                  {getLocalizedTitle().split(' - ').pop() || getLocalizedTitle().split(': ').pop() || getLocalizedTitle()}
+                </h3>
+              </Editable>
               {/* Sponsored label right underneath the name, like Facebook */}
               {isSponsored && (
                 <div className="mb-1">
@@ -791,9 +794,11 @@ export const ServiceCard = ({
                   ) : effectivePricing.retail > 0 ? (
                     <div className="flex items-center justify-between mt-4">
                       <span className="text-sm text-muted-foreground">{t('serviceCard.listPrice')}</span>
-                      <span className="text-xl font-bold text-foreground">
-                         {formatPrice(effectivePricing.retail, service.price_duration || 'month')}
-                      </span>
+                       <Editable entity="services" entityId={service.id} field="retail_price" value={service.retail_price}>
+                         <span className="text-xl font-bold text-foreground">
+                            {formatPrice(effectivePricing.retail, service.price_duration || 'month')}
+                         </span>
+                       </Editable>
                     </div>
                    ) : null}
                     
@@ -808,9 +813,11 @@ export const ServiceCard = ({
                               <span className="text-sm font-medium text-circle-primary">{t('serviceCard.circleProPrice')}</span>
                               <Crown className="w-4 h-4 text-circle-primary" />
                             </div>
-                            <span className="text-lg font-bold text-circle-primary">
-                               {formatPrice(effectivePricing.pro, service.price_duration || 'month')}
-                            </span>
+                             <Editable entity="services" entityId={service.id} field="pro_price" value={service.pro_price}>
+                               <span className="text-lg font-bold text-circle-primary">
+                                  {formatPrice(effectivePricing.pro, service.price_duration || 'month')}
+                               </span>
+                             </Editable>
                           </div>
                         </TooltipTrigger>
                         <TooltipContent className="w-40 sm:w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>

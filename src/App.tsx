@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { WebAnalyticsTracker } from "@/components/analytics/WebAnalyticsTracker";
+import { EditModeProvider } from "@/contexts/EditModeContext";
 
 // Lazy load pages for better performance
 import { lazy, Suspense } from "react";
@@ -31,7 +32,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <TooltipProvider>
-          <Router>
+          <EditModeProvider>
+            <Router>
             <WebAnalyticsTracker />
             <Suspense
               fallback={
@@ -58,6 +60,7 @@ function App() {
           </Router>
           <Toaster />
           <Sonner />
+          </EditModeProvider>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
