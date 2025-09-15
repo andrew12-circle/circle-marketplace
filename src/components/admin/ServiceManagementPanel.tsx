@@ -1215,7 +1215,7 @@ export const ServiceManagementPanel = () => {
                             </div>}
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-sm line-clamp-2">
-                              {editForm.title || selectedService.title || 'Service Title'}
+                              {selectedService.title || 'Service Title'}
                             </h3>
                             <p className="text-xs text-muted-foreground">
                               {editForm.category || selectedService.category || 'Category'}
@@ -1223,39 +1223,21 @@ export const ServiceManagementPanel = () => {
                           </div>
                         </div>
                         <p className="text-xs text-muted-foreground mb-3 line-clamp-3">
-                          {editForm.description || selectedService.description || 'Service description will appear here...'}
+                          {selectedService.description || 'Service description will appear here...'}
                         </p>
                         <div className="flex justify-between items-center text-xs">
                           <span className="text-muted-foreground">
-                            {editForm.duration || selectedService.duration || 'Duration not set'}
+                            {selectedService.duration || 'Duration not set'}
                           </span>
                           <span className="font-medium">
-                            {editForm.retail_price || selectedService.retail_price || 'Price TBD'}
+                            {selectedService.retail_price || 'Price TBD'}
                           </span>
                         </div>
                       </div>
                     </div>
                     
                     {isDetailsDirty && <Badge variant="outline" className="text-xs">Unsaved changes</Badge>}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Service Title</label>
-                        <Input value={editForm.title || ''} onChange={e => setEditForm({
-                    ...editForm,
-                    title: e.target.value
-                  })} />
-                       </div>
-                       <div className="space-y-2">
-                         <label className="text-sm font-medium">Card Subheadline</label>
-                         <Textarea value={editForm.description || ''} onChange={e => setEditForm({
-                    ...editForm,
-                    description: e.target.value
-                   })} placeholder="Brief description shown on service cards (up to 1,500 characters)" className="min-h-[80px]" />
-                          <div className="text-xs text-muted-foreground">
-                            {(editForm.description || '').length}/1,500 characters
-                          </div>
-                       </div>
-                      </div>
+                    {/* Basic service info is managed in Service Funnel tab */}
 
                       {/* Category and Classification */}
                       <div className="space-y-4 p-4 border rounded-lg bg-green-50/50">
@@ -1286,21 +1268,8 @@ export const ServiceManagementPanel = () => {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Time to Results</label>
-                        <Input value={editForm.duration || ''} onChange={e => setEditForm({
-                    ...editForm,
-                    duration: e.target.value
-                  })} placeholder="e.g., 30 days" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Time to Setup</label>
-                        <Input value={editForm.setup_time || ''} onChange={e => setEditForm({
-                    ...editForm,
-                    setup_time: e.target.value
-                  })} placeholder="e.g., 24 hours" />
-                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Duration and setup time are managed in Service Funnel tab */}
                       <div className="space-y-2">
                         <label className="text-sm font-medium">ROI (%)</label>
                         <div className="relative">
@@ -1326,30 +1295,7 @@ export const ServiceManagementPanel = () => {
                       </div>
                     </div>
 
-                    {/* Pricing and Tags */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">List Price</label>
-                          <Input value={editForm.retail_price || ''} onChange={e => setEditForm({
-                    ...editForm,
-                    retail_price: e.target.value
-                  })} placeholder="e.g., $0.00" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Pro Price</label>
-                        <Input value={editForm.pro_price || ''} onChange={e => setEditForm({
-                    ...editForm,
-                    pro_price: e.target.value
-                  })} placeholder="e.g., $0.00" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Price Duration</label>
-                        <Input value={editForm.price_duration || ''} onChange={e => setEditForm({
-                    ...editForm,
-                    price_duration: e.target.value
-                  })} placeholder="e.g., mo" />
-                      </div>
-                    </div>
+                    {/* Pricing is managed in Service Funnel tab */}
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Quick Category Tags</label>
                         <p className="text-xs text-muted-foreground">
