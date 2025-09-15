@@ -51,18 +51,17 @@ export const ServiceConsultationEmails = ({
 
       console.log("📤 Making Supabase update call...", { unique });
       
-      // Use promise-based timeout instead of function-based
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Save operation timed out')), 15000)
-      );
-      
-      const savePromise = supabase
-        .from("services")
-        .update({ consultation_emails: unique })
-        .eq("id", serviceId)
-        .select();
-
-      await Promise.race([savePromise, timeoutPromise]);
+      // Use the existing saveWithTimeout utility for reliability
+      await saveWithTimeout(async () => {
+        const { data, error } = await supabase
+          .from("services")
+          .update({ consultation_emails: unique })
+          .eq("id", serviceId)
+          .select();
+        
+        if (error) throw error;
+        return data;
+      });
       
       console.log("✅ Save successful");
       toast.success("Consultation emails saved");
