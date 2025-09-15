@@ -1465,10 +1465,18 @@ export const ServiceManagementPanel = () => {
                       <div className="p-4 border rounded-lg bg-gray-50">
                         <h4 className="text-sm font-semibold mb-3">Settlement Service Provider Coverage</h4>
                         <div className="flex items-center space-x-2 mb-3">
-                          <Switch checked={editForm.ssp_allowed !== false} onCheckedChange={checked => setEditForm({
-                      ...editForm,
-                      ssp_allowed: checked
-                    })} />
+                          <Switch checked={editForm.ssp_allowed !== false} onCheckedChange={checked => {
+                            const updatedForm = {
+                              ...editForm,
+                              ssp_allowed: checked
+                            };
+                            setEditForm(updatedForm);
+                            
+                            // Trigger debounced save for SSP setting change
+                            if (selectedService?.id) {
+                              debouncedSave(selectedService.id, { ssp_allowed: checked }, 'ssp-allowed-change');
+                            }
+                          }} />
                           <label className="text-sm font-medium">SSP Allowed</label>
                         </div>
                         <div className="space-y-2">
