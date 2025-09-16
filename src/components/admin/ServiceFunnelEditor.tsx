@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,13 +12,11 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useInvalidateMarketplace, QUERY_KEYS } from "@/hooks/useMarketplaceData";
 import { useQueryClient } from "@tanstack/react-query";
-import { useDebouncedServiceSave } from "@/hooks/useDebouncedServiceSave";
 import { useNavigationGuard } from "@/hooks/useNavigationGuard";
 import { FunnelSectionEditor } from "./FunnelSectionEditor";
 import { FunnelMediaEditor } from "./FunnelMediaEditor";
 import { FunnelPricingEditor } from "./FunnelPricingEditor";
 import { normalizePrice, dlogPriceTransform } from "@/utils/priceNormalization";
-
 import { FunnelFAQEditor } from "./FunnelFAQEditor";
 import { FunnelProofEditor } from "./FunnelProofEditor";
 import { 
@@ -34,6 +31,9 @@ import {
   Settings
 } from "lucide-react";
 import { ServiceFunnelModal } from "@/components/marketplace/ServiceFunnelModal";
+import { useAutosave } from "@/hooks/useAutosave";
+import { updateServiceById, normalizeServiceNumbers } from "@/lib/updateService";
+import { diffPatch } from "@/lib/diff";
 
 interface Service {
   id: string;
@@ -56,7 +56,6 @@ interface Service {
   category?: string;
   is_featured?: boolean;
   is_top_pick?: boolean;
-  // Add pricing fields
   retail_price?: string | null;
   pro_price?: string | null;
   co_pay_price?: string | null;
@@ -81,235 +80,8 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
   const [hasChanges, setHasChanges] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const { toast } = useToast();
-  const { invalidateServices } = useInvalidateMarketplace();
-  const queryClient = useQueryClient();
-  
-  // Sync local state when service prop changes (e.g., after save)
-  useEffect(() => {
-    setFunnelData(service.funnel_content || {});
-    setPricingTiers(service.pricing_tiers || []);
-  }, [service.id, service.funnel_content, service.pricing_tiers]);
-  
-  
-  // Unified save system with debouncing
-  const {
-    debouncedSave,
-    saveImmediately,
-    isSaving,
-    hasUnsavedChanges,
-    cancelPendingSave,
-    error: saveError,
-    lastSaved: hookLastSaved
-  } = useDebouncedServiceSave({
-    debounceMs: 3000,
-    autoSave: true,
-    onSaveSuccess: (serviceId, result) => {
-      console.log('[ServiceFunnelEditor] Save successful:', result);
-      setHasChanges(false);
-      setLastSavedAt(new Date().toISOString());
-      
-      // Update parent with the actual saved data instead of old service object
-      const updatedService = {
-        ...service,
-        ...result, // This contains the saved data from the database
-        funnel_content: funnelData,
-        pricing_tiers: pricingTiers
-      };
-      onUpdate(updatedService);
-    },
-    onSaveError: (serviceId, error) => {
-      console.error('[ServiceFunnelEditor] Save failed:', error);
-    }
-  });
-  
-  // Navigation guard
-  useNavigationGuard({
-    hasUnsavedChanges: hasChanges || hasUnsavedChanges || isSaving
-  });
-
-  // Reset state when service changes, but preserve unsaved changes to prevent data loss
-  useEffect(() => {
-    console.log('[ServiceFunnelEditor] Service changed, syncing state:', service.id, { hasChanges, hasUnsavedChanges, isSaving });
-    
-    // Always sync with service data unless we're actively saving
-    // This ensures we pick up successful saves from the server
-    if (!isSaving) {
-      console.log('[ServiceFunnelEditor] Not currently saving, syncing with service data');
-      setFunnelData(service.funnel_content || {});
-      setPricingTiers(service.pricing_tiers || []);
-      setSelectedDefaultPackageId((service as any).default_package_id || null);
-      setLocalPricing({
-        retail_price: service.retail_price,
-        pro_price: service.pro_price,
-        co_pay_price: service.co_pay_price,
-        pricing_mode: service.pricing_mode,
-        pricing_external_url: service.pricing_external_url,
-        pricing_cta_label: service.pricing_cta_label,
-        pricing_cta_type: service.pricing_cta_type,
-        pricing_note: service.pricing_note
-      });
-      
-      // Only reset change flags if we're not in the middle of an auto-save
-      if (!hasUnsavedChanges) {
-        setHasChanges(false);
-        setLastSavedAt(null);
-      }
-    } else {
-      console.log('[ServiceFunnelEditor] Currently saving, preserving local state');
-    }
-    
-    // Initialize default funnel content if none exists for this service
-    if (!service.funnel_content) {
-      const defaultFunnel = {
-        headline: service.title,
-        subHeadline: "Transform your real estate business with our proven system",
-        media: [],
-        benefits: [
-          {
-            title: "Increase Lead Generation",
-            description: "Generate more qualified leads with proven strategies",
-            icon: "TrendingUp"
-          },
-          {
-            title: "Save Time",
-            description: "Automate your workflow and focus on closing deals",
-            icon: "Clock"
-          },
-          {
-            title: "Boost Revenue",
-            description: "Increase your conversion rates and average deal size",
-            icon: "DollarSign"
-          }
-        ],
-        testimonials: [
-          {
-            name: "Sarah M.",
-            title: "Keller Williams",
-            content: "Doubled my leads in 60 days. The automation saves me 15 hours per week!",
-            rating: 5
-          }
-        ],
-        stats: [
-          { value: "600%", label: "Avg ROI", icon: "TrendingUp" },
-          { value: "30", label: "Days Setup", icon: "Clock" },
-          { value: "24/7", label: "Support", icon: "Trophy" }
-        ],
-        proofItWorks: {
-          testimonials: {
-            enabled: true,
-            items: [
-              {
-                id: "testimonial-1",
-                name: "Sarah M.",
-                company: "Keller Williams",
-                content: "Doubled my leads in 60 days. The automation saves me 15 hours per week!",
-                rating: 5
-              }
-            ]
-          },
-          caseStudy: {
-            enabled: true,
-            data: {
-              beforeValue: 12,
-              afterValue: 85,
-              beforeLabel: "leads/month",
-              afterLabel: "leads/month",
-              percentageIncrease: 608,
-              timeframe: "90 Days",
-              description: "Real agent results from Q3 2024"
-            }
-          },
-          vendorVerification: {
-            enabled: true,
-            data: {
-              badges: ["Background checked", "Performance verified"],
-              description: "This vendor has been vetted and meets our quality standards."
-            }
-          }
-        },
-        faqSections: [
-          {
-            id: "question-1",
-            title: "Why Should I Care?",
-            content: service.description || "All-in-one real estate lead generation & CRM platform designed to turn online leads into closings faster"
-          },
-          {
-            id: "question-2", 
-            title: "What's My ROI Potential?",
-            content: "600% average return on investment with proper implementation"
-          }
-        ],
-        callToAction: {
-          title: "Ready to Transform Your Business?",
-          description: "Join thousands of agents who've already made the switch",
-          buttonText: "Book Your Free Demo",
-          buttonVariant: "default"
-        }
-      };
-      setFunnelData(defaultFunnel);
-    }
-  }, [service.id]); // Only depend on service.id to trigger reset when switching services
-
-  // Helper: enforce a max time to wait for save to complete
-  const saveWithTimeout = <T,>(promise: PromiseLike<T>, ms = 20000): Promise<T> => {
-    let timeoutId: number | undefined;
-    const timeout = new Promise<never>((_, reject) => {
-      timeoutId = window.setTimeout(() => {
-        reject(new Error("Save timed out. Please try again."));
-      }, ms);
-    });
-    return Promise.race([promise as Promise<any>, timeout]).finally(() => {
-      if (timeoutId) window.clearTimeout(timeoutId);
-    }) as Promise<T>;
-  };
-
-  // Sanitize funnel payload to avoid non-serializable values and trim fields
-  const sanitizeFunnel = (data: any) => {
-    const prune = (val: any): any => {
-      if (val === null) return null;
-      if (typeof val === 'undefined') return null;
-      if (typeof val === 'function') return undefined;
-      if (val instanceof Date) return val.toISOString();
-      if (Array.isArray(val)) return val.map(prune).filter((v) => v !== undefined);
-      if (typeof val === 'object') {
-        const out: any = {};
-        for (const key of Object.keys(val)) {
-          const v = prune((val as any)[key]);
-          if (v !== undefined) out[key] = v;
-        }
-        return out;
-      }
-      return val;
-    };
-    
-    try {
-      const cleaned: any = prune(data) ?? {};
-      
-      // Ensure media array is properly structured for database storage
-      if (Array.isArray(cleaned.media)) {
-        cleaned.media = cleaned.media.map((m: any) => {
-          const mediaItem = {
-            url: String(m?.url ?? ''),
-            type: (m?.type === 'video') ? 'video' : 'image',
-            title: String(m?.title ?? ''),
-            description: String(m?.description ?? '')
-          };
-          return mediaItem;
-        }).filter(m => m.url); // Only keep items with valid URLs
-      }
-      
-      // Test serialization
-      JSON.stringify(cleaned);
-      console.log('[ServiceFunnelEditor] Sanitized funnel data:', cleaned);
-      return cleaned;
-    } catch (error) {
-      console.error('[ServiceFunnelEditor] Funnel sanitization error:', error);
-      throw new Error('Failed to sanitize funnel data for saving');
-    }
-  };
-
-  // Track local pricing changes separate from service object
+  const [selectedDefaultPackageId, setSelectedDefaultPackageId] = useState((service as any).default_package_id || null);
+  const [currentEditingPackageId, setCurrentEditingPackageId] = useState<string | null>(null);
   const [localPricing, setLocalPricing] = useState({
     retail_price: service.retail_price,
     pro_price: service.pro_price,
@@ -321,56 +93,87 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     pricing_note: service.pricing_note
   });
 
-  // Track current editing package ID for preview
-  const [currentEditingPackageId, setCurrentEditingPackageId] = useState<string | null>(null);
+  const { toast } = useToast();
+  const { invalidateServices } = useInvalidateMarketplace();
+  const queryClient = useQueryClient();
+  
+  // Sync local state when service prop changes
+  useEffect(() => {
+    setFunnelData(service.funnel_content || {});
+    setPricingTiers(service.pricing_tiers || []);
+    setSelectedDefaultPackageId((service as any).default_package_id || null);
+    setLocalPricing({
+      retail_price: service.retail_price,
+      pro_price: service.pro_price,
+      co_pay_price: service.co_pay_price,
+      pricing_mode: service.pricing_mode,
+      pricing_external_url: service.pricing_external_url,
+      pricing_cta_label: service.pricing_cta_label,
+      pricing_cta_type: service.pricing_cta_type,
+      pricing_note: service.pricing_note
+    });
+  }, [service.id]);
+  
+  // Unified autosave system 
+  const { triggerAutosave, isSaving, cancelPendingSave } = useAutosave({
+    onSave: async (patch: Record<string, any>) => {
+      console.log('[ServiceFunnelEditor] Auto-saving patch:', patch);
+      
+      // Normalize numeric values before saving
+      const normalizedPatch = normalizeServiceNumbers(patch);
+      
+      // Save to database using the clean updateServiceById
+      const updatedService = await updateServiceById(service.id, normalizedPatch);
+      
+      console.log('[ServiceFunnelEditor] Save successful:', updatedService);
+      setLastSavedAt(new Date().toISOString());
+      setHasChanges(false);
+      
+      // Update parent with fresh data
+      onUpdate({
+        ...service,
+        ...updatedService
+      });
+      
+      return updatedService;
+    },
+    onSaved: () => {
+      // Invalidate cache after successful save
+      invalidateServices();
+    },
+    delay: 2000, // 2 second debounce for funnel editor
+    enabled: true
+  });
 
-  // Track selected default package ID
-  const [selectedDefaultPackageId, setSelectedDefaultPackageId] = useState<string | null>(
-    (service as any).default_package_id || null
-  );
+  // Navigation guard
+  useNavigationGuard({
+    hasUnsavedChanges: hasChanges || isSaving()
+  });
 
-
-  // Prepare save payload with current service and local pricing data
+  // Prepare save payload
   const prepareSavePayload = useCallback(() => {
-    const sanitizedFunnel = sanitizeFunnel(funnelData);
-    const sanitizedPricing = JSON.parse(JSON.stringify(pricingTiers || []));
-    
-    // Normalize pricing fields to prevent NaN errors
     const normalizedRetailPrice = normalizePrice(localPricing.retail_price);
     const normalizedProPrice = normalizePrice(localPricing.pro_price);
     const normalizedCoPayPrice = normalizePrice(localPricing.co_pay_price);
-    
-    // Debug log the price transformations
+
     dlogPriceTransform('retail_price', localPricing.retail_price, normalizedRetailPrice);
     dlogPriceTransform('pro_price', localPricing.pro_price, normalizedProPrice);
     dlogPriceTransform('co_pay_price', localPricing.co_pay_price, normalizedCoPayPrice);
-    
-    // Convert pricing packages to proper format with normalized prices
-    const updatedPackages = sanitizedPricing.map((p: any) => ({
-      ...p,
-      retail_price: normalizePrice(p.retail_price),
-      pro_price: normalizePrice(p.pro_price),
-      co_pay_price: normalizePrice(p.co_pay_price),
-    }));
-    
+
     return {
-      // Service-level fields that can be edited in funnel
       title: service.title,
       description: service.description,
       website_url: service.website_url,
       duration: service.duration,
       setup_time: service.setup_time,
-      image_url: service.image_url,
-      logo_url: service.logo_url,
-      price_duration: service.price_duration,
-      // Funnel content
-      funnel_content: sanitizedFunnel,
-      pricing_tiers: updatedPackages,
-      // Use normalized pricing values to prevent NaN database errors
+      image_url: service.image_url || service.logo_url,
+      price_duration: localPricing.pricing_mode === 'external' ? 'quote' : service.price_duration,
+      funnel_content: funnelData,
+      pricing_tiers: pricingTiers,
       retail_price: normalizedRetailPrice,
       pro_price: normalizedProPrice,
       co_pay_price: normalizedCoPayPrice,
-      default_package_id: selectedDefaultPackageId || null,
+      default_package_id: selectedDefaultPackageId,
       pricing_mode: localPricing.pricing_mode,
       pricing_external_url: localPricing.pricing_external_url,
       pricing_cta_label: localPricing.pricing_cta_label,
@@ -381,210 +184,83 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
   }, [service, localPricing, funnelData, pricingTiers, selectedDefaultPackageId]);
 
   const handleSave = async () => {
-    if (isSaving) return;
+    if (isSaving()) return;
     
-    try {
-      console.log('[ServiceFunnelEditor] Starting save process...');
-      
-      const payload = prepareSavePayload();
-      console.log('[ServiceFunnelEditor] Payload prepared:', Object.keys(payload));
-      
-      // Check if funnel_content exists and log its structure
-      if (payload.funnel_content) {
-        console.log('[ServiceFunnelEditor] Funnel content keys:', Object.keys(payload.funnel_content));
-        if (payload.funnel_content.media) {
-          console.log('[ServiceFunnelEditor] Media items count:', payload.funnel_content.media.length);
-        }
-      }
-      
-      // Validate funnel_content serialization
-      if (payload.funnel_content) {
-        try {
-          const serialized = JSON.stringify(payload.funnel_content);
-          console.log('[ServiceFunnelEditor] Funnel content serialized successfully, size:', serialized.length);
-          
-          // If payload is very large, show warning
-          if (serialized.length > 1000000) { // 1MB
-            console.warn('[ServiceFunnelEditor] Large payload detected:', serialized.length, 'bytes');
-          }
-        } catch (e) {
-          console.error('[ServiceFunnelEditor] Funnel content serialization failed:', e);
-          toast({
-            title: "Save Error",
-            description: "Content contains invalid data and cannot be saved",
-            variant: "destructive"
-          });
-          return;
-        }
-      }
-      
-      console.log('[ServiceFunnelEditor] Calling saveImmediately...');
-      
-      // Use the hook's saveImmediately method which handles saving state internally
-      const result = await saveImmediately(service.id, payload);
-      
-      // Check if save actually succeeded
-      if (result && !result.ok) {
-        throw new Error(result.error || 'Save failed');
-      }
-      
-      console.log('[ServiceFunnelEditor] Save completed successfully');
-      
-      setHasChanges(false);
-      setLastSavedAt(new Date().toISOString());
-      
-      // Show explicit save confirmation
-      toast({
-        title: "Saved Successfully", 
-        description: "All changes have been saved",
-        duration: 2000
-      });
-      
-      // Only run heavy operations on explicit save
-      setTimeout(() => {
-        (async () => {
-          try {
-            // Add cache busting to ensure fresh data
-            const cacheBuster = Date.now();
-            await fetch(
-              `${window.location.origin}/functions/v1/warm-marketplace-cache?v=${cacheBuster}`,
-              { 
-                method: 'POST', 
-                headers: { 
-                  'cache-control': 'no-store',
-                  'pragma': 'no-cache'
-                } 
-              }
-            );
-            console.log("[Admin ServiceFunnelEditor] Cache warmed with cache busting");
-          } catch (e) {
-            console.warn('[Admin ServiceFunnelEditor] Cache warm failed', e);
-          }
-          // Full invalidation after explicit save
-          invalidateServices();
-        })();
-      }, 100);
-    } catch (error: any) {
-      console.error('[ServiceFunnelEditor] Save operation failed:', error);
-      
-      // Force clear any pending saves to reset state
-      cancelPendingSave(service.id);
-      
-      // Show explicit save error with timeout-specific messaging
-      const isTimeout = error.message?.includes('timed out') || error.message?.includes('timeout');
-      
-      toast({
-        title: "Save Failed",
-        description: isTimeout 
-          ? "Save timed out - your content may be too large. Try reducing image sizes or content."
-          : (error.message || "Please try again"),
-        variant: "destructive",
-        duration: 8000
-      });
-    }
+    const payload = prepareSavePayload();
+    console.log('[ServiceFunnelEditor] Manual save triggered:', Object.keys(payload));
+    
+    // Use the new autosave system for immediate save
+    triggerAutosave(payload);
+    
+    toast({
+      title: "Saving...", 
+      description: "Changes are being saved",
+      duration: 1000
+    });
   };
 
-  const handleDataChange = (section: string, data: any) => {
+  // Handle data changes with autosave
+  const handleDataChange = useCallback((section: string, data: any) => {
     setFunnelData(prev => ({
       ...prev,
       [section]: data
     }));
     setHasChanges(true);
     
-    // Trigger debounced auto-save
-    const payload = prepareSavePayload();
-    debouncedSave(service.id, payload, 'funnel-data-change');
-  };
-
-  // Add ref to track pricing save in progress
-  const pricingSaveInProgress = useRef(false);
-  const pricingDebounceTimeout = useRef<NodeJS.Timeout>();
+    // Trigger autosave after data change
+    if (service?.id) {
+      const payload = prepareSavePayload();
+      triggerAutosave(payload);
+    }
+  }, [service?.id, triggerAutosave, prepareSavePayload]);
 
   const handlePricingChange = useCallback(async (tiers: any[]) => {
-    // Prevent multiple concurrent saves
-    if (pricingSaveInProgress.current) {
-      console.log('[ServiceFunnelEditor] Pricing save already in progress, skipping');
-      return;
-    }
-
-    console.log('[ServiceFunnelEditor] Pricing change detected, using simplified save');
     setPricingTiers(tiers);
     setHasChanges(true);
     
-    // Clear existing debounce timeout
-    if (pricingDebounceTimeout.current) {
-      clearTimeout(pricingDebounceTimeout.current);
+    // Trigger autosave after pricing change
+    if (service?.id) {
+      const payload = prepareSavePayload();
+      triggerAutosave(payload);
     }
-    
-    // Debounce the save operation
-    pricingDebounceTimeout.current = setTimeout(async () => {
-      pricingSaveInProgress.current = true;
-      
-      try {
-        console.log('[UnifiedSave] Starting pricing save...');
-        
-        // Use unified save system instead of separate pricing save
-        debouncedSave(service.id, {
-          pricing_tiers: tiers,
-          retail_price: localPricing.retail_price,
-          pro_price: localPricing.pro_price,
-          co_pay_price: localPricing.co_pay_price,
-          default_package_id: selectedDefaultPackageId,
-          pricing_mode: localPricing.pricing_mode,
-          pricing_external_url: localPricing.pricing_external_url,
-          pricing_cta_label: localPricing.pricing_cta_label,
-          pricing_cta_type: localPricing.pricing_cta_type,
-          pricing_note: localPricing.pricing_note
-        }, 'pricing-tiers-change');
-        
-        console.log('[UnifiedSave] Pricing save queued');
-        setHasChanges(false);
-      } catch (error) {
-        console.error('[ServiceFunnelEditor] Unified pricing save failed:', error);
-      } finally {
-        pricingSaveInProgress.current = false;
-      }
-    }, 500); // 500ms debounce
-  }, [service.id, localPricing, selectedDefaultPackageId, debouncedSave]);
+  }, [service?.id, triggerAutosave, prepareSavePayload]);
 
-  // Handle pricing field changes (retail_price, pro_price, etc.)
   const handlePricingFieldChange = async (field: string, value: string | number | null) => {
-    console.log(`[ServiceFunnelEditor] Pricing field changed: ${field} = ${value}, using simplified save`);
+    console.log(`[ServiceFunnelEditor] Pricing field changed: ${field} = ${value}`);
     setLocalPricing(prev => ({
       ...prev,
       [field]: value
     }));
     setHasChanges(true);
     
-    // Use unified save for pricing field changes
-    try {
-      const updatedPricing = { ...localPricing, [field]: value };
-      
-      // Use debounced save instead of immediate save
-      debouncedSave(service.id, {
-        pricing_tiers: pricingTiers,
-        retail_price: updatedPricing.retail_price,
-        pro_price: updatedPricing.pro_price,
-        co_pay_price: updatedPricing.co_pay_price,
-        default_package_id: selectedDefaultPackageId,
-        pricing_mode: updatedPricing.pricing_mode,
-        pricing_external_url: updatedPricing.pricing_external_url,
-        pricing_cta_label: updatedPricing.pricing_cta_label,
-        pricing_cta_type: updatedPricing.pricing_cta_type,
-        pricing_note: updatedPricing.pricing_note
-      }, `pricing-field-${field}-change`);
-      
-      setHasChanges(true); // Mark as changed, will be cleared when save completes
-    } catch (error) {
-      console.error('[ServiceFunnelEditor] Simplified pricing field save failed:', error);
+    // Trigger autosave after pricing field change
+    if (service?.id) {
+      const payload = prepareSavePayload();
+      triggerAutosave(payload);
     }
   };
 
   const handleReset = () => {
     setFunnelData(service.funnel_content || {});
     setPricingTiers(service.pricing_tiers || []);
+    setLocalPricing({
+      retail_price: service.retail_price,
+      pro_price: service.pro_price,
+      co_pay_price: service.co_pay_price,
+      pricing_mode: service.pricing_mode,
+      pricing_external_url: service.pricing_external_url,
+      pricing_cta_label: service.pricing_cta_label,
+      pricing_cta_type: service.pricing_cta_type,
+      pricing_note: service.pricing_note
+    });
+    setSelectedDefaultPackageId((service as any).default_package_id || null);
     setHasChanges(false);
-    setLastSavedAt(null);
+    cancelPendingSave();
+    
+    toast({
+      title: "Reset Complete",
+      description: "All changes have been reset to the last saved version"
+    });
   };
 
   // Create preview service object with required fields
@@ -593,42 +269,44 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     funnel_content: funnelData,
     pricing_tiers: pricingTiers,
     default_package_id: selectedDefaultPackageId,
-    category: service.category || 'general',
-    is_featured: service.is_featured || false,
-    is_top_pick: service.is_top_pick || false,
-    vendor: service.vendor || { 
-      name: 'Preview Vendor', 
-      rating: 4.8, 
-      review_count: 127, 
-      is_verified: true, 
-      logo_url: '' 
-    }
+    retail_price: localPricing.retail_price,
+    pro_price: localPricing.pro_price,
+    co_pay_price: localPricing.co_pay_price,
+    pricing_mode: localPricing.pricing_mode,
+    pricing_external_url: localPricing.pricing_external_url,
+    pricing_cta_label: localPricing.pricing_cta_label,
+    pricing_cta_type: localPricing.pricing_cta_type,
+    pricing_note: localPricing.pricing_note
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Save/Preview Controls */}  
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                Service Funnel Editor
-              </CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                Customize the sales funnel for "{service.title}"
-              </p>
-            </div>
             <div className="flex items-center gap-2">
-              {hasChanges && (
+              <h2 className="text-lg font-semibold">Funnel Editor</h2>
+              {hasChanges && !isSaving() && (
                 <Badge variant="outline" className="text-orange-600 border-orange-200">
                   Unsaved Changes
                 </Badge>
               )}
+              {isSaving() && (
+                <Badge variant="outline" className="text-blue-600 border-blue-200">
+                  Auto-saving...
+                </Badge>
+              )}
+              {lastSavedAt && !hasChanges && (
+                <Badge variant="outline" className="text-green-600 border-green-200">
+                  Saved
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
               <Button 
                 variant="outline" 
-                size="sm"
+                size="sm" 
                 onClick={() => setIsPreviewOpen(true)}
               >
                 <Eye className="w-4 h-4 mr-2" />
@@ -645,12 +323,12 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
               </Button>
               <Button 
                 onClick={handleSave} 
-                disabled={!hasChanges || isSaving}
+                disabled={!hasChanges || isSaving()}
                 size="sm"
                 variant={lastSavedAt && !hasChanges ? "outline" : "default"}
               >
                 <Save className="w-4 h-4 mr-2" />
-                {isSaving ? 'Saving...' : 
+                {isSaving() ? 'Saving...' : 
                  lastSavedAt && !hasChanges ? 'Saved' : 'Save Changes'}
               </Button>
             </div>
@@ -673,127 +351,63 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
             <DollarSign className="w-4 h-4" />
             Pricing
           </TabsTrigger>
-          <TabsTrigger value="testimonials" className="flex items-center gap-2">
+          <TabsTrigger value="proof" className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4" />
             Social Proof
           </TabsTrigger>
-          <TabsTrigger value="faq" className="flex items-center gap-2">
+          <TabsTrigger value="faqs" className="flex items-center gap-2">
             <HelpCircle className="w-4 h-4" />
-            FAQ
+            FAQs
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="content" className="space-y-4">
-          <FunnelSectionEditor
-            data={{
-              ...service,
-              ...funnelData,
-            }}
-            onChange={(data) => {
-              // Extract funnel-specific fields
-              const { id, title, description, website_url, duration, setup_time, image_url, logo_url, profile_image_url, ...funnelContent } = data;
-              
-              // Update funnel content immediately
-              setFunnelData(prev => ({
-                ...prev,
-                ...funnelContent
-              }));
-              setHasChanges(true);
-              
-              // Update service-level fields if they changed
-              if (title !== service.title || description !== service.description || website_url !== service.website_url || 
-                  duration !== service.duration || setup_time !== service.setup_time ||
-                  image_url !== service.image_url || logo_url !== service.logo_url || profile_image_url !== service.profile_image_url) {
-                // Update the service directly via parent
-                onUpdate({
-                  ...service,
-                  title: title || service.title,
-                  description: description || service.description,
-                  website_url: website_url || service.website_url,
-                  duration: duration || service.duration,
-                  setup_time: setup_time || service.setup_time,
-                  image_url: image_url || service.image_url,
-                  logo_url: logo_url || service.logo_url,
-                  profile_image_url: profile_image_url || service.profile_image_url
-                });
-              }
-              
-              // Create save payload with updated values instead of relying on service object
-              const sanitizedFunnel = sanitizeFunnel({...funnelData, ...funnelContent});
-              const updatedServiceData = {
-                title: title || service.title,
-                description: description || service.description,
-                website_url: website_url || service.website_url,
-                duration: duration || service.duration,
-                setup_time: setup_time || service.setup_time,
-                image_url: image_url || service.image_url,
-                logo_url: logo_url || service.logo_url,
-                profile_image_url: profile_image_url || service.profile_image_url,
-                funnel_content: sanitizedFunnel,
-                updated_at: new Date().toISOString()
-              };
-              
-              // Trigger immediate debounced save with the updated data
-              debouncedSave(service.id, updatedServiceData, 'service-fields-change');
-            }}
+          <FunnelSectionEditor 
+            sections={funnelData}
+            onChange={(sections) => handleDataChange('sections', sections)}
+            service={service}
           />
         </TabsContent>
 
         <TabsContent value="media" className="space-y-4">
-          <FunnelMediaEditor
+          <FunnelMediaEditor 
             media={funnelData.media || []}
-            serviceImageUrl={service.image_url}
             onChange={(media) => handleDataChange('media', media)}
+            service={service}
           />
         </TabsContent>
 
         <TabsContent value="pricing" className="space-y-4">
           <FunnelPricingEditor
+            service={service}
             pricingTiers={pricingTiers}
-            onChange={handlePricingChange}
-            pricingMode={service.pricing_mode}
-            pricingExternalUrl={service.pricing_external_url}
-            pricingCtaLabel={service.pricing_cta_label}
-            pricingCtaType={service.pricing_cta_type}
-            pricingNote={service.pricing_note}
-            service={{
-              ...service,
-              ...localPricing
-            }}
+            onPricingTiersChange={handlePricingChange}
+            localPricing={localPricing}
             onPricingFieldChange={handlePricingFieldChange}
-            onPricingModeChange={(mode) => {
-              // Update service pricing mode immediately for UI responsiveness
-              const updatedService = { ...service, pricing_mode: mode };
-              onUpdate(updatedService);
-              setHasChanges(true);
-            }}
+            selectedDefaultPackageId={selectedDefaultPackageId}
+            onDefaultPackageChange={setSelectedDefaultPackageId}
+            onCurrentEditingPackageChange={setCurrentEditingPackageId}
           />
         </TabsContent>
 
-        <TabsContent value="testimonials" className="space-y-4">
-          <div className="space-y-4">
-            {/* Proof Settings - Toggles for what displays in funnel */}
-            <FunnelProofEditor
-              proofData={funnelData.proofItWorks || {
-                testimonials: { enabled: false, items: [] },
-                caseStudy: { enabled: false, data: { beforeValue: 0, afterValue: 0, beforeLabel: "", afterLabel: "", percentageIncrease: 0, timeframe: "", description: "" } },
-                vendorVerification: { enabled: false, data: { badges: [], description: "" } }
-              }}
-              onChange={(data) => handleDataChange('proofItWorks', data)}
-            />
-            
-          </div>
+        <TabsContent value="proof" className="space-y-4">
+          <FunnelProofEditor 
+            socialProof={funnelData.socialProof || { testimonials: [], stats: [] }}
+            onChange={(socialProof) => handleDataChange('socialProof', socialProof)}
+            service={service}
+          />
         </TabsContent>
 
-        <TabsContent value="faq" className="space-y-4">
-          <FunnelFAQEditor
-            faqSections={funnelData.faqSections || []}
-            onChange={(data) => handleDataChange('faqSections', data)}
+        <TabsContent value="faqs" className="space-y-4">
+          <FunnelFAQEditor 
+            faqs={funnelData.faqs || []}
+            onChange={(faqs) => handleDataChange('faqs', faqs)}
+            service={service}
           />
         </TabsContent>
       </Tabs>
 
-      {/* Preview Modal - pass currentEditingPackageId for Package Two testing */}
+      {/* Preview Modal */}
       <ServiceFunnelModal
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
