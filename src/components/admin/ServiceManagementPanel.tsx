@@ -397,9 +397,24 @@ export const ServiceManagementPanel = () => {
     position: 1
   }]);
 
+  // Filter formData to only core fields (exclude funnel-specific fields)
+  const getCoreFieldsOnly = (service: Service | null) => {
+    if (!service) return {};
+    
+    const {
+      // Exclude funnel-specific fields that exist in the interface
+      funnel_content,
+      pricing_tiers,
+      // Keep all other fields (they're core fields)
+      ...coreFields
+    } = service;
+    
+    return coreFields;
+  };
+
   // Versioned autosave for core service fields only
   const { isSaving, showConflictBanner, refreshAndRetry } = useVersionedAutosave({
-    value: formData || {},
+    value: getCoreFieldsOnly(formData),
     version: selectedService?.core_version || 1,
     saveFn: async (patch, version) => {
       if (!selectedService?.id) throw new Error('No service selected');
