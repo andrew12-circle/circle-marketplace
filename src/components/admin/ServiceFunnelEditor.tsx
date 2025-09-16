@@ -362,19 +362,41 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     if (isSaving) return;
     
     try {
-      const payload = prepareSavePayload();
-      console.log('[ServiceFunnelEditor] Save payload:', payload);
+      console.log('[ServiceFunnelEditor] Starting save process...');
       
-      // Validate funnel_content before saving
+      const payload = prepareSavePayload();
+      console.log('[ServiceFunnelEditor] Payload prepared:', Object.keys(payload));
+      
+      // Check if funnel_content exists and log its structure
+      if (payload.funnel_content) {
+        console.log('[ServiceFunnelEditor] Funnel content keys:', Object.keys(payload.funnel_content));
+        if (payload.funnel_content.media) {
+          console.log('[ServiceFunnelEditor] Media items count:', payload.funnel_content.media.length);
+        }
+      }
+      
+      // Validate funnel_content serialization
       if (payload.funnel_content) {
         try {
-          JSON.stringify(payload.funnel_content);
+          const serialized = JSON.stringify(payload.funnel_content);
+          console.log('[ServiceFunnelEditor] Funnel content serialized successfully, size:', serialized.length);
         } catch (e) {
+          console.error('[ServiceFunnelEditor] Funnel content serialization failed:', e);
           throw new Error('Funnel content contains non-serializable data');
         }
       }
       
-      await saveImmediately(service.id, payload);
+      console.log('[ServiceFunnelEditor] Calling saveImmediately...');
+      
+      // Add timeout to prevent hanging
+      const savePromise = saveImmediately(service.id, payload);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Save operation timed out after 30 seconds')), 30000)
+      );
+      
+      await Promise.race([savePromise, timeoutPromise]);
+      console.log('[ServiceFunnelEditor] Save completed successfully');
+      
       setHasChanges(false);
       setLastSavedAt(new Date().toISOString());
       
@@ -410,14 +432,15 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
         })();
       }, 100);
     } catch (error: any) {
+      console.error('[ServiceFunnelEditor] Save operation failed:', error);
+      
       // Show explicit save error
       toast({
         title: "Save Failed",
-        description: "Please try again",
+        description: error.message || "Please try again",
         variant: "destructive",
-        duration: 3000
+        duration: 5000
       });
-      console.error('[Admin ServiceFunnelEditor] Save operation failed:', error);
     }
   };
 
