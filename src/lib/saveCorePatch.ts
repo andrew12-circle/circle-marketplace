@@ -12,16 +12,14 @@ export async function saveCorePatch(
   supabase: SupabaseClient,
   args: { id: string; patch: Json; version: number }
 ): Promise<SaveResult> {
-  // Field mapping: convert common field names to allowlist names
-  const fieldMapping: Record<string, string> = {
-    'logo_url': 'image_url', // map logo_url to image_url which is in allowlist
-    'profile_image_url': 'image_url', // map profile_image_url to image_url
-    'time_to_results': 'duration', // map time_to_results to duration
-    'pricing_packages': 'pricing_tiers' // map pricing_packages to pricing_tiers
-  };
+  // Skip empty patches
+  if (Object.keys(args.patch).length === 0) {
+    console.log('[saveCorePatch] Empty patch, skipping');
+    throw new Error('No valid fields to update');
+  }
 
+  // Sanitize patch
   const sanitized: Json = {};
-  
   for (const [key, value] of Object.entries(args.patch)) {
     if (value === undefined) continue;
     if (typeof value === 'number' && Number.isNaN(value)) { 
@@ -32,16 +30,7 @@ export async function saveCorePatch(
       sanitized[key] = null; 
       continue; 
     }
-    
-    // Use field mapping if available
-    const mappedKey = fieldMapping[key] || key;
-    sanitized[mappedKey] = value;
-  }
-
-  // Skip empty patches
-  if (Object.keys(sanitized).length === 0) {
-    console.log('[saveCorePatch] Empty patch after sanitization, skipping');
-    throw new Error('No valid fields to update');
+    sanitized[key] = value;
   }
 
   // IMPORTANT: use the exact SQL arg names
@@ -65,8 +54,7 @@ export async function saveCorePatch(
       message: error.message, 
       details: error.details, 
       hint: error.hint, 
-      payloadKeys: Object.keys(payload.p_patch),
-      payload
+      payloadKeys: Object.keys(payload.p_patch)
     });
     throw error;
   }

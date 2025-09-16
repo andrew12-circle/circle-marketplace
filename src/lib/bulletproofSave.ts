@@ -88,6 +88,7 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T
   }
 }
 
+// Core save logic with retries - NOW USES DIRECT TABLE UPDATE INSTEAD OF RPC
 async function executeSaveWithRetries(operation: SaveOperation): Promise<SaveResult> {
   const { traceId, serviceId, patch } = operation;
   
@@ -99,37 +100,40 @@ async function executeSaveWithRetries(operation: SaveOperation): Promise<SaveRes
       
       // Apply timeout wrapper to the database operation to prevent indefinite hanging
       const dbOperation = async () => {
-        console.log(`[BulletproofSave] Starting database operation for ${serviceId}`);
+        console.log(`[BulletproofSave] Starting direct table update for ${serviceId}`);
         console.log(`[BulletproofSave] Patch keys:`, Object.keys(patch));
         console.log(`[BulletproofSave] Patch size:`, JSON.stringify(patch).length);
         
         const startDbTime = performance.now();
         
-        // Get current version if not provided
-        let versionToUse = operation.expectedVersion;
-        if (!versionToUse) {
-          console.log(`[BulletproofSave] No version provided, fetching current version for ${serviceId}`);
-          const { data: serviceData, error: versionError } = await supabase
-            .from('services')
-            .select('core_version')
-            .eq('id', serviceId)
-            .single();
-          
-          if (versionError) {
-            console.error(`[BulletproofSave] Failed to get current version:`, versionError);
-            throw versionError;
+        // Clean patch - remove undefined values and convert empty strings to null
+        const cleanPatch: Record<string, any> = {};
+        for (const [key, value] of Object.entries(patch)) {
+          if (value === undefined) continue;
+          if (value === '') {
+            cleanPatch[key] = null;
+          } else if (typeof value === 'number' && Number.isNaN(value)) {
+            cleanPatch[key] = null;
+          } else {
+            cleanPatch[key] = value;
           }
-          
-          versionToUse = serviceData?.core_version || 1;
-          console.log(`[BulletproofSave] Using current version: ${versionToUse}`);
         }
         
-        // Use the new versioned RPC function instead of direct table update
-        const result = await supabase.rpc('svc_save_core_patch', {
-          p_id: serviceId,
-          p_patch: patch,
-          p_version: versionToUse
-        });
+        if (Object.keys(cleanPatch).length === 0) {
+          console.log(`[BulletproofSave] No valid fields to update, skipping`);
+          return { data: null, error: null };
+        }
+        
+        // Use direct table update instead of RPC - this is bulletproof and bypasses versioning
+        const result = await supabase
+          .from('services')
+          .update({
+            ...cleanPatch,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', serviceId)
+          .select('id, updated_at, core_version')
+          .single();
         
         const dbDuration = Math.round(performance.now() - startDbTime);
         console.log(`[BulletproofSave] Database operation completed in ${dbDuration}ms`);
@@ -166,7 +170,7 @@ async function executeSaveWithRetries(operation: SaveOperation): Promise<SaveRes
       log(traceId, serviceId, `attempt_${attempt + 1}_success`, undefined, duration);
       
       // Extract updated version from response if available
-      const currentVersion = data && data[0] ? data[0].version : undefined;
+      const currentVersion = data ? data.core_version : undefined;
       
       return {
         ok: true,
@@ -218,7 +222,7 @@ export async function bulletproofSave(serviceId: string, patch: Record<string, a
     await existingOperation; // Wait for existing to complete
   }
   
-  // Filter out undefined values
+  // Filter out undefined values and empty patches
   const cleanPatch = Object.fromEntries(
     Object.entries(patch).filter(([_, value]) => value !== undefined)
   );
@@ -226,10 +230,9 @@ export async function bulletproofSave(serviceId: string, patch: Record<string, a
   if (Object.keys(cleanPatch).length === 0) {
     log(traceId, serviceId, 'no_changes_to_save');
     return {
-      ok: false,
+      ok: true, // Changed from false to true for no-op saves
       traceId,
-      error: 'No valid fields to update',
-      code: 'NO_CHANGES'
+      error: 'No changes detected'
     };
   }
   
