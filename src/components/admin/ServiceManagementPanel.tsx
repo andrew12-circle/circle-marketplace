@@ -460,9 +460,15 @@ export const ServiceManagementPanel = () => {
   }, [services, searchTerm]);
 
   // Sync editForm when selectedService changes (critical for form stability)
+  // IMPORTANT: Preserve pricing_tiers and funnel_content to prevent data loss
   useEffect(() => {
     if (selectedService) {
-      setEditForm(selectedService);
+      setEditForm(prevForm => ({
+        ...selectedService,
+        // Preserve pricing_tiers and funnel_content if they exist in editForm
+        pricing_tiers: prevForm?.pricing_tiers || selectedService.pricing_tiers,
+        funnel_content: prevForm?.funnel_content || selectedService.funnel_content
+      }));
     }
   }, [selectedService]);
   const fetchServices = async () => {
