@@ -848,7 +848,8 @@ export const ServiceManagementPanel = () => {
         </Card>
       </div>;
   }
-  return <div className="space-y-6">
+  return (
+    <div className="space-y-6">
       {/* Service Selection */}
       <Card>
         <CardHeader>
@@ -1544,17 +1545,18 @@ export const ServiceManagementPanel = () => {
           </CardContent>
         </Card>}
 
-      // AI Service Updater
-      <AIServiceUpdater services={services} onServiceUpdate={serviceId => {
-        // Invalidate queries to trigger refresh without full refetch
-        queryClient.invalidateQueries({
-          queryKey: QUERY_KEYS.services
-        });
-        toast({
-          title: 'Service Updated',
-          description: 'Service has been updated by AI. Please review and verify the changes.'
-        });
-      }} />
+      {/* AI Service Updater */}
+      <AIServiceUpdater 
+        services={services} 
+        onServiceUpdate={(serviceId) => {
+          queryClient.invalidateQueries({
+            queryKey: QUERY_KEYS.services
+          });
+          toast({
+            title: 'Service Updated',
+            description: 'Service has been updated by AI. Please review and verify the changes.'
+          });
+        }} 
+      />
     </div>
   );
-};
