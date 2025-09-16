@@ -1160,7 +1160,14 @@ export const ServiceFunnelModal = ({
                 {displayPackages.slice(0, 4).map((pkg, index) => {
                   const dbPkg = packages.find(p => p.id === pkg.id)
                   const pkgRetail = Number(pkg.originalPrice ?? pkg.price ?? dbPkg?.retail_price ?? service.retail_price ?? 0)
-                  const pkgPro = Number(pkg.price ?? dbPkg?.pro_price ?? service.pro_price ?? pkgRetail)
+                  const pkgPro = Number((pkg as any).pro_price ?? pkg.price ?? dbPkg?.pro_price ?? service.pro_price ?? pkgRetail)
+                  
+                  console.log(`Package ${pkg.name} pricing:`, { 
+                    originalPrice: pkg.originalPrice, 
+                    price: pkg.price, 
+                    pro_price: (pkg as any).pro_price,
+                    calculated: { pkgRetail, pkgPro }
+                  })
                   const selected = pkg.id === activePackageId
 
                   return <div key={pkg.id} className={`relative p-6 rounded-2xl border-2 cursor-pointer transition-all hover:scale-105 hover:shadow-xl ${selected ? 'border-blue-500 bg-white shadow-xl ring-4 ring-blue-100' : 'border-gray-200 bg-white hover:border-gray-300 shadow-lg'} ${pkg.popular ? 'ring-2 ring-blue-200' : ''}`} onClick={() => setActivePackageId(pkg.id)}>
