@@ -19,6 +19,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ServiceConsultationEmails } from './ServiceConsultationEmails';
+import { ServiceComplianceTracker } from './ServiceComplianceTracker';
 import { ServiceDisclaimerSection } from './ServiceDisclaimerSection';
 import { ServiceAIResearchEditor } from './ServiceAIResearchEditor';
 import { ServiceImageUploader } from './ServiceImageUploader';
