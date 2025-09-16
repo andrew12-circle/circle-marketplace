@@ -122,8 +122,29 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     hasUnsavedChanges: hasChanges || hasUnsavedChanges || isSaving
   });
 
-  // Initialize default funnel content if none exists
+  // Reset all state when service changes (critical for switching between services)
   useEffect(() => {
+    console.log('[ServiceFunnelEditor] Service changed, resetting state:', service.id);
+    
+    // Reset all local state to match the new service
+    setFunnelData(service.funnel_content || {});
+    setPricingTiers(service.pricing_tiers || []);
+    setHasChanges(false);
+    setLastSavedAt(null);
+    setCurrentEditingPackageId(null);
+    setSelectedDefaultPackageId((service as any).default_package_id || null);
+    setLocalPricing({
+      retail_price: service.retail_price,
+      pro_price: service.pro_price,
+      co_pay_price: service.co_pay_price,
+      pricing_mode: service.pricing_mode,
+      pricing_external_url: service.pricing_external_url,
+      pricing_cta_label: service.pricing_cta_label,
+      pricing_cta_type: service.pricing_cta_type,
+      pricing_note: service.pricing_note
+    });
+    
+    // Initialize default funnel content if none exists for this service
     if (!service.funnel_content) {
       const defaultFunnel = {
         headline: service.title,
@@ -213,7 +234,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       };
       setFunnelData(defaultFunnel);
     }
-  }, [service]);
+  }, [service.id]); // Only depend on service.id to trigger reset when switching services
 
   // Helper: enforce a max time to wait for save to complete
   const saveWithTimeout = <T,>(promise: PromiseLike<T>, ms = 20000): Promise<T> => {
@@ -293,20 +314,6 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     (service as any).default_package_id || null
   );
 
-  // Update local pricing when service changes
-  useEffect(() => {
-    setLocalPricing({
-      retail_price: service.retail_price,
-      pro_price: service.pro_price,
-      co_pay_price: service.co_pay_price,
-      pricing_mode: service.pricing_mode,
-      pricing_external_url: service.pricing_external_url,
-      pricing_cta_label: service.pricing_cta_label,
-      pricing_cta_type: service.pricing_cta_type,
-      pricing_note: service.pricing_note
-    });
-    setSelectedDefaultPackageId((service as any).default_package_id || null);
-  }, [service]);
 
   // Prepare save payload with current service and local pricing data
   const prepareSavePayload = useCallback(() => {
