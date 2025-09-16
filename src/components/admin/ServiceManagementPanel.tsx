@@ -734,19 +734,6 @@ export const ServiceManagementPanel = () => {
   const handleTabChange = (value: 'details' | 'funnel') => {
     setActiveTab(value);
   };
-  const detailKeys = ['title', 'description', 'category', 'duration', 'estimated_roi', 'sort_order', 'is_featured', 'is_top_pick', 'is_verified', 'requires_quote', 'copay_allowed', 'direct_purchase_enabled', 'respa_split_limit', 'max_split_percentage_non_ssp', 'retail_price', 'pro_price', 'price_duration', 'tags'] as const;
-  const isDetailsDirty = selectedService ? detailKeys.some(key => {
-    const currentValue = (editForm as any)[key];
-    const originalValue = (selectedService as any)[key];
-    const isDifferent = !compareValues(currentValue, originalValue);
-    
-    // Only log when DEBUG is enabled to prevent render cascade
-    if (isDifferent) {
-      dlog(`Field ${key} is dirty:`, { current: currentValue, original: originalValue });
-    }
-    
-    return isDifferent;
-  }) : false;
   const formatRelativeTime = (iso?: string | null) => {
     if (!iso) return '';
     const diffMs = Date.now() - new Date(iso).getTime();
