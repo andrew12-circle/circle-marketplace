@@ -125,27 +125,35 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     hasUnsavedChanges: hasChanges || hasUnsavedChanges || isSaving
   });
 
-  // Reset all state when service changes (critical for switching between services)
+  // Reset state when service changes, but preserve unsaved changes to prevent data loss
   useEffect(() => {
-    console.log('[ServiceFunnelEditor] Service changed, resetting state:', service.id);
+    console.log('[ServiceFunnelEditor] Service changed, syncing state:', service.id);
     
-    // Reset all local state to match the new service
-    setFunnelData(service.funnel_content || {});
-    setPricingTiers(service.pricing_tiers || []);
-    setHasChanges(false);
-    setLastSavedAt(null);
-    setCurrentEditingPackageId(null);
-    setSelectedDefaultPackageId((service as any).default_package_id || null);
-    setLocalPricing({
-      retail_price: service.retail_price,
-      pro_price: service.pro_price,
-      co_pay_price: service.co_pay_price,
-      pricing_mode: service.pricing_mode,
-      pricing_external_url: service.pricing_external_url,
-      pricing_cta_label: service.pricing_cta_label,
-      pricing_cta_type: service.pricing_cta_type,
-      pricing_note: service.pricing_note
-    });
+    // Only reset state if this is a completely different service (service ID changed)
+    // or if there are no unsaved changes to preserve
+    if (!hasChanges && !hasUnsavedChanges) {
+      console.log('[ServiceFunnelEditor] No unsaved changes, safe to reset state');
+      setFunnelData(service.funnel_content || {});
+      setPricingTiers(service.pricing_tiers || []);
+      setHasChanges(false);
+      setLastSavedAt(null);
+      setCurrentEditingPackageId(null);
+      setSelectedDefaultPackageId((service as any).default_package_id || null);
+      setLocalPricing({
+        retail_price: service.retail_price,
+        pro_price: service.pro_price,
+        co_pay_price: service.co_pay_price,
+        pricing_mode: service.pricing_mode,
+        pricing_external_url: service.pricing_external_url,
+        pricing_cta_label: service.pricing_cta_label,
+        pricing_cta_type: service.pricing_cta_type,
+        pricing_note: service.pricing_note
+      });
+    } else {
+      console.log('[ServiceFunnelEditor] Has unsaved changes, preserving local state');
+      // Only update non-conflicting fields that wouldn't cause data loss
+      setSelectedDefaultPackageId((service as any).default_package_id || null);
+    }
     
     // Initialize default funnel content if none exists for this service
     if (!service.funnel_content) {
