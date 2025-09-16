@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { saveCorePatch as saveCorePatchRPC } from './saveCorePatch';
 
 export interface SaveResult {
   id: string;
@@ -23,24 +24,7 @@ export async function saveCorePatch(
   patch: Record<string, any>, 
   version: number
 ): Promise<SaveResult> {
-  const { data, error } = await supabase.rpc('svc_save_core_patch', {
-    p_id: id,
-    p_patch: patch,
-    p_version: version
-  });
-  
-  if (error) {
-    if (error.message?.includes('VERSION_CONFLICT')) {
-      throw new Error('VERSION_CONFLICT');
-    }
-    throw error;
-  }
-  
-  return {
-    id: data[0].id,
-    version: data[0].version,
-    updated_at: data[0].updated_at
-  };
+  return await saveCorePatchRPC(supabase, { id, patch, version });
 }
 
 // Save funnel content only

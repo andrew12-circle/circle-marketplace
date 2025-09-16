@@ -25,8 +25,7 @@ import { diffPatch } from '@/lib/diff';
 import { dlog, dwarn } from '@/utils/debugLogger';
 import { AIServiceUpdater } from './AIServiceUpdater';
 import { updateServiceById, toggleServiceField, normalizeServiceNumbers } from '@/lib/updateService';
-import { useVersionedAutosave } from '@/hooks/useVersionedAutosave';
-import { saveCorePatch } from '@/lib/serviceSaveHelpers';
+import { useUnifiedServiceSave } from '@/hooks/useUnifiedServiceSave';
 import ServiceCard from './ServiceCard';
 
 interface PricingFeature {
@@ -412,38 +411,27 @@ export const ServiceManagementPanel = () => {
     return coreFields;
   };
 
-  // Versioned autosave for core service fields only
-  const { isSaving, showConflictBanner, refreshAndRetry } = useVersionedAutosave({
-    value: getCoreFieldsOnly(formData),
-    version: selectedService?.core_version || 1,
-    saveFn: async (patch, version) => {
-      if (!selectedService?.id) throw new Error('No service selected');
-      
-      console.log('[Core Autosave] Saving patch:', { serviceId: selectedService.id, patch, version });
-      
-      // Normalize numeric values before saving 
-      const normalizedPatch = normalizeServiceNumbers(patch);
-      
-      // Save only core fields using RPC
-      const result = await saveCorePatch(selectedService.id, normalizedPatch, version);
-      
-      // Update local state
-      const updatedService = { ...selectedService, ...normalizedPatch, core_version: result.version };
-      setServices(prev => prev.map(s => s.id === selectedService.id ? updatedService : s));
-      setSelectedService(updatedService);
-      setBaseline(prev => prev ? { ...prev, ...normalizedPatch } : null);
-      
-      console.log('[Core Autosave] Save completed successfully');
-      
-      // Narrow cache invalidation - only update this service
-      queryClient.setQueryData(QUERY_KEYS.services, (old: any) => 
-        old?.map((s: any) => s.id === selectedService.id ? updatedService : s) || old
-      );
-      
-      return result;
+  // Unified save for core service fields using direct table updates (not RPC)
+  const { save, isSaving, hasUnsavedChanges, setOriginalData, markChanged } = useUnifiedServiceSave({
+    showToasts: true,
+    autoInvalidateCache: true,
+    onSaveSuccess: (serviceId, result) => {
+      // Update local state after successful save
+      if (selectedService?.id === serviceId && formData) {
+        const updatedService = { ...selectedService, ...result };
+        setServices(prev => prev.map(s => s.id === serviceId ? updatedService : s));
+        setSelectedService(updatedService);
+        setBaseline(updatedService);
+        setFormData(updatedService);
+        
+        // Update query cache  
+        queryClient.setQueryData(QUERY_KEYS.services, (old: any) => 
+          old?.map((s: any) => s.id === serviceId ? updatedService : s) || old
+        );
+      }
     },
-    onVersionUpdate: (newVersion) => {
-      setSelectedService(prev => prev ? { ...prev, core_version: newVersion } : null);
+    onSaveError: (serviceId, error) => {
+      console.error(`[ServiceManagementPanel] Save failed for ${serviceId}:`, error);
     }
   });
 
@@ -467,8 +455,9 @@ export const ServiceManagementPanel = () => {
       const baseline = JSON.parse(JSON.stringify(selectedService));
       setBaseline(baseline);
       setFormData(selectedService);
+      setOriginalData(selectedService); // Set original data for unified save
     }
-  }, [selectedService?.id]); // Only reset when switching to different service
+  }, [selectedService?.id, setOriginalData]); // Only reset when switching to different service
 
   // Compute dirty state from stable baseline
   const isDirty = useMemo(() => {
@@ -476,47 +465,43 @@ export const ServiceManagementPanel = () => {
     return JSON.stringify(formData) !== JSON.stringify(baseline);
   }, [formData, baseline]);
 
-  // Handle form field changes with autosave
-  const handleFieldChange = useCallback((field: string, value: any) => {
-    if (!formData) return;
+  // Handle form field changes with auto-save through unified system
+  const handleFieldChange = useCallback(async (field: string, value: any) => {
+    if (!formData || !selectedService?.id) return;
     
     const newFormData = { ...formData, [field]: value };
     setFormData(newFormData);
-  }, [formData]);
+    markChanged(); // Mark as having unsaved changes
+    
+    // Auto-save the change using unified system
+    const patch = { [field]: value };
+    const normalizedPatch = normalizeServiceNumbers(patch);
+    
+    try {
+      await save(selectedService.id, normalizedPatch, 'field-change');
+    } catch (error: any) {
+      console.error(`Failed to save field ${field}:`, error);
+      // Don't revert the form data - let user retry or see error state
+    }
+  }, [formData, selectedService?.id, markChanged, save]);
 
-  // Handle toggle fields with immediate save
+  // Handle toggle fields through unified save system
   const handleToggleField = useCallback(async (field: string, value: boolean) => {
     if (!selectedService?.id) return;
     
     try {
-      // Update immediately for toggles
-      await toggleServiceField(selectedService.id, field, value);
+      // Update form data immediately
+      const newFormData = { ...formData, [field]: value };
+      setFormData(newFormData);
       
-      // Update local state
-      const updatedService = { ...selectedService, [field]: value };
-      setSelectedService(updatedService);
-      setServices(prev => prev.map(s => s.id === selectedService.id ? updatedService : s));
-      setFormData(prev => prev ? { ...prev, [field]: value } : null);
-      setBaseline(prev => prev ? { ...prev, [field]: value } : null);
-      
-      toast({
-        title: "Saved",
-        description: `${field.replace(/_/g, ' ')} updated successfully`,
-        duration: 2000
-      });
-      
-      // Invalidate cache
-      invalidateServices();
+      // Save using unified system
+      await save(selectedService.id, { [field]: value }, 'toggle');
     } catch (error: any) {
       console.error(`Failed to update ${field}:`, error);
-      toast({
-        title: "Save Failed", 
-        description: error.message || `Failed to update ${field}`,
-        variant: "destructive",
-        duration: 3000
-      });
+      // Revert form data on error
+      setFormData(prev => prev ? { ...prev, [field]: !value } : null);
     }
-  }, [selectedService, toast, invalidateServices]);
+  }, [selectedService?.id, formData, save]);
 
   const fetchServices = async () => {
     try {
