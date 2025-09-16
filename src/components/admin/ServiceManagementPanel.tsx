@@ -1527,16 +1527,42 @@ export const ServiceManagementPanel = () => {
                       <div className="p-4 border rounded-lg bg-gray-50">
                         <h4 className="text-sm font-semibold mb-3">Settlement Service Provider Coverage</h4>
                         <div className="flex items-center space-x-2 mb-3">
-                          <Switch checked={editForm.ssp_allowed !== false} onCheckedChange={checked => {
+                          <Switch checked={editForm.ssp_allowed !== false} onCheckedChange={async (checked) => {
                             const updatedForm = {
                               ...editForm,
                               ssp_allowed: checked
                             };
                             setEditForm(updatedForm);
                             
-                            // Trigger debounced save for SSP setting change
+                            // Use direct Supabase update for simple boolean toggles to avoid timeout issues
                             if (selectedService?.id) {
-                              debouncedSave(selectedService.id, { ssp_allowed: checked }, 'ssp-allowed-change');
+                              try {
+                                const { error } = await supabase
+                                  .from('services')
+                                  .update({ ssp_allowed: checked })
+                                  .eq('id', selectedService.id);
+                                
+                                if (error) throw error;
+                                
+                                toast({
+                                  title: "Saved",
+                                  description: "SSP setting updated successfully",
+                                  duration: 2000
+                                });
+                              } catch (error) {
+                                console.error('Failed to update SSP setting:', error);
+                                toast({
+                                  title: "Save Failed",
+                                  description: "Failed to update SSP setting",
+                                  variant: "destructive",
+                                  duration: 5000
+                                });
+                                // Revert the change
+                                setEditForm({
+                                  ...editForm,
+                                  ssp_allowed: !checked
+                                });
+                              }
                             }
                           }} />
                           <label className="text-sm font-medium">SSP Allowed</label>
