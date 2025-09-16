@@ -246,16 +246,31 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       }
       return val;
     };
-    const cleaned: any = prune(data) ?? {};
-    if (Array.isArray(cleaned.media)) {
-      cleaned.media = cleaned.media.map((m: any) => ({
-        url: m?.url ?? '',
-        type: m?.type === 'video' ? 'video' : 'image',
-        title: m?.title ?? '',
-        description: m?.description ?? ''
-      }));
+    
+    try {
+      const cleaned: any = prune(data) ?? {};
+      
+      // Ensure media array is properly structured for database storage
+      if (Array.isArray(cleaned.media)) {
+        cleaned.media = cleaned.media.map((m: any) => {
+          const mediaItem = {
+            url: String(m?.url ?? ''),
+            type: (m?.type === 'video') ? 'video' : 'image',
+            title: String(m?.title ?? ''),
+            description: String(m?.description ?? '')
+          };
+          return mediaItem;
+        }).filter(m => m.url); // Only keep items with valid URLs
+      }
+      
+      // Test serialization
+      JSON.stringify(cleaned);
+      console.log('[ServiceFunnelEditor] Sanitized funnel data:', cleaned);
+      return cleaned;
+    } catch (error) {
+      console.error('[ServiceFunnelEditor] Funnel sanitization error:', error);
+      throw new Error('Failed to sanitize funnel data for saving');
     }
-    return cleaned;
   };
 
   // Track local pricing changes separate from service object
@@ -348,13 +363,24 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     
     try {
       const payload = prepareSavePayload();
+      console.log('[ServiceFunnelEditor] Save payload:', payload);
+      
+      // Validate funnel_content before saving
+      if (payload.funnel_content) {
+        try {
+          JSON.stringify(payload.funnel_content);
+        } catch (e) {
+          throw new Error('Funnel content contains non-serializable data');
+        }
+      }
+      
       await saveImmediately(service.id, payload);
       setHasChanges(false);
       setLastSavedAt(new Date().toISOString());
       
       // Show explicit save confirmation
       toast({
-        title: "Saved Successfully",
+        title: "Saved Successfully", 
         description: "All changes have been saved",
         duration: 2000
       });
