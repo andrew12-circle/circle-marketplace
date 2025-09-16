@@ -1159,7 +1159,7 @@ export const ServiceFunnelModal = ({
               <div className={`grid gap-6 ${displayPackages.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : displayPackages.length === 2 ? 'grid-cols-1 lg:grid-cols-2 max-w-4xl mx-auto' : displayPackages.length === 3 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-w-7xl mx-auto'}`}>
                 {displayPackages.slice(0, 4).map((pkg, index) => {
                   const dbPkg = packages.find(p => p.id === pkg.id)
-                  const pkgRetail = Number(pkg.originalPrice ?? dbPkg?.retail_price ?? service.retail_price ?? 0)
+                  const pkgRetail = Number(pkg.originalPrice ?? pkg.price ?? dbPkg?.retail_price ?? service.retail_price ?? 0)
                   const pkgPro = Number(pkg.price ?? dbPkg?.pro_price ?? service.pro_price ?? pkgRetail)
                   const selected = pkg.id === activePackageId
 
