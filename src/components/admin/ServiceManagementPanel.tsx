@@ -1363,7 +1363,7 @@ export const ServiceManagementPanel = () => {
                       }}>
                         Cancel
                       </Button>
-                      {isDebouncedSaving && (
+                      {isSaving && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
                           Auto-saving...
