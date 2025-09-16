@@ -127,17 +127,14 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
 
   // Reset state when service changes, but preserve unsaved changes to prevent data loss
   useEffect(() => {
-    console.log('[ServiceFunnelEditor] Service changed, syncing state:', service.id);
+    console.log('[ServiceFunnelEditor] Service changed, syncing state:', service.id, { hasChanges, hasUnsavedChanges, isSaving });
     
-    // Only reset state if this is a completely different service (service ID changed)
-    // or if there are no unsaved changes to preserve
-    if (!hasChanges && !hasUnsavedChanges) {
-      console.log('[ServiceFunnelEditor] No unsaved changes, safe to reset state');
+    // Always sync with service data unless we're actively saving
+    // This ensures we pick up successful saves from the server
+    if (!isSaving) {
+      console.log('[ServiceFunnelEditor] Not currently saving, syncing with service data');
       setFunnelData(service.funnel_content || {});
       setPricingTiers(service.pricing_tiers || []);
-      setHasChanges(false);
-      setLastSavedAt(null);
-      setCurrentEditingPackageId(null);
       setSelectedDefaultPackageId((service as any).default_package_id || null);
       setLocalPricing({
         retail_price: service.retail_price,
@@ -149,10 +146,14 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
         pricing_cta_type: service.pricing_cta_type,
         pricing_note: service.pricing_note
       });
+      
+      // Only reset change flags if we're not in the middle of an auto-save
+      if (!hasUnsavedChanges) {
+        setHasChanges(false);
+        setLastSavedAt(null);
+      }
     } else {
-      console.log('[ServiceFunnelEditor] Has unsaved changes, preserving local state');
-      // Only update non-conflicting fields that wouldn't cause data loss
-      setSelectedDefaultPackageId((service as any).default_package_id || null);
+      console.log('[ServiceFunnelEditor] Currently saving, preserving local state');
     }
     
     // Initialize default funnel content if none exists for this service
