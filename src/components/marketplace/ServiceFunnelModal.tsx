@@ -310,7 +310,7 @@ export const ServiceFunnelModal = ({
     id: string;
     title: string;
     content: string;
-  }> = fc?.faqSections as any || [];
+  }> = fc?.faqs as any || [];
 
   // Calculate pricing from selected package
   const isPro = !!profile?.is_pro_member
@@ -811,7 +811,7 @@ export const ServiceFunnelModal = ({
                       <AccordionContent className="border-l-4 border-l-blue-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
                         <div className="p-6 pt-0">
                           <p className="text-gray-600 leading-relaxed pt-[5px]">
-                            {Array.isArray((fc as any)?.faqSections) && ((fc as any).faqSections.find((s: any) => s?.id === 'question-1') || (fc as any).faqSections[0])?.content || fc?.heroDescription || service.description || "All-in-one real estate lead generation & CRM platform designed to turn online leads into closings faster"}
+                            {Array.isArray((fc as any)?.faqs) && ((fc as any).faqs.find((s: any) => s?.id === 'question-1') || (fc as any).faqs[0])?.content || fc?.heroDescription || service.description || "All-in-one real estate lead generation & CRM platform designed to turn online leads into closings faster"}
                           </p>
                         </div>
                       </AccordionContent>
@@ -828,7 +828,7 @@ export const ServiceFunnelModal = ({
                       <AccordionContent className="border-l-4 border-l-purple-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
                           <div className="p-6 pt-[5px]">
                             {(() => {
-                          const sections = Array.isArray((fc as any)?.faqSections) ? (fc as any).faqSections : [];
+                          const sections = Array.isArray((fc as any)?.faqs) ? (fc as any).faqs : [];
                           const byId = sections.find((s: any) => s?.id === 'question-2');
                           const byTitle = sections.find((s: any) => typeof s?.title === 'string' && s.title.toLowerCase().includes('roi'));
                           const roi = byId?.content || byTitle?.content || (isVerified && typeof fc?.estimatedRoi === 'number' ? `Based on similar deployments, average ROI is ~${fc.estimatedRoi}% within ${fc?.duration || '30 days'}.` : isVerified ? '600% average return on investment with proper implementation' : 'ROI data is not available for non-verified vendors. Contact the vendor directly for performance information.');
@@ -849,7 +849,7 @@ export const ServiceFunnelModal = ({
                       <AccordionContent className="border-l-4 border-l-orange-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
                         <div className="p-6 pt-[5px]">
                           {(() => {
-                          const sections = Array.isArray((fc as any)?.faqSections) ? (fc as any).faqSections : [];
+                          const sections = Array.isArray((fc as any)?.faqs) ? (fc as any).faqs : [];
                           const byId = sections.find((s: any) => s?.id === 'question-3');
                           const byTitle = sections.find((s: any) => typeof s?.title === 'string' && s.title.toLowerCase().includes('soon'));
                           const answer = byId?.content || byTitle?.content;
@@ -947,7 +947,7 @@ export const ServiceFunnelModal = ({
                       <AccordionContent className="border-l-4 border-l-red-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
                           <div className="p-6 pt-[5px] whitespace-pre-wrap">
                             {(() => {
-                           const sections = Array.isArray((fc as any)?.faqSections) ? (fc as any).faqSections : [];
+                           const sections = Array.isArray((fc as any)?.faqs) ? (fc as any).faqs : [];
                            const byId = sections.find((s: any) => s?.id === 'question-4');
                            const byTitle = sections.find((s: any) => typeof s?.title === 'string' && s.title.toLowerCase().includes('included'));
                            const included = byId?.content || byTitle?.content;
@@ -980,9 +980,9 @@ export const ServiceFunnelModal = ({
                            <div className="space-y-6">
                              {/* FAQ Answer Content */}
                              {(() => {
-                               const faqContent = Array.isArray((fc as any)?.faqSections) 
-                                 ? (fc as any).faqSections.find((s: any) => s?.id === 'question-5') 
-                                 : null;
+                                const faqContent = Array.isArray((fc as any)?.faqs) 
+                                  ? (fc as any).faqs.find((s: any) => s?.id === 'question-5') 
+                                  : null;
                                const content = faqContent?.content || "Over 1000+ successful implementations with verified case studies and testimonials";
                                
                                 return content && content.trim() ? (
