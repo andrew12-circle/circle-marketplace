@@ -38,7 +38,7 @@ export async function saveCorePatch(
   
   return {
     id: data[0].id,
-    version: data[0].core_version,
+    version: data[0].version,
     updated_at: data[0].updated_at
   };
 }
@@ -64,7 +64,7 @@ export async function saveFunnelPatch(
   
   return {
     id: data[0].id,
-    version: data[0].funnel_version,
+    version: data[0].version,
     updated_at: data[0].updated_at
   };
 }

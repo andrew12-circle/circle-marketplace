@@ -17,11 +17,11 @@ export function useBulletproofSave() {
   
   const { toast } = useToast();
   
-  const save = useCallback(async (serviceId: string, patch: Record<string, any>) => {
+  const save = useCallback(async (serviceId: string, patch: Record<string, any>, expectedVersion?: number) => {
     setSaveState(prev => ({ ...prev, isSaving: true, error: null }));
     
     try {
-      const result = await bulletproofSave(serviceId, patch);
+      const result = await bulletproofSave(serviceId, patch, expectedVersion);
       
       setSaveState({
         isSaving: false,

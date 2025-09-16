@@ -104,12 +104,32 @@ async function executeSaveWithRetries(operation: SaveOperation): Promise<SaveRes
         console.log(`[BulletproofSave] Patch size:`, JSON.stringify(patch).length);
         
         const startDbTime = performance.now();
-        const result = await supabase
-          .from('services')
-          .update(patch)
-          .eq('id', serviceId)
-          .select('id')
-          .single();
+        
+        // Get current version if not provided
+        let versionToUse = operation.expectedVersion;
+        if (!versionToUse) {
+          console.log(`[BulletproofSave] No version provided, fetching current version for ${serviceId}`);
+          const { data: serviceData, error: versionError } = await supabase
+            .from('services')
+            .select('core_version')
+            .eq('id', serviceId)
+            .single();
+          
+          if (versionError) {
+            console.error(`[BulletproofSave] Failed to get current version:`, versionError);
+            throw versionError;
+          }
+          
+          versionToUse = serviceData?.core_version || 1;
+          console.log(`[BulletproofSave] Using current version: ${versionToUse}`);
+        }
+        
+        // Use the new versioned RPC function instead of direct table update
+        const result = await supabase.rpc('svc_save_core_patch', {
+          p_id: serviceId,
+          p_patch: patch,
+          p_version: versionToUse
+        });
         
         const dbDuration = Math.round(performance.now() - startDbTime);
         console.log(`[BulletproofSave] Database operation completed in ${dbDuration}ms`);
@@ -145,9 +165,13 @@ async function executeSaveWithRetries(operation: SaveOperation): Promise<SaveRes
       
       log(traceId, serviceId, `attempt_${attempt + 1}_success`, undefined, duration);
       
+      // Extract updated version from response if available
+      const currentVersion = data && data[0] ? data[0].version : undefined;
+      
       return {
         ok: true,
-        traceId
+        traceId,
+        currentVersion
       };
       
     } catch (error) {
@@ -184,7 +208,7 @@ async function executeSaveWithRetries(operation: SaveOperation): Promise<SaveRes
   };
 }
 
-export async function bulletproofSave(serviceId: string, patch: Record<string, any>): Promise<SaveResult> {
+export async function bulletproofSave(serviceId: string, patch: Record<string, any>, expectedVersion?: number): Promise<SaveResult> {
   const traceId = nanoid(8);
   
   // Check if there's already a save in progress for this service
@@ -212,7 +236,8 @@ export async function bulletproofSave(serviceId: string, patch: Record<string, a
   const operation: SaveOperation = {
     traceId,
     serviceId,
-    patch: cleanPatch
+    patch: cleanPatch,
+    expectedVersion
   };
   
   // Create the save promise and store it

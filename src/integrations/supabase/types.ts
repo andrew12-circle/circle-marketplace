@@ -12046,11 +12046,11 @@ export type Database = {
         }[]
       }
       svc_save_funnel_patch: {
-        Args: { p_id: string; p_patch: Json; p_version?: number }
+        Args: { p_id: string; p_patch: Json; p_version: number }
         Returns: {
-          funnel_version: number
           id: string
           updated_at: string
+          version: number
         }[]
       }
       touch_session: {
