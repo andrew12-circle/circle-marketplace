@@ -247,10 +247,38 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
 
         <TabsContent value="content" className="space-y-4">
           <FunnelSectionEditor 
-            data={service}
+            data={{
+              // Map service fields to expected FunnelSectionEditor field names
+              title: service.title,
+              description: service.description,
+              website_url: service.website_url,
+              duration: service.duration,
+              setup_time: service.setup_time,
+              image_url: service.image_url,
+              logo_url: service.logo_url,
+              profile_image_url: service.profile_image_url,
+              // Map funnel content fields with proper field name handling
+              headline: service.funnel_content?.headline || service.title,
+              subHeadline: service.funnel_content?.subheadline || service.funnel_content?.subHeadline || service.description
+            }}
             onChange={(data) => {
-              // Update service fields directly since these are core service properties
-              onUpdate({ ...service, ...data });
+              // Update service fields, mapping back to correct field names
+              const serviceUpdates = { ...data };
+              
+              // Handle funnel content separately 
+              if (data.headline || data.subHeadline) {
+                serviceUpdates.funnel_content = {
+                  ...service.funnel_content,
+                  headline: data.headline,
+                  subheadline: data.subHeadline // Map back to lowercase
+                };
+                
+                // Remove these from direct service updates since they go in funnel_content
+                delete serviceUpdates.headline;
+                delete serviceUpdates.subHeadline;
+              }
+              
+              onUpdate({ ...service, ...serviceUpdates });
             }}
             onPricingChange={handlePricingFieldChange}
           />
