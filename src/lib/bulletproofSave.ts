@@ -117,8 +117,12 @@ async function executeSaveWithRetries(operation: SaveOperation): Promise<SaveRes
         return result;
       };
       
-      console.log(`[BulletproofSave] Calling withTimeout with ${SAVE_TIMEOUT_MS}ms timeout`);
-      const { data, error } = await withTimeout(dbOperation(), SAVE_TIMEOUT_MS);
+      // Use dynamic timeout based on payload size
+      const payloadSize = JSON.stringify(patch).length;
+      const dynamicTimeout = payloadSize > 10000 ? 20000 : payloadSize > 5000 ? 15000 : SAVE_TIMEOUT_MS;
+      
+      console.log(`[BulletproofSave] Calling withTimeout with ${dynamicTimeout}ms timeout (payload: ${payloadSize} bytes)`);
+      const { data, error } = await withTimeout(dbOperation(), dynamicTimeout);
       
       const duration = Math.round(performance.now() - startTime);
       

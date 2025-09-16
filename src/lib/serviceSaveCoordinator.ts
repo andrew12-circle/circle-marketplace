@@ -1,5 +1,6 @@
 import { bulletproofSave } from '@/lib/bulletproofSave';
 import { logger } from '@/utils/logger';
+import { analyzePayloadSize, optimizeFunnelContent, chunkPayload, getSaveOptions } from './payloadOptimizer';
 
 interface SaveOperation {
   serviceId: string;
@@ -137,7 +138,18 @@ class ServiceSaveCoordinator {
   }
   
   private async performSave(serviceId: string, patch: Record<string, any>, source: string): Promise<any> {
-    logger.log(`💾 ServiceSaveCoordinator: Executing save`, { serviceId, source });
+    // Analyze payload size and optimize strategy
+    const analysis = analyzePayloadSize(patch);
+    const saveOptions = getSaveOptions(patch);
+    
+    logger.log(`💾 ServiceSaveCoordinator: Executing save`, {
+      serviceId,
+      source,
+      payloadSize: `${analysis.sizeKB}KB`,
+      category: analysis.category,
+      timeout: `${analysis.recommendedTimeout}ms`,
+      shouldChunk: analysis.shouldChunk
+    });
     
     // Filter out undefined values and detect actual changes
     const cleanPatch = this.sanitizePatch(patch);
@@ -147,12 +159,21 @@ class ServiceSaveCoordinator {
       return { ok: true, skipped: true };
     }
     
-    // Optimize patch for large media content
-    const optimizedPatch = this.optimizePatchForMedia(cleanPatch);
+    // For large payloads, try chunked saving
+    if (analysis.shouldChunk && analysis.sizeBytes > 15000) {
+      return await this.performChunkedSave(serviceId, cleanPatch, source, saveOptions);
+    }
+    
+    // Optimize patch for better performance
+    let optimizedPatch = cleanPatch;
+    if (optimizedPatch.funnel_content) {
+      optimizedPatch.funnel_content = optimizeFunnelContent(optimizedPatch.funnel_content);
+    }
     
     console.log('[ServiceSaveCoordinator] About to call bulletproofSave with patch:', {
       keys: Object.keys(optimizedPatch),
-      hasLargeFunnelContent: optimizedPatch.funnel_content && JSON.stringify(optimizedPatch.funnel_content).length > 10000
+      originalSize: `${analysis.sizeKB}KB`,
+      optimizedSize: `${analyzePayloadSize(optimizedPatch).sizeKB}KB`
     });
     
     const result = await bulletproofSave(serviceId, optimizedPatch);
@@ -171,6 +192,48 @@ class ServiceSaveCoordinator {
     }
     
     return result;
+  }
+
+  private async performChunkedSave(serviceId: string, patch: Record<string, any>, source: string, options: any): Promise<any> {
+    logger.log(`🔄 ServiceSaveCoordinator: Attempting chunked save`, { serviceId, source });
+    
+    const { corePayload, mediaPayload, metadataPayload } = chunkPayload(patch);
+    
+    try {
+      // Save core fields first (fastest)
+      let result = await bulletproofSave(serviceId, this.sanitizePatch(corePayload));
+      if (!result.ok) throw new Error(result.error);
+      
+      // Save media content if exists
+      if (mediaPayload) {
+        const optimizedMedia = { funnel_content: optimizeFunnelContent(mediaPayload.funnel_content) };
+        result = await bulletproofSave(serviceId, this.sanitizePatch(optimizedMedia));
+        if (!result.ok) throw new Error(result.error);
+      }
+      
+      // Save metadata if exists
+      if (metadataPayload) {
+        result = await bulletproofSave(serviceId, this.sanitizePatch(metadataPayload));
+        if (!result.ok) throw new Error(result.error);
+      }
+      
+      logger.log(`✅ ServiceSaveCoordinator: Chunked save successful`, { serviceId, source });
+      return result;
+    } catch (error: any) {
+      logger.error(`❌ ServiceSaveCoordinator: Chunked save failed, falling back to single save`, { 
+        serviceId, 
+        source, 
+        error: error.message 
+      });
+      
+      // Fallback to single optimized save
+      const optimized = this.sanitizePatch(patch);
+      if (optimized.funnel_content) {
+        optimized.funnel_content = optimizeFunnelContent(optimized.funnel_content);
+      }
+      
+      return await bulletproofSave(serviceId, optimized);
+    }
   }
   
   private optimizePatchForMedia(patch: Record<string, any>): Record<string, any> {
