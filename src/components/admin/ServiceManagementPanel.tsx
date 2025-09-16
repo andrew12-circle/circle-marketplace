@@ -25,7 +25,8 @@ import { diffPatch } from '@/lib/diff';
 import { dlog, dwarn } from '@/utils/debugLogger';
 import { AIServiceUpdater } from './AIServiceUpdater';
 import { updateServiceById, toggleServiceField, normalizeServiceNumbers } from '@/lib/updateService';
-import { useAutosave } from '@/hooks/useAutosave';
+import { useVersionedAutosave } from '@/hooks/useVersionedAutosave';
+import { saveCorePatch } from '@/lib/serviceSaveHelpers';
 import ServiceCard from './ServiceCard';
 
 interface PricingFeature {
@@ -82,6 +83,8 @@ interface Service {
   sort_order?: number;
   created_at: string;
   updated_at: string;
+  core_version?: number;
+  funnel_version?: number;
   service_providers?: {
     name: string;
     logo_url?: string;
@@ -394,34 +397,39 @@ export const ServiceManagementPanel = () => {
     position: 1
   }]);
 
-  // Unified autosave system
-  const { triggerAutosave, isSaving, cancelPendingSave } = useAutosave({
-    onSave: async (patch: Record<string, any>) => {
-      if (!selectedService?.id) return;
+  // Versioned autosave for core service fields only
+  const { isSaving, showConflictBanner, refreshAndRetry } = useVersionedAutosave({
+    value: formData || {},
+    version: selectedService?.core_version || 1,
+    saveFn: async (patch, version) => {
+      if (!selectedService?.id) throw new Error('No service selected');
       
-      console.log('[Autosave] Saving patch:', { serviceId: selectedService.id, patch });
+      console.log('[Core Autosave] Saving patch:', { serviceId: selectedService.id, patch, version });
       
-      // Normalize numeric values before saving
+      // Normalize numeric values before saving 
       const normalizedPatch = normalizeServiceNumbers(patch);
       
-      // Save to database
-      const updatedService = await updateServiceById(selectedService.id, normalizedPatch);
+      // Save only core fields using RPC
+      const result = await saveCorePatch(selectedService.id, normalizedPatch, version);
       
       // Update local state
-      setServices(prev => prev.map(s => s.id === selectedService.id ? { ...s, ...updatedService } : s));
-      setSelectedService(prev => prev ? { ...prev, ...updatedService } : null);
+      const updatedService = { ...selectedService, ...normalizedPatch, core_version: result.version };
+      setServices(prev => prev.map(s => s.id === selectedService.id ? updatedService : s));
+      setSelectedService(updatedService);
+      setBaseline(prev => prev ? { ...prev, ...normalizedPatch } : null);
       
-      // Update baseline after successful save
-      setBaseline(prev => prev ? { ...prev, ...updatedService } : null);
+      console.log('[Core Autosave] Save completed successfully');
       
-      console.log('[Autosave] Save completed successfully');
+      // Narrow cache invalidation - only update this service
+      queryClient.setQueryData(QUERY_KEYS.services, (old: any) => 
+        old?.map((s: any) => s.id === selectedService.id ? updatedService : s) || old
+      );
+      
+      return result;
     },
-    onSaved: () => {
-      // Invalidate cache after successful save
-      invalidateServices();
-    },
-    delay: 800, // 800ms debounce
-    enabled: true
+    onVersionUpdate: (newVersion) => {
+      setSelectedService(prev => prev ? { ...prev, core_version: newVersion } : null);
+    }
   });
 
   useEffect(() => {
@@ -459,13 +467,7 @@ export const ServiceManagementPanel = () => {
     
     const newFormData = { ...formData, [field]: value };
     setFormData(newFormData);
-    
-    // Calculate what changed and trigger autosave
-    const patch = diffPatch(baseline || {}, newFormData);
-    if (Object.keys(patch).length > 0) {
-      triggerAutosave(patch);
-    }
-  }, [formData, baseline, triggerAutosave]);
+  }, [formData]);
 
   // Handle toggle fields with immediate save
   const handleToggleField = useCallback(async (field: string, value: boolean) => {
@@ -530,9 +532,6 @@ export const ServiceManagementPanel = () => {
   };
 
   const handleServiceSelect = (service: Service) => {
-    // Cancel any pending saves for the previous service
-    cancelPendingSave();
-    
     setSelectedService(service);
     setFormData(service);
     setIsEditingDetails(false);
@@ -702,7 +701,7 @@ export const ServiceManagementPanel = () => {
                   className="pl-9" 
                 />
               </div>
-              {isSaving() && (
+              {isSaving && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
                   Auto-saving...
@@ -868,7 +867,6 @@ export const ServiceManagementPanel = () => {
                         if (selectedService) {
                           setFormData(selectedService);
                           setIsEditingDetails(false);
-                          cancelPendingSave();
                         }
                       }}>
                         Cancel

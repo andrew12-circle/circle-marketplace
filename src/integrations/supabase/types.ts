@@ -8170,6 +8170,7 @@ export type Database = {
           consultation_emails: string[]
           consultation_phone: string | null
           copay_allowed: boolean | null
+          core_version: number
           created_at: string | null
           default_package_id: string | null
           description: string | null
@@ -8184,6 +8185,7 @@ export type Database = {
           external_booking_provider: string | null
           external_booking_url: string | null
           funnel_content: Json | null
+          funnel_version: number
           id: string
           image_url: string | null
           is_active: boolean | null
@@ -8244,6 +8246,7 @@ export type Database = {
           consultation_emails?: string[]
           consultation_phone?: string | null
           copay_allowed?: boolean | null
+          core_version?: number
           created_at?: string | null
           default_package_id?: string | null
           description?: string | null
@@ -8258,6 +8261,7 @@ export type Database = {
           external_booking_provider?: string | null
           external_booking_url?: string | null
           funnel_content?: Json | null
+          funnel_version?: number
           id?: string
           image_url?: string | null
           is_active?: boolean | null
@@ -8318,6 +8322,7 @@ export type Database = {
           consultation_emails?: string[]
           consultation_phone?: string | null
           copay_allowed?: boolean | null
+          core_version?: number
           created_at?: string | null
           default_package_id?: string | null
           description?: string | null
@@ -8332,6 +8337,7 @@ export type Database = {
           external_booking_provider?: string | null
           external_booking_url?: string | null
           funnel_content?: Json | null
+          funnel_version?: number
           id?: string
           image_url?: string | null
           is_active?: boolean | null
@@ -12030,6 +12036,22 @@ export type Database = {
       start_admin_session: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      svc_save_core_patch: {
+        Args: { p_id: string; p_patch: Json; p_version: number }
+        Returns: {
+          core_version: number
+          id: string
+          updated_at: string
+        }[]
+      }
+      svc_save_funnel_patch: {
+        Args: { p_id: string; p_patch: Json; p_version: number }
+        Returns: {
+          funnel_version: number
+          id: string
+          updated_at: string
+        }[]
       }
       touch_session: {
         Args: { p_session_id: string }

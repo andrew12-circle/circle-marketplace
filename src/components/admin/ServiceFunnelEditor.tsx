@@ -31,9 +31,8 @@ import {
   Settings
 } from "lucide-react";
 import { ServiceFunnelModal } from "@/components/marketplace/ServiceFunnelModal";
-import { useAutosave } from "@/hooks/useAutosave";
-import { updateServiceById, normalizeServiceNumbers } from "@/lib/updateService";
-import { diffPatch } from "@/lib/diff";
+import { useVersionedAutosave } from '@/hooks/useVersionedAutosave';
+import { saveFunnelPatch } from '@/lib/serviceSaveHelpers';
 
 interface Service {
   id: string;
@@ -59,6 +58,8 @@ interface Service {
   retail_price?: string | null;
   pro_price?: string | null;
   co_pay_price?: string | null;
+  core_version?: number;
+  funnel_version?: number;
   vendor?: {
     name: string;
     rating: number;
@@ -77,8 +78,6 @@ interface ServiceFunnelEditorProps {
 export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorProps) => {
   const [funnelData, setFunnelData] = useState(service.funnel_content || {});
   const [pricingTiers, setPricingTiers] = useState(service.pricing_tiers || []);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [selectedDefaultPackageId, setSelectedDefaultPackageId] = useState((service as any).default_package_id || null);
   const [currentEditingPackageId, setCurrentEditingPackageId] = useState<string | null>(null);
@@ -114,154 +113,47 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     });
   }, [service.id]);
   
-  // Unified autosave system 
-  const { triggerAutosave, isSaving, cancelPendingSave } = useAutosave({
-    onSave: async (patch: Record<string, any>) => {
-      console.log('[ServiceFunnelEditor] Auto-saving patch:', patch);
+  // Versioned autosave for funnel content only
+  const { isSaving, showConflictBanner, refreshAndRetry } = useVersionedAutosave({
+    value: { funnel_content: funnelData, pricing_tiers: pricingTiers },
+    version: service.funnel_version || 1,
+    saveFn: async (patch, version) => {
+      console.log('[Funnel Autosave] Saving patch:', { serviceId: service.id, patch, version });
       
-      // Normalize numeric values before saving
-      const normalizedPatch = normalizeServiceNumbers(patch);
+      // Save only funnel fields using RPC
+      const result = await saveFunnelPatch(service.id, patch, version);
       
-      // Save to database using the clean updateServiceById
-      const updatedService = await updateServiceById(service.id, normalizedPatch);
+      // Update the parent component with the changes
+      onUpdate({ ...service, ...patch, funnel_version: result.version });
       
-      console.log('[ServiceFunnelEditor] Save successful:', updatedService);
-      setLastSavedAt(new Date().toISOString());
-      setHasChanges(false);
+      console.log('[Funnel Autosave] Save completed successfully');
       
-      // Update parent with fresh data
-      onUpdate({
-        ...service,
-        ...updatedService
-      });
-      
-      return updatedService;
+      return result;
     },
-    onSaved: () => {
-      // Invalidate cache after successful save
-      invalidateServices();
-    },
-    delay: 2000, // 2 second debounce for funnel editor
-    enabled: true
+    onVersionUpdate: (newVersion) => {
+      onUpdate({ ...service, funnel_version: newVersion });
+    }
   });
 
   // Navigation guard
   useNavigationGuard({
-    hasUnsavedChanges: hasChanges || isSaving()
+    hasUnsavedChanges: isSaving
   });
 
-  // Prepare save payload
-  const prepareSavePayload = useCallback(() => {
-    const normalizedRetailPrice = normalizePrice(localPricing.retail_price);
-    const normalizedProPrice = normalizePrice(localPricing.pro_price);
-    const normalizedCoPayPrice = normalizePrice(localPricing.co_pay_price);
+  // Handle funnel data changes
+  const handleDataChange = useCallback((key: string, value: any) => {
+    setFunnelData(prev => ({ ...prev, [key]: value }));
+  }, []);
 
-    dlogPriceTransform('retail_price', localPricing.retail_price, normalizedRetailPrice);
-    dlogPriceTransform('pro_price', localPricing.pro_price, normalizedProPrice);
-    dlogPriceTransform('co_pay_price', localPricing.co_pay_price, normalizedCoPayPrice);
-
-    return {
-      title: service.title,
-      description: service.description,
-      website_url: service.website_url,
-      duration: service.duration,
-      setup_time: service.setup_time,
-      image_url: service.image_url || service.logo_url,
-      price_duration: localPricing.pricing_mode === 'external' ? 'quote' : service.price_duration,
-      funnel_content: funnelData,
-      pricing_tiers: pricingTiers,
-      retail_price: normalizedRetailPrice,
-      pro_price: normalizedProPrice,
-      co_pay_price: normalizedCoPayPrice,
-      default_package_id: selectedDefaultPackageId,
-      pricing_mode: localPricing.pricing_mode,
-      pricing_external_url: localPricing.pricing_external_url,
-      pricing_cta_label: localPricing.pricing_cta_label,
-      pricing_cta_type: localPricing.pricing_cta_type,
-      pricing_note: localPricing.pricing_note,
-      updated_at: new Date().toISOString()
-    };
-  }, [service, localPricing, funnelData, pricingTiers, selectedDefaultPackageId]);
-
-  const handleSave = async () => {
-    if (isSaving()) return;
-    
-    const payload = prepareSavePayload();
-    console.log('[ServiceFunnelEditor] Manual save triggered:', Object.keys(payload));
-    
-    // Use the new autosave system for immediate save
-    triggerAutosave(payload);
-    
-    toast({
-      title: "Saving...", 
-      description: "Changes are being saved",
-      duration: 1000
-    });
-  };
-
-  // Handle data changes with autosave
-  const handleDataChange = useCallback((section: string, data: any) => {
-    setFunnelData(prev => ({
-      ...prev,
-      [section]: data
-    }));
-    setHasChanges(true);
-    
-    // Trigger autosave after data change
-    if (service?.id) {
-      const payload = prepareSavePayload();
-      triggerAutosave(payload);
-    }
-  }, [service?.id, triggerAutosave, prepareSavePayload]);
-
+  // Handle pricing changes  
   const handlePricingChange = useCallback(async (tiers: any[]) => {
     setPricingTiers(tiers);
-    setHasChanges(true);
-    
-    // Trigger autosave after pricing change
-    if (service?.id) {
-      const payload = prepareSavePayload();
-      triggerAutosave(payload);
-    }
-  }, [service?.id, triggerAutosave, prepareSavePayload]);
+  }, []);
 
-  const handlePricingFieldChange = async (field: string, value: string | number | null) => {
-    console.log(`[ServiceFunnelEditor] Pricing field changed: ${field} = ${value}`);
-    setLocalPricing(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    setHasChanges(true);
-    
-    // Trigger autosave after pricing field change
-    if (service?.id) {
-      const payload = prepareSavePayload();
-      triggerAutosave(payload);
-    }
-  };
-
-  const handleReset = () => {
-    setFunnelData(service.funnel_content || {});
-    setPricingTiers(service.pricing_tiers || []);
-    setLocalPricing({
-      retail_price: service.retail_price,
-      pro_price: service.pro_price,
-      co_pay_price: service.co_pay_price,
-      pricing_mode: service.pricing_mode,
-      pricing_external_url: service.pricing_external_url,
-      pricing_cta_label: service.pricing_cta_label,
-      pricing_cta_type: service.pricing_cta_type,
-      pricing_note: service.pricing_note
-    });
-    setSelectedDefaultPackageId((service as any).default_package_id || null);
-    setHasChanges(false);
-    cancelPendingSave();
-    
-    toast({
-      title: "Reset Complete",
-      description: "All changes have been reset to the last saved version"
-    });
-  };
+  // Handle pricing field changes
+  const handlePricingFieldChange = useCallback(async (field: string, value: string | number) => {
+    setLocalPricing(prev => ({ ...prev, [field]: value }));
+  }, []);
 
   // Create preview service object with required fields
   const previewService = {
@@ -289,82 +181,72 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
 
   return (
     <div className="space-y-6">
-      {/* Save/Preview Controls */}  
-      <Card>
-        <CardHeader>
+      {showConflictBanner && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold">Funnel Editor</h2>
-              {hasChanges && !isSaving() && (
-                <Badge variant="outline" className="text-orange-600 border-orange-200">
-                  Unsaved Changes
-                </Badge>
-              )}
-              {isSaving() && (
-                <Badge variant="outline" className="text-blue-600 border-blue-200">
-                  Auto-saving...
-                </Badge>
-              )}
-              {lastSavedAt && !hasChanges && (
-                <Badge variant="outline" className="text-green-600 border-green-200">
-                  Saved
-                </Badge>
-              )}
+            <div>
+              <h4 className="font-medium text-yellow-800">Version Conflict</h4>
+              <p className="text-sm text-yellow-700">
+                This service has been updated by another user. Please refresh to get the latest version.
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setIsPreviewOpen(true)}
-              >
-                <Eye className="w-4 h-4 mr-2" />
-                Preview
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleReset}
-                disabled={!hasChanges}
-              >
-                <Undo className="w-4 h-4 mr-2" />
-                Reset
-              </Button>
-              <Button 
-                onClick={handleSave} 
-                disabled={!hasChanges || isSaving()}
-                size="sm"
-                variant={lastSavedAt && !hasChanges ? "outline" : "default"}
-              >
-                <Save className="w-4 h-4 mr-2" />
-                {isSaving() ? 'Saving...' : 
-                 lastSavedAt && !hasChanges ? 'Saved' : 'Save Changes'}
-              </Button>
-            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={refreshAndRetry}
+              className="border-yellow-300 text-yellow-800 hover:bg-yellow-100"
+            >
+              Refresh
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-xl">Service Funnel Editor</CardTitle>
+            {isSaving && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
+                Saving...
+              </div>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setIsPreviewOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Eye className="h-4 w-4" />
+              Preview
+            </Button>
           </div>
         </CardHeader>
       </Card>
 
-      {/* Main Editor Tabs */}
       <Tabs defaultValue="content" className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="content" className="flex items-center gap-2">
-            <FileText className="w-4 h-4" />
+            <FileText className="h-4 w-4" />
             Content
           </TabsTrigger>
           <TabsTrigger value="media" className="flex items-center gap-2">
-            <Image className="w-4 h-4" />
+            <Image className="h-4 w-4" />
             Media
           </TabsTrigger>
           <TabsTrigger value="pricing" className="flex items-center gap-2">
-            <DollarSign className="w-4 h-4" />
+            <DollarSign className="h-4 w-4" />
             Pricing
           </TabsTrigger>
           <TabsTrigger value="proof" className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4" />
+            <MessageSquare className="h-4 w-4" />
             Social Proof
           </TabsTrigger>
           <TabsTrigger value="faqs" className="flex items-center gap-2">
-            <HelpCircle className="w-4 h-4" />
+            <HelpCircle className="h-4 w-4" />
             FAQs
           </TabsTrigger>
         </TabsList>
@@ -418,12 +300,10 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
         </TabsContent>
       </Tabs>
 
-      {/* Preview Modal */}
-      <ServiceFunnelModal
+      <ServiceFunnelModal 
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
         service={previewService}
-        requestedId={currentEditingPackageId}
       />
     </div>
   );
