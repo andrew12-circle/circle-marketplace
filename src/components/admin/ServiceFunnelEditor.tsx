@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -470,30 +470,58 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     debouncedSave(service.id, payload, 'funnel-data-change');
   };
 
-  const handlePricingChange = async (tiers: any[]) => {
+  // Add ref to track pricing save in progress
+  const pricingSaveInProgress = useRef(false);
+  const pricingDebounceTimeout = useRef<NodeJS.Timeout>();
+
+  const handlePricingChange = useCallback(async (tiers: any[]) => {
+    // Prevent multiple concurrent saves
+    if (pricingSaveInProgress.current) {
+      console.log('[ServiceFunnelEditor] Pricing save already in progress, skipping');
+      return;
+    }
+
     console.log('[ServiceFunnelEditor] Pricing change detected, using simplified save');
     setPricingTiers(tiers);
     setHasChanges(true);
     
-    // Use simplified save for pricing data only
-    try {
-      await savePricingOnly(service.id, {
-        pricing_tiers: tiers,
-        retail_price: localPricing.retail_price,
-        pro_price: localPricing.pro_price,
-        co_pay_price: localPricing.co_pay_price,
-        default_package_id: selectedDefaultPackageId,
-        pricing_mode: localPricing.pricing_mode,
-        pricing_external_url: localPricing.pricing_external_url,
-        pricing_cta_label: localPricing.pricing_cta_label,
-        pricing_cta_type: localPricing.pricing_cta_type,
-        pricing_note: localPricing.pricing_note
-      });
-      setHasChanges(false);
-    } catch (error) {
-      console.error('[ServiceFunnelEditor] Simplified pricing save failed:', error);
+    // Clear existing debounce timeout
+    if (pricingDebounceTimeout.current) {
+      clearTimeout(pricingDebounceTimeout.current);
     }
-  };
+    
+    // Debounce the save operation
+    pricingDebounceTimeout.current = setTimeout(async () => {
+      pricingSaveInProgress.current = true;
+      
+      try {
+        console.log('[SimplifiedSave] Starting pricing save...');
+        const result = await savePricingOnly(service.id, {
+          pricing_tiers: tiers,
+          retail_price: localPricing.retail_price,
+          pro_price: localPricing.pro_price,
+          co_pay_price: localPricing.co_pay_price,
+          default_package_id: selectedDefaultPackageId,
+          pricing_mode: localPricing.pricing_mode,
+          pricing_external_url: localPricing.pricing_external_url,
+          pricing_cta_label: localPricing.pricing_cta_label,
+          pricing_cta_type: localPricing.pricing_cta_type,
+          pricing_note: localPricing.pricing_note
+        });
+        
+        if (result.ok) {
+          console.log('[SimplifiedSave] Pricing save successful');
+          setHasChanges(false);
+        } else {
+          console.error('[SimplifiedSave] Pricing save failed:', result.error);
+        }
+      } catch (error) {
+        console.error('[ServiceFunnelEditor] Simplified pricing save failed:', error);
+      } finally {
+        pricingSaveInProgress.current = false;
+      }
+    }, 500); // 500ms debounce
+  }, [service.id, localPricing, selectedDefaultPackageId, savePricingOnly]);
 
   // Handle pricing field changes (retail_price, pro_price, etc.)
   const handlePricingFieldChange = async (field: string, value: string | number | null) => {
