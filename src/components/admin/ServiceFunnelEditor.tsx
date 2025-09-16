@@ -674,8 +674,12 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
               // Extract funnel-specific fields
               const { id, title, description, website_url, duration, setup_time, image_url, logo_url, ...funnelContent } = data;
               
-              // Update funnel content
-              setFunnelData(funnelContent);
+              // Update funnel content immediately
+              setFunnelData(prev => ({
+                ...prev,
+                ...funnelContent
+              }));
+              setHasChanges(true);
               
               // Update service-level fields if they changed
               if (title !== service.title || description !== service.description || website_url !== service.website_url || 
@@ -692,18 +696,11 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
                   image_url: image_url || service.image_url,
                   logo_url: logo_url || service.logo_url
                 });
-                
-                // Trigger debounced save for service-level changes
-                setTimeout(() => {
-                  const payload = prepareSavePayload();
-                  debouncedSave(service.id, payload, 'service-fields-change');
-                }, 100);
               }
               
-              // Update pricing tiers if changed (this shouldn't happen from content tab anymore)
-              // All pricing is now handled in the dedicated pricing tab
-              
-              setHasChanges(true);
+              // Trigger immediate debounced save for all changes
+              const payload = prepareSavePayload();
+              debouncedSave(service.id, payload, 'service-fields-change');
             }}
           />
         </TabsContent>
