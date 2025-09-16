@@ -855,7 +855,10 @@ export const ServiceManagementPanel = () => {
                           min="0"
                           max="10000"
                           value={formData?.estimated_roi || ''}
-                          onChange={e => handleFieldChange('estimated_roi', Number(e.target.value))}
+                          onChange={e => {
+                            const value = e.target.value === '' ? null : Number(e.target.value);
+                            handleFieldChange('estimated_roi', value);
+                          }}
                           placeholder="150"
                         />
                       </div>
