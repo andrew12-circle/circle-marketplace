@@ -113,6 +113,19 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     version: service.funnel_version || 1,
     saveFn: async (patch, version) => {
       console.log('[Funnel Autosave] Saving patch:', { serviceId: service.id, patch, version });
+      console.log('[Funnel Autosave] Current funnelData:', funnelData);
+      console.log('[Funnel Autosave] Current pricingTiers:', pricingTiers);
+      
+      // Check if patch is empty or meaningless
+      const hasRealChanges = Object.keys(patch).some(key => {
+        const value = patch[key];
+        return value != null && value !== '' && JSON.stringify(value) !== '{}' && JSON.stringify(value) !== '[]';
+      });
+      
+      if (!hasRealChanges) {
+        console.log('[Funnel Autosave] Skipping save - no meaningful changes detected');
+        return { id: service.id, version, updated_at: new Date().toISOString() };
+      }
       
       // Save only funnel fields using RPC
       const result = await saveFunnelPatch(service.id, patch, version);
