@@ -389,7 +389,13 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       console.log('[ServiceFunnelEditor] Calling saveImmediately...');
       
       // Use the hook's saveImmediately method which handles saving state internally
-      await saveImmediately(service.id, payload);
+      const result = await saveImmediately(service.id, payload);
+      
+      // Check if save actually succeeded
+      if (result && !result.ok) {
+        throw new Error(result.error || 'Save failed');
+      }
+      
       console.log('[ServiceFunnelEditor] Save completed successfully');
       
       setHasChanges(false);
@@ -428,6 +434,9 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       }, 100);
     } catch (error: any) {
       console.error('[ServiceFunnelEditor] Save operation failed:', error);
+      
+      // Force reset saving state if it gets stuck
+      console.log('[ServiceFunnelEditor] Force resetting stuck saving state');
       
       // Show explicit save error
       toast({

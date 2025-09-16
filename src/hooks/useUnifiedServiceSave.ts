@@ -100,7 +100,10 @@ export function useUnifiedServiceSave(options: UseUnifiedServiceSaveOptions = {}
       }
       
       onSaveError?.(serviceId, error);
-      throw error;
+      
+      // Don't throw error - let UI continue working
+      console.error(`[useUnifiedServiceSave] Save failed for ${serviceId}:`, error);
+      return { ok: false, error: error.message };
     }
   }, [toast, invalidateServices, autoInvalidateCache, showToasts, onSaveSuccess, onSaveError]);
   
