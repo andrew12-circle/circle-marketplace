@@ -18,8 +18,8 @@ class ServiceSaveCoordinator {
   
   // Minimum time between saves (ms)
   private readonly SAVE_DEBOUNCE = 1000;
-  // Maximum time to wait for a save (ms)
-  private readonly SAVE_TIMEOUT = 10000;
+  // Maximum time to wait for a save (ms) - increased for media-heavy saves
+  private readonly SAVE_TIMEOUT = 30000;
   
   async save(serviceId: string, patch: Record<string, any>, source = 'unknown'): Promise<any> {
     logger.log(`🔒 ServiceSaveCoordinator: Save requested`, { serviceId, source, patchKeys: Object.keys(patch) });
@@ -147,15 +147,28 @@ class ServiceSaveCoordinator {
       return { ok: true, skipped: true };
     }
     
-    const result = await bulletproofSave(serviceId, cleanPatch);
+    console.log('[ServiceSaveCoordinator] About to call bulletproofSave with patch:', Object.keys(cleanPatch));
     
-    if (result.ok) {
-      logger.log(`✅ ServiceSaveCoordinator: Save completed`, { serviceId, traceId: result.traceId });
-    } else {
-      logger.error(`❌ ServiceSaveCoordinator: Save failed`, { serviceId, error: result.error });
+    try {
+      // Add timeout wrapper around bulletproofSave to prevent indefinite hanging
+      const savePromise = bulletproofSave(serviceId, cleanPatch);
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('bulletproofSave timed out after 25 seconds')), 25000)
+      );
+      
+      const result = await Promise.race([savePromise, timeoutPromise]);
+      
+      if (result.ok) {
+        logger.log(`✅ ServiceSaveCoordinator: Save completed`, { serviceId, traceId: result.traceId });
+      } else {
+        logger.error(`❌ ServiceSaveCoordinator: Save failed`, { serviceId, error: result.error });
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('[ServiceSaveCoordinator] bulletproofSave threw error:', error);
+      throw error;
     }
-    
-    return result;
   }
   
   private sanitizePatch(patch: Record<string, any>): Record<string, any> {
