@@ -85,6 +85,13 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
   const { invalidateServices } = useInvalidateMarketplace();
   const queryClient = useQueryClient();
   
+  // Sync local state when service prop changes (e.g., after save)
+  useEffect(() => {
+    setFunnelData(service.funnel_content || {});
+    setPricingTiers(service.pricing_tiers || []);
+  }, [service.id, service.funnel_content, service.pricing_tiers]);
+  
+  
   // Unified save system with debouncing
   const {
     debouncedSave,
@@ -99,7 +106,15 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       console.log('[ServiceFunnelEditor] Save successful:', result);
       setHasChanges(false);
       setLastSavedAt(new Date().toISOString());
-      onUpdate(service); // Trigger parent update
+      
+      // Update parent with the actual saved data instead of old service object
+      const updatedService = {
+        ...service,
+        ...result, // This contains the saved data from the database
+        funnel_content: funnelData,
+        pricing_tiers: pricingTiers
+      };
+      onUpdate(updatedService);
     },
     onSaveError: (serviceId, error) => {
       console.error('[ServiceFunnelEditor] Save failed:', error);
