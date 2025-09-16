@@ -98,7 +98,9 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     saveImmediately,
     isSaving,
     hasUnsavedChanges,
-    lastSaved
+    cancelPendingSave,
+    error: saveError,
+    lastSaved: hookLastSaved
   } = useDebouncedServiceSave({
     debounceMs: 3000,
     autoSave: true,
@@ -400,9 +402,19 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
         try {
           const serialized = JSON.stringify(payload.funnel_content);
           console.log('[ServiceFunnelEditor] Funnel content serialized successfully, size:', serialized.length);
+          
+          // If payload is very large, show warning
+          if (serialized.length > 1000000) { // 1MB
+            console.warn('[ServiceFunnelEditor] Large payload detected:', serialized.length, 'bytes');
+          }
         } catch (e) {
           console.error('[ServiceFunnelEditor] Funnel content serialization failed:', e);
-          throw new Error('Funnel content contains non-serializable data');
+          toast({
+            title: "Save Error",
+            description: "Content contains invalid data and cannot be saved",
+            variant: "destructive"
+          });
+          return;
         }
       }
       
@@ -455,15 +467,19 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     } catch (error: any) {
       console.error('[ServiceFunnelEditor] Save operation failed:', error);
       
-      // Force reset saving state if it gets stuck
-      console.log('[ServiceFunnelEditor] Force resetting stuck saving state');
+      // Force clear any pending saves to reset state
+      cancelPendingSave(service.id);
       
-      // Show explicit save error
+      // Show explicit save error with timeout-specific messaging
+      const isTimeout = error.message?.includes('timed out') || error.message?.includes('timeout');
+      
       toast({
         title: "Save Failed",
-        description: error.message || "Please try again",
+        description: isTimeout 
+          ? "Save timed out - your content may be too large. Try reducing image sizes or content."
+          : (error.message || "Please try again"),
         variant: "destructive",
-        duration: 5000
+        duration: 8000
       });
     }
   };
