@@ -388,13 +388,8 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       
       console.log('[ServiceFunnelEditor] Calling saveImmediately...');
       
-      // Add timeout to prevent hanging
-      const savePromise = saveImmediately(service.id, payload);
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Save operation timed out after 30 seconds')), 30000)
-      );
-      
-      await Promise.race([savePromise, timeoutPromise]);
+      // Use the hook's saveImmediately method which handles saving state internally
+      await saveImmediately(service.id, payload);
       console.log('[ServiceFunnelEditor] Save completed successfully');
       
       setHasChanges(false);
