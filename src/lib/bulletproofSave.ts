@@ -55,18 +55,35 @@ function log(traceId: string, serviceId: string, operation: string, error?: stri
 }
 
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
-  const abortController = new AbortController();
-  const timeoutId = setTimeout(() => abortController.abort(), timeoutMs);
+  let timeoutId: NodeJS.Timeout;
+  let isResolved = false;
+  
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => {
+      if (!isResolved) {
+        console.log(`[withTimeout] Timeout fired after ${timeoutMs}ms`);
+        reject(new Error(`Operation timed out after ${timeoutMs}ms`));
+      }
+    }, timeoutMs);
+  });
   
   try {
-    const result = await promise;
-    clearTimeout(timeoutId);
+    const result = await Promise.race([
+      promise.then(result => {
+        isResolved = true;
+        clearTimeout(timeoutId);
+        return result;
+      }).catch(error => {
+        isResolved = true;
+        clearTimeout(timeoutId);
+        throw error;
+      }),
+      timeoutPromise
+    ]);
+    
     return result;
   } catch (error) {
     clearTimeout(timeoutId);
-    if (abortController.signal.aborted) {
-      throw new Error('Operation timed out');
-    }
     throw error;
   }
 }
@@ -82,14 +99,25 @@ async function executeSaveWithRetries(operation: SaveOperation): Promise<SaveRes
       
       // Apply timeout wrapper to the database operation to prevent indefinite hanging
       const dbOperation = async () => {
-        return await supabase
+        console.log(`[BulletproofSave] Starting database operation for ${serviceId}`);
+        console.log(`[BulletproofSave] Patch keys:`, Object.keys(patch));
+        console.log(`[BulletproofSave] Patch size:`, JSON.stringify(patch).length);
+        
+        const startDbTime = performance.now();
+        const result = await supabase
           .from('services')
           .update(patch)
           .eq('id', serviceId)
           .select('id')
           .single();
+        
+        const dbDuration = Math.round(performance.now() - startDbTime);
+        console.log(`[BulletproofSave] Database operation completed in ${dbDuration}ms`);
+        
+        return result;
       };
       
+      console.log(`[BulletproofSave] Calling withTimeout with ${SAVE_TIMEOUT_MS}ms timeout`);
       const { data, error } = await withTimeout(dbOperation(), SAVE_TIMEOUT_MS);
       
       const duration = Math.round(performance.now() - startTime);
