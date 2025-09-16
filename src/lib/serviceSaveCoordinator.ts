@@ -19,8 +19,8 @@ class ServiceSaveCoordinator {
   
   // Minimum time between saves (ms)
   private readonly SAVE_DEBOUNCE = 1000;
-  // Maximum time to wait for a save (ms) - increased for media-heavy saves
-  private readonly SAVE_TIMEOUT = 30000;
+  // Maximum time to wait for a save (ms) - increased for better reliability
+  private readonly SAVE_TIMEOUT = 20000;
   
   async save(serviceId: string, patch: Record<string, any>, source = 'unknown'): Promise<any> {
     logger.log(`🔒 ServiceSaveCoordinator: Save requested`, { serviceId, source, patchKeys: Object.keys(patch) });

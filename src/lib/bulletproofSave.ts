@@ -16,9 +16,9 @@ export interface SaveResult {
   currentVersion?: number;
 }
 
-const SAVE_TIMEOUT_MS = 8000;
-const MAX_RETRIES = 3;
-const RETRY_DELAYS = [500, 1000, 2000]; // Exponential backoff
+const SAVE_TIMEOUT_MS = 15000; // Increased from 8000ms to 15000ms
+const MAX_RETRIES = 2; // Reduced retries to fail faster
+const RETRY_DELAYS = [1000, 2000]; // Faster retry progression
 
 // Single-flight save queue per service
 const saveQueues = new Map<string, Promise<SaveResult>>();
