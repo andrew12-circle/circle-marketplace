@@ -12038,11 +12038,11 @@ export type Database = {
         Returns: boolean
       }
       svc_save_core_patch: {
-        Args: { p_id: string; p_patch: Json; p_version?: number }
+        Args: { p_id: string; p_patch: Json; p_version: number }
         Returns: {
-          core_version: number
           id: string
           updated_at: string
+          version: number
         }[]
       }
       svc_save_funnel_patch: {
