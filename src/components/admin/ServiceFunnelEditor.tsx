@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useInvalidateMarketplace, QUERY_KEYS } from "@/hooks/useMarketplaceData";
 import { useQueryClient } from "@tanstack/react-query";
 import { useDebouncedServiceSave } from "@/hooks/useDebouncedServiceSave";
+import { useSimplifiedServiceSave } from "@/hooks/useSimplifiedServiceSave";
 import { useNavigationGuard } from "@/hooks/useNavigationGuard";
 import { FunnelSectionEditor } from "./FunnelSectionEditor";
 import { FunnelMediaEditor } from "./FunnelMediaEditor";
@@ -85,37 +86,39 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
   const { invalidateServices } = useInvalidateMarketplace();
   const queryClient = useQueryClient();
   
-  // Unified save system with debouncing and coordination
+  // Unified save system with debouncing (for funnel content)
   const {
     debouncedSave,
     saveImmediately,
-    isSaving,
+    isSaving: isComplexSaving,
     hasUnsavedChanges,
     lastSaved
   } = useDebouncedServiceSave({
     debounceMs: 3000,
     autoSave: true,
     onSaveSuccess: (serviceId, result) => {
-      console.log('[ServiceFunnelEditor] Save successful:', result);
+      console.log('[ServiceFunnelEditor] Complex save successful:', result);
       setHasChanges(false);
       setLastSavedAt(new Date().toISOString());
-      toast({
-        title: "Saved Successfully", 
-        description: "All changes have been saved",
-        duration: 2000
-      });
       onUpdate(service); // Trigger parent update
     },
     onSaveError: (serviceId, error) => {
-      console.error('[ServiceFunnelEditor] Save failed:', error);
-      toast({
-        title: "Save Failed",
-        description: "Please try again",
-        variant: "destructive",
-        duration: 3000
-      });
+      console.error('[ServiceFunnelEditor] Complex save failed:', error);
     }
   });
+  
+  // Simplified save system (for pricing and basic fields)
+  const {
+    savePricingOnly,
+    saveFunnelOnly,
+    saveServiceFields,
+    isSaving: isSimpleSaving,
+    lastSaved: lastSimpleSaved,
+    error: simpleSaveError
+  } = useSimplifiedServiceSave();
+  
+  // Combined saving state
+  const isSaving = isComplexSaving || isSimpleSaving;
   
   // Navigation guard
   useNavigationGuard({
@@ -467,29 +470,59 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     debouncedSave(service.id, payload, 'funnel-data-change');
   };
 
-  const handlePricingChange = (tiers: any[]) => {
+  const handlePricingChange = async (tiers: any[]) => {
+    console.log('[ServiceFunnelEditor] Pricing change detected, using simplified save');
     setPricingTiers(tiers);
     setHasChanges(true);
     
-    // Trigger debounced auto-save
-    const payload = prepareSavePayload();
-    debouncedSave(service.id, payload, 'pricing-tiers-change');
+    // Use simplified save for pricing data only
+    try {
+      await savePricingOnly(service.id, {
+        pricing_tiers: tiers,
+        retail_price: localPricing.retail_price,
+        pro_price: localPricing.pro_price,
+        co_pay_price: localPricing.co_pay_price,
+        default_package_id: selectedDefaultPackageId,
+        pricing_mode: localPricing.pricing_mode,
+        pricing_external_url: localPricing.pricing_external_url,
+        pricing_cta_label: localPricing.pricing_cta_label,
+        pricing_cta_type: localPricing.pricing_cta_type,
+        pricing_note: localPricing.pricing_note
+      });
+      setHasChanges(false);
+    } catch (error) {
+      console.error('[ServiceFunnelEditor] Simplified pricing save failed:', error);
+    }
   };
 
   // Handle pricing field changes (retail_price, pro_price, etc.)
-  const handlePricingFieldChange = (field: string, value: string | number | null) => {
-    console.log(`[Admin ServiceFunnelEditor] Pricing field changed: ${field} = ${value}`);
+  const handlePricingFieldChange = async (field: string, value: string | number | null) => {
+    console.log(`[ServiceFunnelEditor] Pricing field changed: ${field} = ${value}, using simplified save`);
     setLocalPricing(prev => ({
       ...prev,
       [field]: value
     }));
     setHasChanges(true);
     
-    // Trigger debounced auto-save
-    setTimeout(() => {
-      const payload = prepareSavePayload();
-      debouncedSave(service.id, payload, 'pricing-field-change');
-    }, 100); // Small delay to ensure state is updated
+    // Use simplified save for pricing field changes
+    try {
+      const updatedPricing = { ...localPricing, [field]: value };
+      await savePricingOnly(service.id, {
+        pricing_tiers: pricingTiers,
+        retail_price: updatedPricing.retail_price,
+        pro_price: updatedPricing.pro_price,
+        co_pay_price: updatedPricing.co_pay_price,
+        default_package_id: selectedDefaultPackageId,
+        pricing_mode: updatedPricing.pricing_mode,
+        pricing_external_url: updatedPricing.pricing_external_url,
+        pricing_cta_label: updatedPricing.pricing_cta_label,
+        pricing_cta_type: updatedPricing.pricing_cta_type,
+        pricing_note: updatedPricing.pricing_note
+      });
+      setHasChanges(false);
+    } catch (error) {
+      console.error('[ServiceFunnelEditor] Simplified pricing field save failed:', error);
+    }
   };
 
   const handleReset = () => {
