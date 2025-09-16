@@ -266,9 +266,17 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
   // Create preview service object with required fields
   const previewService = {
     ...service,
+    category: service.category || 'general',
+    is_featured: service.is_featured || false,
+    is_top_pick: service.is_top_pick || false,
+    vendor: service.vendor || {
+      name: '',
+      rating: 0,
+      review_count: 0,
+      is_verified: false
+    },
     funnel_content: funnelData,
     pricing_tiers: pricingTiers,
-    default_package_id: selectedDefaultPackageId,
     retail_price: localPricing.retail_price,
     pro_price: localPricing.pro_price,
     co_pay_price: localPricing.co_pay_price,
@@ -277,7 +285,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     pricing_cta_label: localPricing.pricing_cta_label,
     pricing_cta_type: localPricing.pricing_cta_type,
     pricing_note: localPricing.pricing_note
-  };
+  } as any;
 
   return (
     <div className="space-y-6">
@@ -363,9 +371,9 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
 
         <TabsContent value="content" className="space-y-4">
           <FunnelSectionEditor 
-            sections={funnelData}
-            onChange={(sections) => handleDataChange('sections', sections)}
-            service={service}
+            data={funnelData}
+            onChange={(data) => handleDataChange('sections', data)}
+            onPricingChange={handlePricingFieldChange}
           />
         </TabsContent>
 
@@ -373,36 +381,39 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
           <FunnelMediaEditor 
             media={funnelData.media || []}
             onChange={(media) => handleDataChange('media', media)}
-            service={service}
+            serviceImageUrl={service.image_url || service.logo_url}
           />
         </TabsContent>
 
         <TabsContent value="pricing" className="space-y-4">
           <FunnelPricingEditor
-            service={service}
             pricingTiers={pricingTiers}
-            onPricingTiersChange={handlePricingChange}
-            localPricing={localPricing}
+            onChange={handlePricingChange}
+            pricingMode={localPricing.pricing_mode}
+            pricingExternalUrl={localPricing.pricing_external_url}
+            pricingCtaLabel={localPricing.pricing_cta_label}
+            pricingCtaType={localPricing.pricing_cta_type}
+            pricingNote={localPricing.pricing_note}
             onPricingFieldChange={handlePricingFieldChange}
-            selectedDefaultPackageId={selectedDefaultPackageId}
-            onDefaultPackageChange={setSelectedDefaultPackageId}
-            onCurrentEditingPackageChange={setCurrentEditingPackageId}
+            service={service}
           />
         </TabsContent>
 
         <TabsContent value="proof" className="space-y-4">
           <FunnelProofEditor 
-            socialProof={funnelData.socialProof || { testimonials: [], stats: [] }}
-            onChange={(socialProof) => handleDataChange('socialProof', socialProof)}
-            service={service}
+            proofData={funnelData.socialProof || { 
+              testimonials: { enabled: false, items: [] }, 
+              caseStudy: { enabled: false, data: {} }, 
+              vendorVerification: { enabled: false, data: { badges: [], description: '' } } 
+            }}
+            onChange={(proofData) => handleDataChange('socialProof', proofData)}
           />
         </TabsContent>
 
         <TabsContent value="faqs" className="space-y-4">
           <FunnelFAQEditor 
-            faqs={funnelData.faqs || []}
-            onChange={(faqs) => handleDataChange('faqs', faqs)}
-            service={service}
+            faqSections={funnelData.faqs || []}
+            onChange={(faqSections) => handleDataChange('faqs', faqSections)}
           />
         </TabsContent>
       </Tabs>
