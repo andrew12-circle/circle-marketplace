@@ -14,7 +14,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useInvalidateMarketplace, QUERY_KEYS } from "@/hooks/useMarketplaceData";
 import { useQueryClient } from "@tanstack/react-query";
 import { useDebouncedServiceSave } from "@/hooks/useDebouncedServiceSave";
-import { useSimplifiedServiceSave } from "@/hooks/useSimplifiedServiceSave";
 import { useNavigationGuard } from "@/hooks/useNavigationGuard";
 import { FunnelSectionEditor } from "./FunnelSectionEditor";
 import { FunnelMediaEditor } from "./FunnelMediaEditor";
@@ -86,39 +85,26 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
   const { invalidateServices } = useInvalidateMarketplace();
   const queryClient = useQueryClient();
   
-  // Unified save system with debouncing (for funnel content)
+  // Unified save system with debouncing
   const {
     debouncedSave,
     saveImmediately,
-    isSaving: isComplexSaving,
+    isSaving,
     hasUnsavedChanges,
     lastSaved
   } = useDebouncedServiceSave({
     debounceMs: 3000,
     autoSave: true,
     onSaveSuccess: (serviceId, result) => {
-      console.log('[ServiceFunnelEditor] Complex save successful:', result);
+      console.log('[ServiceFunnelEditor] Save successful:', result);
       setHasChanges(false);
       setLastSavedAt(new Date().toISOString());
       onUpdate(service); // Trigger parent update
     },
     onSaveError: (serviceId, error) => {
-      console.error('[ServiceFunnelEditor] Complex save failed:', error);
+      console.error('[ServiceFunnelEditor] Save failed:', error);
     }
   });
-  
-  // Simplified save system (for pricing and basic fields)
-  const {
-    savePricingOnly,
-    saveFunnelOnly,
-    saveServiceFields,
-    isSaving: isSimpleSaving,
-    lastSaved: lastSimpleSaved,
-    error: simpleSaveError
-  } = useSimplifiedServiceSave();
-  
-  // Combined saving state
-  const isSaving = isComplexSaving || isSimpleSaving;
   
   // Navigation guard
   useNavigationGuard({

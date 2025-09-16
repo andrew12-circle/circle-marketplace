@@ -27,7 +27,7 @@ import { diffPatch } from '@/lib/diff';
 import { dlog, dwarn } from '@/utils/debugLogger';
 import { AIServiceUpdater } from './AIServiceUpdater';
 import { updateServiceResilient } from '@/lib/resilientServiceUpdate';
-import { ServiceComplianceTracker } from './ServiceComplianceTracker';
+import { updateServiceById, toggleServiceField, normalizeServiceNumbers } from '@/lib/serviceUpdates';
 import ServiceCard from './ServiceCard';
 interface PricingFeature {
   id: string;
@@ -250,29 +250,24 @@ export const ServiceManagementPanel = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saveInProgress, setSaveInProgress] = useState(false);
-  // Auto-save system for marketplace settings
-  const { debouncedSave, isSaving: isDebouncedSaving } = useDebouncedServiceSave({
+  const [baselineService, setBaselineService] = useState<Service | null>(null);
+  // Unified save system - primary save method
+  const { debouncedSave, saveImmediately, isSaving, hasUnsavedChanges } = useDebouncedServiceSave({
     onSaveSuccess: async (id: string, result: any) => {
       console.log('[ServicePanel] Save successful', { id, result });
       
-      // Update local state - get fresh data from the result
+      // Update local state with fresh data
       setServices(prev => prev.map(s => s.id === id ? { ...s, ...result } : s));
       if (selectedService?.id === id) {
         setSelectedService(prev => prev ? { ...prev, ...result } : null);
-        setEditForm(prev => ({ ...prev, ...result }));
+        // Don't reset editForm during save to prevent UI flicker
       }
-      
-      // Clear saving state
-      setSaving(false);
       
       // Invalidate cache to ensure consistency
       await invalidateCache();
     },
     onSaveError: (id: string, error: any) => {
       console.error('[ServicePanel] Save failed', { id, error });
-      setSaving(false);
     }
   });
   
@@ -459,18 +454,63 @@ export const ServiceManagementPanel = () => {
     setFilteredServices(filtered);
   }, [services, searchTerm]);
 
-  // Sync editForm when selectedService changes (critical for form stability)
-  // IMPORTANT: Preserve pricing_tiers and funnel_content to prevent data loss
+  // Set baseline for dirty detection when service changes
   useEffect(() => {
     if (selectedService) {
-      setEditForm(prevForm => ({
-        ...selectedService,
-        // Preserve pricing_tiers and funnel_content if they exist in editForm
-        pricing_tiers: prevForm?.pricing_tiers || selectedService.pricing_tiers,
-        funnel_content: prevForm?.funnel_content || selectedService.funnel_content
-      }));
+      // Create stable baseline for dirty detection
+      const baseline = JSON.parse(JSON.stringify(selectedService));
+      setBaselineService(baseline);
+      
+      // Sync edit form with selected service
+      setEditForm(selectedService);
     }
-  }, [selectedService]);
+  }, [selectedService?.id]); // Only reset when switching to different service
+  // Compute dirty state from stable baseline
+  const isDetailsDirty = useMemo(() => {
+    if (!selectedService || !baselineService) return false;
+    
+    // Compare key form fields against baseline
+    return !compareValues(editForm.title, baselineService.title) ||
+           !compareValues(editForm.description, baselineService.description) ||
+           !compareValues(editForm.category, baselineService.category) ||
+           !compareValues(editForm.estimated_roi, baselineService.estimated_roi) ||
+           !compareValues(editForm.duration, baselineService.duration) ||
+           !compareValues(editForm.retail_price, baselineService.retail_price) ||
+           !compareValues(editForm.pro_price, baselineService.pro_price) ||
+           !compareValues(editForm.is_featured, baselineService.is_featured) ||
+           !compareValues(editForm.is_verified, baselineService.is_verified) ||
+           !compareValues(editForm.tags, baselineService.tags);
+  }, [editForm, baselineService, selectedService]);
+
+  // Replace all toggle operations with unified helper
+  const handleToggleField = useCallback(async (field: string, value: boolean) => {
+    if (!selectedService?.id) return;
+    
+    try {
+      await toggleServiceField(selectedService.id, field, value);
+      
+      // Update local state
+      const updatedService = { ...selectedService, [field]: value };
+      setSelectedService(updatedService);
+      setServices(prev => prev.map(s => s.id === selectedService.id ? updatedService : s));
+      setEditForm(prev => ({ ...prev, [field]: value }));
+      
+      toast({
+        title: "Saved",
+        description: `${field.replace(/_/g, ' ')} updated successfully`,
+        duration: 2000
+      });
+    } catch (error: any) {
+      console.error(`Failed to update ${field}:`, error);
+      toast({
+        title: "Save Failed", 
+        description: error.message || `Failed to update ${field}`,
+        variant: "destructive",
+        duration: 3000
+      });
+    }
+  }, [selectedService, toast]);
+
   const fetchServices = async () => {
     try {
       setError(null);
@@ -546,289 +586,21 @@ export const ServiceManagementPanel = () => {
       }
     }
   };
-  const handleServiceUpdate = async () => {
-    dlog('handleServiceUpdate called:', { selectedService: !!selectedService, saving, saveInProgress });
-    
-    if (!selectedService || saving || saveInProgress) {
-      dlog('Early return from handleServiceUpdate:', { 
-        hasSelectedService: !!selectedService, 
-        saving, 
-        saveInProgress 
-      });
-      return;
-    }
-    
-    dlog('Starting save process...');
-    setSaveInProgress(true);
-    setSaving(true);
-    try {
-      dlog('Step 1: Starting validation...');
-      
-      // Basic required field validation
-      if (!editForm.title || !editForm.category) {
-        dlog('Validation failed: missing required fields');
-        toast({
-          title: 'Missing required fields',
-          description: 'Please provide both Title and Category before saving.',
-          variant: 'destructive'
-        });
-        return;
-      }
-      
-      dlog('Step 2: Validation passed, processing numeric fields...');
-      
-      // Normalize numeric fields to match DB constraints
-      let roi = editForm.estimated_roi ?? null;
-      let respa = editForm.respa_split_limit ?? null;
-      let nonSsp = editForm.max_split_percentage_non_ssp ?? null;
-      const adjustments: string[] = [];
-
-      // Allow high ROI values up to 10000%
-      if (typeof roi === 'number') {
-        if (roi > 10000) {
-          roi = 10000;
-          adjustments.push(`ROI capped at 10000%`);
-        }
-        if (roi < 0) {
-          roi = 0;
-          adjustments.push(`ROI cannot be negative`);
-        }
-      }
-      if (typeof respa === 'number') {
-        const original = respa;
-        respa = Math.min(1000, Math.max(0, Math.round(respa)));
-        if (respa !== original) adjustments.push(`RESPA split normalized to ${respa}%`);
-      }
-      if (typeof nonSsp === 'number') {
-        const original = nonSsp;
-        nonSsp = Math.min(1000, Math.max(0, Math.round(nonSsp)));
-        if (nonSsp !== original) adjustments.push(`Non-SSP split normalized to ${nonSsp}%`);
-      }
-      if (adjustments.length) {
-        toast({
-          title: 'Adjusted values',
-          description: adjustments.join(' • ')
-        });
-      }
-
-      // Prepare update data with only valid database fields
-      const updateData = {
-        title: editForm.title,
-        description: editForm.description,
-        category: editForm.category,
-        duration: editForm.duration,
-        setup_time: editForm.setup_time ?? null,
-        estimated_roi: roi,
-        sort_order: editForm.sort_order || null,
-        is_featured: !!editForm.is_featured,
-        is_top_pick: !!editForm.is_top_pick,
-        is_verified: !!editForm.is_verified,
-        requires_quote: !!editForm.requires_quote,
-        copay_allowed: !!editForm.copay_allowed,
-        direct_purchase_enabled: !!editForm.direct_purchase_enabled,
-        respa_split_limit: respa,
-        max_split_percentage_non_ssp: nonSsp,
-        retail_price: editForm.retail_price ?? null,
-        pro_price: editForm.pro_price ?? null,
-        price_duration: editForm.price_duration ?? null,
-        website_url: editForm.website_url ?? null,
-        tags: Array.isArray(editForm.tags) ? editForm.tags : null,
-        updated_at: new Date().toISOString()
-      };
-      
-      // Filter out any undefined values that might cause issues
-      const cleanUpdateData = Object.fromEntries(
-        Object.entries(updateData).filter(([_, value]) => value !== undefined)
-      );
-      dlog('Step 3: Prepared update data, sending to database...');
-      dlog('Updating service with cleaned data:', cleanUpdateData);
-      dlog('Service ID:', selectedService.id);
-      dlog('Update data keys:', Object.keys(cleanUpdateData));
-      dlog('Update data types:', Object.entries(cleanUpdateData).map(([key, value]) => [key, typeof value, value]));
-      
-      let error = null;
-      let result = null;
-      
-      try {
-        // Add timeout to prevent hanging
-        const updatePromise = supabase
-          .from('services')
-          .update(cleanUpdateData as any)
-          .eq('id', selectedService.id as any);
-        
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Database update timeout after 15 seconds')), 15000)
-        );
-        
-        dlog('Step 4: Starting database update...');
-        result = await Promise.race([updatePromise, timeoutPromise]) as any;
-        error = result?.error;
-        
-        dlog('Step 5: Database update completed, result:', result);
-      } catch (timeoutError) {
-        console.error('Database update timed out:', timeoutError);
-        toast({
-          title: 'Database Timeout',
-          description: 'The save operation took too long and timed out. Please try again.',
-          variant: 'destructive'
-        });
-        throw timeoutError;
-      }
-      
-      dlog('Step 6: Checking for database errors...');
-      
-      if (error) {
-        console.error('Update error details:', {
-          error,
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          serviceId: selectedService.id,
-          updateData: cleanUpdateData
-        });
-        toast({
-          title: 'Failed to save service',
-          description: `Database error: ${error.message || 'Unknown error'}`,
-          variant: 'destructive'
-        });
-        throw error;
-      }
-      
-      dlog('Step 7: No database error, fetching updated service...');
-      
-      // Fetch updated service to get latest data
-      const {
-        data: updatedServiceData,
-        error: fetchError
-      } = await supabase.from('services').select(`
-          *,
-          service_providers (name, logo_url)
-        `).eq('id' as any, selectedService.id as any).single();
-      if (fetchError) {
-        console.error('Step 6: Fetch error:', fetchError);
-        throw fetchError;
-      }
-
-      dlog('Step 7: Successfully fetched updated service, updating local state...');
-
-      // Update local state with fresh data
-      setSelectedService(updatedServiceData as any);
-      setServices(services.map(s => s.id === selectedService.id ? updatedServiceData as any : s));
-      setEditForm(updatedServiceData as any);
-
-      // Optimistically update marketplace cache so front-end reflects changes immediately
-      queryClient.setQueryData(QUERY_KEYS.marketplaceCombined, (prev: any) => {
-        if (!prev) return prev;
-        const updated = {
-          ...prev,
-          services: Array.isArray(prev.services) ? prev.services.map((s: any) => s.id === selectedService.id ? {
-            ...s,
-            ...(updatedServiceData as any)
-          } : s) : prev.services
-        };
-        return updated;
-      });
-      // Narrow cache invalidation - only invalidate services, not everything
-      invalidateCache.invalidateServices();
-      
-      dlog('Save completed successfully!');
-      toast({
-        title: 'Success',
-        description: 'Service updated successfully'
-      });
-    } catch (error) {
-      console.error('Error updating service:', error);
-      const err: any = error;
-      const code = err?.code || err?.status || '';
-      const details = err?.details || err?.hint || err?.message || 'Failed to update service';
-      const permissionHint = typeof details === 'string' && details.toLowerCase().includes('permission') || code === '42501';
-      const isPrecisionError = code === '22003';
-      toast({
-        title: 'Error',
-        description: isPrecisionError ? 'Numeric limit exceeded: use percentages below 1000 (e.g., 999.99) and valid 2‑decimal values.' : permissionHint ? 'You do not have permission to update services. Please ensure you are signed in as an admin.' : `${details}${code ? ` (code: ${code})` : ''}`,
-        variant: 'destructive'
-      });
-    } finally {
-      setSaving(false);
-      setSaveInProgress(false);
-    }
-  };
+  
+  // Initialize funnel content from service data
   const handleVerificationToggle = async (serviceId: string, currentStatus: boolean, event?: React.MouseEvent) => {
     if (event) {
       event.stopPropagation();
     }
-    try {
-      const {
-        error
-      } = await (supabase.from('services').update as any)({
-        is_verified: !currentStatus
-      }).eq('id' as any, serviceId);
-      if (error) throw error;
-
-      // Update local state
-      setServices(services.map(service => service.id === serviceId ? {
-        ...service,
-        is_verified: !currentStatus
-      } : service));
-      if (selectedService?.id === serviceId) {
-        const updatedService = {
-          ...selectedService,
-          is_verified: !currentStatus
-        };
-        setSelectedService(updatedService);
-        setEditForm(updatedService);
-      }
-      toast({
-        title: 'Success',
-        description: `Service ${!currentStatus ? 'verified' : 'unverified'} successfully`
-      });
-    } catch (error) {
-      console.error('Error updating verification:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update verification status',
-        variant: 'destructive'
-      });
-    }
+    
+    await handleToggleField('is_verified', !currentStatus);
   };
   const handleVisibilityToggle = async (serviceId: string, currentStatus: boolean, event?: React.MouseEvent) => {
     if (event) {
       event.stopPropagation();
     }
-    try {
-      const {
-        error
-      } = await (supabase.from('services').update as any)({
-        is_active: !currentStatus
-      }).eq('id' as any, serviceId);
-      if (error) throw error;
-
-      // Update local state
-      setServices(services.map(service => service.id === serviceId ? {
-        ...service,
-        is_active: !currentStatus
-      } : service));
-      if (selectedService?.id === serviceId) {
-        const updatedService = {
-          ...selectedService,
-          is_active: !currentStatus
-        };
-        setSelectedService(updatedService);
-        setEditForm(updatedService);
-      }
-      toast({
-        title: 'Success',
-        description: `Service ${!currentStatus ? 'activated' : 'deactivated'} successfully`
-      });
-    } catch (error) {
-      console.error('Error updating visibility:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update visibility status',
-        variant: 'destructive'
-      });
-    }
+    
+    await handleToggleField('is_active', !currentStatus);
   };
   const handleAffiliateToggle = async (serviceId: string, currentStatus: boolean, event?: React.MouseEvent) => {
     if (event) {
