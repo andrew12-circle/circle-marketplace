@@ -617,81 +617,7 @@ export const ServiceManagementPanel = () => {
     
     await handleToggleField('is_booking_link', !currentStatus);
   };
-    if (event) {
-      event.stopPropagation();
-    }
-    try {
-      const {
-        error
-      } = await (supabase.from('services').update as any)({
-        is_affiliate: !currentStatus
-      }).eq('id' as any, serviceId);
-      if (error) throw error;
-
-      // Update local state
-      setServices(services.map(service => service.id === serviceId ? {
-        ...service,
-        is_affiliate: !currentStatus
-      } : service));
-      if (selectedService?.id === serviceId) {
-        const updatedService = {
-          ...selectedService,
-          is_affiliate: !currentStatus
-        };
-        setSelectedService(updatedService);
-        setEditForm(updatedService);
-      }
-      toast({
-        title: 'Success',
-        description: `Service affiliate status ${!currentStatus ? 'enabled' : 'disabled'}`
-      });
-    } catch (error) {
-      console.error('Error updating affiliate status:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update affiliate status',
-        variant: 'destructive'
-      });
-    }
-  };
-  const handleBookingLinkToggle = async (serviceId: string, currentStatus: boolean, event?: React.MouseEvent) => {
-    if (event) {
-      event.stopPropagation();
-    }
-    try {
-      const {
-        error
-      } = await (supabase.from('services').update as any)({
-        is_booking_link: !currentStatus
-      }).eq('id' as any, serviceId);
-      if (error) throw error;
-
-      // Update local state
-      setServices(services.map(service => service.id === serviceId ? {
-        ...service,
-        is_booking_link: !currentStatus
-      } : service));
-      if (selectedService?.id === serviceId) {
-        const updatedService = {
-          ...selectedService,
-          is_booking_link: !currentStatus
-        };
-        setSelectedService(updatedService);
-        setEditForm(updatedService);
-      }
-      toast({
-        title: 'Success',
-        description: `Service booking link ${!currentStatus ? 'enabled' : 'disabled'}`
-      });
-    } catch (error) {
-      console.error('Error updating booking link status:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update booking link status',
-        variant: 'destructive'
-      });
-    }
-  };
+  
   const handleFunnelSave = async (): Promise<SaveResult> => {
     if (!selectedService) return {
       savedAt: new Date().toISOString(),
@@ -1560,3 +1486,4 @@ export const ServiceManagementPanel = () => {
       />
     </div>
   );
+};
