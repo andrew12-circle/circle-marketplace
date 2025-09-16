@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +59,11 @@ export const FunnelPricingEditor = ({
   service
 }: PricingModeEditorProps) => {
   const [tiers, setTiers] = useState<PricingTier[]>(pricingTiers || []);
+
+  // Sync local state when pricingTiers prop changes (e.g., after save)
+  useEffect(() => {
+    setTiers(pricingTiers || []);
+  }, [pricingTiers]);
 
   const addTier = () => {
     const newTier: PricingTier = {
