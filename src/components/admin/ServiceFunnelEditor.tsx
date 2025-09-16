@@ -660,7 +660,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
             }}
             onChange={(data) => {
               // Extract funnel-specific fields
-              const { id, title, description, website_url, duration, setup_time, image_url, logo_url, ...funnelContent } = data;
+              const { id, title, description, website_url, duration, setup_time, image_url, logo_url, profile_image_url, ...funnelContent } = data;
               
               // Update funnel content immediately
               setFunnelData(prev => ({
@@ -672,7 +672,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
               // Update service-level fields if they changed
               if (title !== service.title || description !== service.description || website_url !== service.website_url || 
                   duration !== service.duration || setup_time !== service.setup_time ||
-                  image_url !== service.image_url || logo_url !== service.logo_url) {
+                  image_url !== service.image_url || logo_url !== service.logo_url || profile_image_url !== service.profile_image_url) {
                 // Update the service directly via parent
                 onUpdate({
                   ...service,
@@ -682,13 +682,28 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
                   duration: duration || service.duration,
                   setup_time: setup_time || service.setup_time,
                   image_url: image_url || service.image_url,
-                  logo_url: logo_url || service.logo_url
+                  logo_url: logo_url || service.logo_url,
+                  profile_image_url: profile_image_url || service.profile_image_url
                 });
               }
               
-              // Trigger immediate debounced save for all changes
-              const payload = prepareSavePayload();
-              debouncedSave(service.id, payload, 'service-fields-change');
+              // Create save payload with updated values instead of relying on service object
+              const sanitizedFunnel = sanitizeFunnel({...funnelData, ...funnelContent});
+              const updatedServiceData = {
+                title: title || service.title,
+                description: description || service.description,
+                website_url: website_url || service.website_url,
+                duration: duration || service.duration,
+                setup_time: setup_time || service.setup_time,
+                image_url: image_url || service.image_url,
+                logo_url: logo_url || service.logo_url,
+                profile_image_url: profile_image_url || service.profile_image_url,
+                funnel_content: sanitizedFunnel,
+                updated_at: new Date().toISOString()
+              };
+              
+              // Trigger immediate debounced save with the updated data
+              debouncedSave(service.id, updatedServiceData, 'service-fields-change');
             }}
           />
         </TabsContent>
