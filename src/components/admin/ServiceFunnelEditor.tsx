@@ -82,9 +82,6 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
   const [selectedDefaultPackageId, setSelectedDefaultPackageId] = useState((service as any).default_package_id || null);
   const [currentEditingPackageId, setCurrentEditingPackageId] = useState<string | null>(null);
   const [localPricing, setLocalPricing] = useState({
-    retail_price: service.retail_price,
-    pro_price: service.pro_price,
-    co_pay_price: service.co_pay_price,
     pricing_mode: service.pricing_mode,
     pricing_external_url: service.pricing_external_url,
     pricing_cta_label: service.pricing_cta_label,
@@ -102,9 +99,6 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     setPricingTiers(service.pricing_tiers || []);
     setSelectedDefaultPackageId((service as any).default_package_id || null);
     setLocalPricing({
-      retail_price: service.retail_price,
-      pro_price: service.pro_price,
-      co_pay_price: service.co_pay_price,
       pricing_mode: service.pricing_mode,
       pricing_external_url: service.pricing_external_url,
       pricing_cta_label: service.pricing_cta_label,
@@ -169,9 +163,9 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     },
     funnel_content: funnelData,
     pricing_tiers: pricingTiers,
-    retail_price: localPricing.retail_price,
-    pro_price: localPricing.pro_price,
-    co_pay_price: localPricing.co_pay_price,
+    retail_price: service.retail_price,
+    pro_price: service.pro_price,
+    co_pay_price: service.co_pay_price,
     pricing_mode: localPricing.pricing_mode,
     pricing_external_url: localPricing.pricing_external_url,
     pricing_cta_label: localPricing.pricing_cta_label,
@@ -277,7 +271,6 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
             pricingCtaType={localPricing.pricing_cta_type}
             pricingNote={localPricing.pricing_note}
             onPricingFieldChange={handlePricingFieldChange}
-            service={service}
           />
         </TabsContent>
 

@@ -821,7 +821,7 @@ export const ServiceManagementPanel = () => {
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Retail Price</label>
                           <Input
@@ -836,6 +836,14 @@ export const ServiceManagementPanel = () => {
                             value={formData?.pro_price || ''}
                             onChange={e => handleFieldChange('pro_price', e.target.value)}
                             placeholder="$79"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Co-Pay Price</label>
+                          <Input
+                            value={formData?.co_pay_price || ''}
+                            onChange={e => handleFieldChange('co_pay_price', e.target.value)}
+                            placeholder="$49"
                           />
                         </div>
                       </div>
