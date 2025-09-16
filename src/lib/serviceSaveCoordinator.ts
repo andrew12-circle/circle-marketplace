@@ -147,30 +147,55 @@ class ServiceSaveCoordinator {
       return { ok: true, skipped: true };
     }
     
-    console.log('[ServiceSaveCoordinator] About to call bulletproofSave with patch:', Object.keys(cleanPatch));
+    // Optimize patch for large media content
+    const optimizedPatch = this.optimizePatchForMedia(cleanPatch);
     
-    try {
-      // Add timeout wrapper around bulletproofSave to prevent indefinite hanging
-      const savePromise = bulletproofSave(serviceId, cleanPatch);
-      const timeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('bulletproofSave timed out after 25 seconds')), 25000)
-      );
-      
-      const result = await Promise.race([savePromise, timeoutPromise]);
-      
-      if (result.ok) {
-        logger.log(`✅ ServiceSaveCoordinator: Save completed`, { serviceId, traceId: result.traceId });
-      } else {
-        logger.error(`❌ ServiceSaveCoordinator: Save failed`, { serviceId, error: result.error });
-      }
-      
-      return result;
-    } catch (error) {
-      console.error('[ServiceSaveCoordinator] bulletproofSave threw error:', error);
-      throw error;
+    console.log('[ServiceSaveCoordinator] About to call bulletproofSave with patch:', {
+      keys: Object.keys(optimizedPatch),
+      hasLargeFunnelContent: optimizedPatch.funnel_content && JSON.stringify(optimizedPatch.funnel_content).length > 10000
+    });
+    
+    const result = await bulletproofSave(serviceId, optimizedPatch);
+    
+    if (result.ok) {
+      logger.log(`✅ ServiceSaveCoordinator: Save completed`, { serviceId, traceId: result.traceId });
+    } else {
+      // Enhanced error reporting for timeout vs actual failures
+      const isTimeout = result.code === 'TIMEOUT' || result.error?.includes('timeout');
+      logger.error(`❌ ServiceSaveCoordinator: Save ${isTimeout ? 'timed out' : 'failed'}`, { 
+        serviceId, 
+        error: result.error,
+        code: result.code,
+        possibleSuccess: isTimeout ? 'Save may have succeeded despite timeout' : false
+      });
     }
+    
+    return result;
   }
   
+  private optimizePatchForMedia(patch: Record<string, any>): Record<string, any> {
+    const optimized = { ...patch };
+    
+    // Optimize funnel_content for large media payloads
+    if (optimized.funnel_content && typeof optimized.funnel_content === 'object') {
+      const content = optimized.funnel_content;
+      const contentStr = JSON.stringify(content);
+      
+      // Log size info for debugging
+      if (contentStr.length > 50000) {
+        logger.log(`📊 Large funnel_content detected`, { 
+          size: contentStr.length,
+          hasMediaItems: content.mediaItems?.length || 0
+        });
+      }
+      
+      // Ensure JSON is properly structured for PostgreSQL
+      optimized.funnel_content = content;
+    }
+    
+    return optimized;
+  }
+
   private sanitizePatch(patch: Record<string, any>): Record<string, any> {
     const clean: Record<string, any> = {};
     

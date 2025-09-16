@@ -80,12 +80,17 @@ async function executeSaveWithRetries(operation: SaveOperation): Promise<SaveRes
     try {
       log(traceId, serviceId, `attempt_${attempt + 1}_start`);
       
-      const { data, error } = await supabase
-        .from('services')
-        .update(patch)
-        .eq('id', serviceId)
-        .select('id')
-        .single();
+      // Apply timeout wrapper to the database operation to prevent indefinite hanging
+      const dbOperation = async () => {
+        return await supabase
+          .from('services')
+          .update(patch)
+          .eq('id', serviceId)
+          .select('id')
+          .single();
+      };
+      
+      const { data, error } = await withTimeout(dbOperation(), SAVE_TIMEOUT_MS);
       
       const duration = Math.round(performance.now() - startTime);
       
@@ -119,6 +124,11 @@ async function executeSaveWithRetries(operation: SaveOperation): Promise<SaveRes
       
       log(traceId, serviceId, `attempt_${attempt + 1}_error`, errorMessage, duration);
       
+      // Special handling for timeout errors - they might have succeeded
+      if (errorMessage.includes('timeout') || errorMessage.includes('timed out')) {
+        log(traceId, serviceId, `attempt_${attempt + 1}_timeout_detected`, 'Save may have succeeded despite timeout', duration);
+      }
+      
       if (attempt === MAX_RETRIES - 1) {
         return {
           ok: false,
@@ -128,8 +138,9 @@ async function executeSaveWithRetries(operation: SaveOperation): Promise<SaveRes
         };
       }
       
-      // Wait before retry
-      await new Promise(resolve => setTimeout(resolve, RETRY_DELAYS[attempt]));
+      // Wait before retry, with longer delay for timeouts
+      const delay = errorMessage.includes('timeout') ? RETRY_DELAYS[attempt] * 2 : RETRY_DELAYS[attempt];
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
   
