@@ -490,8 +490,10 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       pricingSaveInProgress.current = true;
       
       try {
-        console.log('[SimplifiedSave] Starting pricing save...');
-        const result = await savePricingOnly(service.id, {
+        console.log('[UnifiedSave] Starting pricing save...');
+        
+        // Use unified save system instead of separate pricing save
+        debouncedSave(service.id, {
           pricing_tiers: tiers,
           retail_price: localPricing.retail_price,
           pro_price: localPricing.pro_price,
@@ -502,21 +504,17 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
           pricing_cta_label: localPricing.pricing_cta_label,
           pricing_cta_type: localPricing.pricing_cta_type,
           pricing_note: localPricing.pricing_note
-        });
+        }, 'pricing-tiers-change');
         
-        if (result.ok) {
-          console.log('[SimplifiedSave] Pricing save successful');
-          setHasChanges(false);
-        } else {
-          console.error('[SimplifiedSave] Pricing save failed:', result.error);
-        }
+        console.log('[UnifiedSave] Pricing save queued');
+        setHasChanges(false);
       } catch (error) {
-        console.error('[ServiceFunnelEditor] Simplified pricing save failed:', error);
+        console.error('[ServiceFunnelEditor] Unified pricing save failed:', error);
       } finally {
         pricingSaveInProgress.current = false;
       }
     }, 500); // 500ms debounce
-  }, [service.id, localPricing, selectedDefaultPackageId, savePricingOnly]);
+  }, [service.id, localPricing, selectedDefaultPackageId, debouncedSave]);
 
   // Handle pricing field changes (retail_price, pro_price, etc.)
   const handlePricingFieldChange = async (field: string, value: string | number | null) => {
@@ -527,10 +525,12 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     }));
     setHasChanges(true);
     
-    // Use simplified save for pricing field changes
+    // Use unified save for pricing field changes
     try {
       const updatedPricing = { ...localPricing, [field]: value };
-      await savePricingOnly(service.id, {
+      
+      // Use debounced save instead of immediate save
+      debouncedSave(service.id, {
         pricing_tiers: pricingTiers,
         retail_price: updatedPricing.retail_price,
         pro_price: updatedPricing.pro_price,
@@ -541,8 +541,9 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
         pricing_cta_label: updatedPricing.pricing_cta_label,
         pricing_cta_type: updatedPricing.pricing_cta_type,
         pricing_note: updatedPricing.pricing_note
-      });
-      setHasChanges(false);
+      }, `pricing-field-${field}-change`);
+      
+      setHasChanges(true); // Mark as changed, will be cleared when save completes
     } catch (error) {
       console.error('[ServiceFunnelEditor] Simplified pricing field save failed:', error);
     }

@@ -606,6 +606,20 @@ export const ServiceManagementPanel = () => {
     if (event) {
       event.stopPropagation();
     }
+    
+    await handleToggleField('is_affiliate', !currentStatus);
+  };
+
+  const handleBookingLinkToggle = async (serviceId: string, currentStatus: boolean, event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    
+    await handleToggleField('is_booking_link', !currentStatus);
+  };
+    if (event) {
+      event.stopPropagation();
+    }
     try {
       const {
         error
@@ -1530,16 +1544,17 @@ export const ServiceManagementPanel = () => {
           </CardContent>
         </Card>}
 
-      {/* AI Service Updater */}
+      // AI Service Updater
       <AIServiceUpdater services={services} onServiceUpdate={serviceId => {
-      // Invalidate queries to trigger refresh without full refetch
-      queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.services
-      });
-      toast({
-        title: 'Service Updated',
-        description: 'Service has been updated by AI. Please review and verify the changes.'
-      });
-    }} />
-    </div>;
+        // Invalidate queries to trigger refresh without full refetch
+        queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.services
+        });
+        toast({
+          title: 'Service Updated',
+          description: 'Service has been updated by AI. Please review and verify the changes.'
+        });
+      }} />
+    </div>
+  );
 };
