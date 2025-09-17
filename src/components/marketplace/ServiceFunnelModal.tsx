@@ -730,10 +730,10 @@ export const ServiceFunnelModal = ({
                           <div className="text-sm sm:text-2xl font-bold">{isVerified && service.estimated_roi ? `${service.estimated_roi}%` : 'TBD'}</div>
                           <div className="text-[10px] sm:text-xs text-blue-200">Avg ROI</div>
                         </div>
-                        <div className="text-center p-1 sm:p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 flex flex-col items-center justify-center">
-                          <div className="text-sm sm:text-2xl font-bold">{isVerified && service.funnel_content?.duration ? service.funnel_content.duration : 'TBD'}</div>
-                          <div className="text-[10px] sm:text-xs text-blue-200">Time to Results</div>
-                        </div>
+                         <div className="text-center p-1 sm:p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 flex flex-col items-center justify-center">
+                           <div className="text-sm sm:text-2xl font-bold">{service.funnel_content?.duration || service.duration || 'TBD'}</div>
+                           <div className="text-[10px] sm:text-xs text-blue-200">Time to Results</div>
+                         </div>
                         <div className="text-center p-1 sm:p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 flex flex-col items-center justify-center">
                           <div className="text-sm sm:text-2xl font-bold">{isVerified && service.setup_time ? service.setup_time : 'TBD'}</div>
                           <div className="text-[10px] sm:text-xs text-blue-200">Time to Setup</div>
