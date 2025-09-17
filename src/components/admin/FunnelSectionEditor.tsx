@@ -71,6 +71,7 @@ export const FunnelSectionEditor = ({ data, onChange, onPricingChange }: FunnelS
                 <SelectValue placeholder="Select timeframe" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="TBD">TBD</SelectItem>
                 <SelectItem value="immediate">Immediate</SelectItem>
                 <SelectItem value="1-7 days">1-7 days</SelectItem>
                 <SelectItem value="1-2 weeks">1-2 weeks</SelectItem>

@@ -831,7 +831,7 @@ export const ServiceFunnelModal = ({
                           const sections = Array.isArray((fc as any)?.faqs) ? (fc as any).faqs : [];
                           const byId = sections.find((s: any) => s?.id === 'question-2');
                           const byTitle = sections.find((s: any) => typeof s?.title === 'string' && s.title.toLowerCase().includes('roi'));
-                          const roi = byId?.content || byTitle?.content || (isVerified && typeof fc?.estimatedRoi === 'number' ? `Based on similar deployments, average ROI is ~${fc.estimatedRoi}% within ${fc?.duration || '30 days'}.` : isVerified ? '600% average return on investment with proper implementation' : 'ROI data is not available for non-verified vendors. Contact the vendor directly for performance information.');
+                          const roi = byId?.content || byTitle?.content || (isVerified && typeof fc?.estimatedRoi === 'number' ? `Based on similar deployments, average ROI is ~${fc.estimatedRoi}% within ${fc?.duration || 'TBD'}.` : isVerified ? '600% average return on investment with proper implementation' : 'ROI data is not available for non-verified vendors. Contact the vendor directly for performance information.');
                           return <SafeHTML html={roi} />;
                         })()}
                           </div>

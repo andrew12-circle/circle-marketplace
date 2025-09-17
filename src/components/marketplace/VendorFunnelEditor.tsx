@@ -137,7 +137,7 @@ export const VendorFunnelEditor = ({ vendorId, serviceId, initialContent, onSave
     subheadline: '',
     heroDescription: '',
     estimatedRoi: 3,
-    duration: '30 days',
+    duration: 'TBD',
     whyChooseUs: {
       title: 'Why Choose Our Service?',
       benefits: [
