@@ -1186,9 +1186,9 @@ export const ServiceFunnelModal = ({
                           const currentPrice = showYearlyPricing && pkg.yearlyPrice ? pkg.yearlyPrice : pkg.price;
                           const currentOriginalPrice = showYearlyPricing && pkg.yearlyOriginalPrice ? pkg.yearlyOriginalPrice : pkg.originalPrice;
                           const period = showYearlyPricing && pkg.yearlyPrice ? '/yr' : 
-                            (pkg.duration?.toLowerCase().includes('one time') || pkg.duration?.toLowerCase().includes('onetime') || pkg.duration?.toLowerCase().includes('once') ? '' : 
+                            (pkg.duration?.toLowerCase().includes('one time') || pkg.duration?.toLowerCase().includes('onetime') || pkg.duration?.toLowerCase().includes('once') ? ' one-time' : 
                               (pkg.duration?.includes('month') ? '/mo' : 
-                                (service.funnel_content?.duration?.toLowerCase().includes('one time') || service.funnel_content?.duration?.toLowerCase().includes('onetime') || service.funnel_content?.duration?.toLowerCase().includes('once') ? '' : 
+                                (service.funnel_content?.duration?.toLowerCase().includes('one time') || service.funnel_content?.duration?.toLowerCase().includes('onetime') || service.funnel_content?.duration?.toLowerCase().includes('once') ? ' one-time' : 
                                   (service.funnel_content?.duration?.includes('month') ? '/mo' : '/mo'))));
                           
                           return (
