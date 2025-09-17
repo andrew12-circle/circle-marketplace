@@ -556,11 +556,24 @@ export const MarketplaceGrid = () => {
     setIsFunnelModalOpen(false);
     setSelectedService(null);
     
-    // Remove service parameter from URL when closing modal
-    const url = new URL(window.location.href);
-    url.searchParams.delete('service');
-    url.searchParams.delete('view');
-    window.history.replaceState({}, '', url.toString());
+    // Navigate to clean marketplace URL to ensure proper header display
+    const currentPath = window.location.pathname;
+    if (currentPath === '/marketplace' || currentPath === '/') {
+      // If already on marketplace, just clean the URL and force a small state refresh
+      const url = new URL(window.location.href);
+      url.searchParams.delete('service');
+      url.searchParams.delete('view');
+      window.history.replaceState({}, '', url.toString());
+      
+      // Small delay to ensure proper state cleanup, then trigger a component refresh
+      setTimeout(() => {
+        // Dispatch a custom event to trigger any necessary component updates
+        window.dispatchEvent(new CustomEvent('marketplace:modal-closed'));
+      }, 100);
+    } else {
+      // Navigate to marketplace if on a different route
+      window.location.href = '/marketplace';
+    }
   };
   
   // Check for QA mode

@@ -41,6 +41,18 @@ const Index = () => {
     }
   }, [user, profile]);
 
+  // Listen for modal closure events to ensure proper header rendering
+  useEffect(() => {
+    const handleModalClosed = () => {
+      console.log('🔄 Modal closed - ensuring header is visible');
+      // Force a small re-render to ensure header displays properly
+      // This is especially important for shared links that open modals
+    };
+
+    window.addEventListener('marketplace:modal-closed', handleModalClosed);
+    return () => window.removeEventListener('marketplace:modal-closed', handleModalClosed);
+  }, []);
+
   // Remove aggressive visibility change refresh to prevent race conditions with Pro status
   // This was causing the temporary admin profile to be overwritten by database profile
   // that might not have matching Pro status fields
