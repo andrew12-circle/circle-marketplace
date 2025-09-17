@@ -338,7 +338,7 @@ export const ServiceFunnelModal = ({
     originalPrice: Number(pkg.retail_price || pkg.price || pkg.originalPrice) || undefined,
     yearlyPrice: undefined, // Not supported in new structure yet
     yearlyOriginalPrice: undefined,
-    duration: pkg.duration || service.duration || "monthly",
+    duration: pkg.duration || service.funnel_content?.duration || "monthly",
     description: Array.isArray(pkg.features) ? normalizeFeatures(pkg.features).map(f => f.text).join(', ') : '',
     features: normalizeFeatures(pkg.features),
     popular: pkg.popular || pkg.is_default,
@@ -1185,7 +1185,7 @@ export const ServiceFunnelModal = ({
                         {(() => {
                           const currentPrice = showYearlyPricing && pkg.yearlyPrice ? pkg.yearlyPrice : pkg.price;
                           const currentOriginalPrice = showYearlyPricing && pkg.yearlyOriginalPrice ? pkg.yearlyOriginalPrice : pkg.originalPrice;
-                          const period = showYearlyPricing && pkg.yearlyPrice ? '/yr' : (pkg.duration?.includes('month') ? '/mo' : (service.duration?.includes('month') ? '/mo' : '/mo'));
+                          const period = showYearlyPricing && pkg.yearlyPrice ? '/yr' : (pkg.duration?.includes('month') ? '/mo' : (service.funnel_content?.duration?.includes('month') ? '/mo' : '/mo'));
                           
                           return (
                             <>
@@ -1514,7 +1514,7 @@ export const ServiceFunnelModal = ({
          retail_price: retail.toString(),
         respa_split_limit: 50,
         // Default 50% split limit
-        price_duration: service.duration,
+        price_duration: service.funnel_content?.duration,
         requires_quote: service.requires_quote,
         max_split_percentage_non_ssp: (service as any).max_split_percentage_non_ssp
       }} onChooseProPrice={handleChooseProPrice} onChooseCoPay={handleChooseCoPay} onChooseAgentPoints={handleChooseAgentPoints} />}
