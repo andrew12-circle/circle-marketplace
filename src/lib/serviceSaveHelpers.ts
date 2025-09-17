@@ -46,6 +46,10 @@ export async function saveFunnelPatch(
     throw error;
   }
   
+  if (!data || data.length === 0) {
+    throw new Error('Save operation returned no data');
+  }
+  
   return {
     id: data[0].id,
     version: data[0].version,
