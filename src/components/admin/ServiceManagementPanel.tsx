@@ -420,9 +420,13 @@ export const ServiceManagementPanel = () => {
       if (selectedService?.id === serviceId && formData) {
         const updatedService = { ...selectedService, ...result };
         setServices(prev => prev.map(s => s.id === serviceId ? updatedService : s));
-        setSelectedService(updatedService);
-        setBaseline(updatedService);
-        setFormData(updatedService);
+        
+        // Only update selectedService and reset form if not currently editing
+        if (!isEditingDetails) {
+          setSelectedService(updatedService);
+          setBaseline(updatedService);
+          setFormData(updatedService);
+        }
         
         // Update query cache  
         queryClient.setQueryData(QUERY_KEYS.services, (old: any) => 
@@ -469,6 +473,9 @@ export const ServiceManagementPanel = () => {
   // Handle form field changes with auto-save through unified system
   const handleFieldChange = useCallback(async (field: string, value: any) => {
     if (!formData || !selectedService?.id) return;
+    
+    // Mark as editing when user starts typing
+    setIsEditingDetails(true);
     
     const newFormData = { ...formData, [field]: value };
     setFormData(newFormData);
