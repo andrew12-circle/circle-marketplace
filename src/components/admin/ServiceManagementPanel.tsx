@@ -917,7 +917,15 @@ export const ServiceManagementPanel = () => {
 
                     {/* Status Switches */}
                     <div className="space-y-4">
-                      <h4 className="text-lg font-semibold">Status Settings</h4>
+                      <h4 className="text-lg font-semibold flex items-center gap-2">
+                        Status Settings
+                        {isSaving && (
+                          <div className="flex items-center gap-1 text-xs text-blue-600">
+                            <div className="animate-spin w-3 h-3 border border-blue-600 border-t-transparent rounded-full"></div>
+                            Saving...
+                          </div>
+                        )}
+                      </h4>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="flex items-center justify-between p-3 border rounded-lg">
                           <div>
@@ -927,6 +935,7 @@ export const ServiceManagementPanel = () => {
                           <Switch
                             checked={formData?.is_active || false}
                             onCheckedChange={(checked) => handleFieldChange('is_active', checked)}
+                            disabled={isSaving}
                           />
                         </div>
                         
@@ -938,6 +947,7 @@ export const ServiceManagementPanel = () => {
                           <Switch
                             checked={formData?.is_verified || false}
                             onCheckedChange={(checked) => handleFieldChange('is_verified', checked)}
+                            disabled={isSaving}
                           />
                         </div>
 
@@ -949,6 +959,7 @@ export const ServiceManagementPanel = () => {
                           <Switch
                             checked={formData?.is_featured || false}
                             onCheckedChange={(checked) => handleFieldChange('is_featured', checked)}
+                            disabled={isSaving}
                           />
                         </div>
 
@@ -960,6 +971,7 @@ export const ServiceManagementPanel = () => {
                           <Switch
                             checked={formData?.is_top_pick || false}
                             onCheckedChange={(checked) => handleFieldChange('is_top_pick', checked)}
+                            disabled={isSaving}
                           />
                         </div>
 
@@ -971,6 +983,7 @@ export const ServiceManagementPanel = () => {
                           <Switch
                             checked={formData?.is_affiliate || false}
                             onCheckedChange={(checked) => handleFieldChange('is_affiliate', checked)}
+                            disabled={isSaving}
                           />
                         </div>
 
@@ -982,6 +995,7 @@ export const ServiceManagementPanel = () => {
                           <Switch
                             checked={formData?.requires_quote || false}
                             onCheckedChange={(checked) => handleFieldChange('requires_quote', checked)}
+                            disabled={isSaving}
                           />
                         </div>
                       </div>
