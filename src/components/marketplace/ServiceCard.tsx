@@ -513,8 +513,8 @@ export const ServiceCard = ({
                 className="w-8 h-8 rounded-full object-cover flex-shrink-0"
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-blue-600 font-semibold text-sm">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <span className="text-primary font-semibold text-sm">
                   {getLocalizedTitle().charAt(0).toUpperCase()}
                 </span>
               </div>
