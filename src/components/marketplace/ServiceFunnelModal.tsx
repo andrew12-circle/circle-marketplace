@@ -1261,11 +1261,11 @@ export const ServiceFunnelModal = ({
                                         )}
                                         
                                         {!isProMember && (
-                                          <Button 
-                                            size="sm" 
-                                            className="w-full h-8 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white text-xs mt-1 px-2"
-                                            onClick={() => window.open('/upgrade', '_blank')}
-                                          >
+                                           <Button 
+                                             size="sm" 
+                                             className="w-full h-8 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white text-xs mt-1 px-2"
+                                             onClick={() => window.open('/pricing', '_blank')}
+                                           >
                                             <Crown className="w-3 h-3 mr-1" />
                                             Upgrade for Co-Pay
                                           </Button>
