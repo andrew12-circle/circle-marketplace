@@ -293,7 +293,7 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
                     <CardContent className="p-4 text-center">
                       <TrendingUp className="w-8 h-8 text-circle-primary mx-auto mb-2" />
                       <h4 className="font-semibold mb-1">{service.vendor?.is_verified ? `${service.estimated_roi}x ROI Guaranteed` : 'ROI: TBD'}</h4>
-                      <p className="text-sm text-muted-foreground">See results within {service.duration}</p>
+                      <p className="text-sm text-muted-foreground">See results within {service.funnel_content?.duration || "30 days"}</p>
                     </CardContent>
                   </Card>
                 </>
