@@ -296,7 +296,7 @@ export const FunnelSectionEditor = ({ data, onChange, onPricingChange }: FunnelS
             <Label htmlFor="subHeadline">Sub-headline</Label>
             <Textarea
               id="subHeadline"
-              value={data.subHeadline || ""}
+              value={data.subHeadline || data.subheadline || ""}
               onChange={(e) => handleBasicInfoChange('subHeadline', e.target.value)}
               placeholder="Supporting description..."
               rows={3}
