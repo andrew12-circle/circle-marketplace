@@ -915,6 +915,78 @@ export const ServiceManagementPanel = () => {
                       </div>
                     </div>
 
+                    {/* Status Switches */}
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-semibold">Status Settings</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <label className="text-sm font-medium">Active</label>
+                            <p className="text-xs text-muted-foreground">Show in marketplace</p>
+                          </div>
+                          <Switch
+                            checked={formData?.is_active || false}
+                            onCheckedChange={(checked) => handleFieldChange('is_active', checked)}
+                          />
+                        </div>
+                        
+                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <label className="text-sm font-medium">Verified</label>
+                            <p className="text-xs text-muted-foreground">Circle verified service</p>
+                          </div>
+                          <Switch
+                            checked={formData?.is_verified || false}
+                            onCheckedChange={(checked) => handleFieldChange('is_verified', checked)}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <label className="text-sm font-medium">Featured</label>
+                            <p className="text-xs text-muted-foreground">Show in featured section</p>
+                          </div>
+                          <Switch
+                            checked={formData?.is_featured || false}
+                            onCheckedChange={(checked) => handleFieldChange('is_featured', checked)}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <label className="text-sm font-medium">Top Pick</label>
+                            <p className="text-xs text-muted-foreground">Recommended service</p>
+                          </div>
+                          <Switch
+                            checked={formData?.is_top_pick || false}
+                            onCheckedChange={(checked) => handleFieldChange('is_top_pick', checked)}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <label className="text-sm font-medium">Affiliate</label>
+                            <p className="text-xs text-muted-foreground">Has affiliate program</p>
+                          </div>
+                          <Switch
+                            checked={formData?.is_affiliate || false}
+                            onCheckedChange={(checked) => handleFieldChange('is_affiliate', checked)}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <label className="text-sm font-medium">Requires Quote</label>
+                            <p className="text-xs text-muted-foreground">Custom pricing only</p>
+                          </div>
+                          <Switch
+                            checked={formData?.requires_quote || false}
+                            onCheckedChange={(checked) => handleFieldChange('requires_quote', checked)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="flex gap-2">
                       <Button variant="outline" onClick={() => {
                         if (selectedService) {
