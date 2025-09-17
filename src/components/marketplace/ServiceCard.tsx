@@ -344,7 +344,7 @@ export const ServiceCard = ({
 
   // Share functionality
   const buildShareUrl = () => {
-    const baseUrl = window.location.origin;
+    const baseUrl = 'https://circlemarketplace.io';
     const url = new URL(`${baseUrl}/marketplace`);
     url.searchParams.set('service', service.id);
     url.searchParams.set('view', 'funnel');
