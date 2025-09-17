@@ -23,6 +23,7 @@ import { ServiceAIResearchEditor } from './ServiceAIResearchEditor';
 import { ServiceImageUploader } from './ServiceImageUploader';
 import { diffPatch } from '@/lib/diff';
 import { dlog, dwarn } from '@/utils/debugLogger';
+import { DISPLAY_TO_TAG, tagToDisplayName, normalizeCategoryToTag } from "@/utils/categoryTags";
 import { AIServiceUpdater } from './AIServiceUpdater';
 import { updateServiceById, toggleServiceField, normalizeServiceNumbers } from '@/lib/updateService';
 import { useUnifiedServiceSave } from '@/hooks/useUnifiedServiceSave';
@@ -812,12 +813,45 @@ export const ServiceManagementPanel = () => {
                       
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <label className="text-sm font-medium">Category</label>
-                          <Input
-                            value={formData?.category || ''}
-                            onChange={e => handleFieldChange('category', e.target.value)}
-                            placeholder="Service category"
-                          />
+                          <label className="text-sm font-medium">Categories</label>
+                           <div className="space-y-3 max-h-60 overflow-y-auto border rounded-lg p-3">
+                             {Object.entries(DISPLAY_TO_TAG).map(([displayName, tag]: [string, string]) => {
+                               const isSelected = formData?.category?.includes(tag) || false;
+                              return (
+                                <div key={tag} className="flex items-center justify-between">
+                                  <label className="text-sm font-medium cursor-pointer flex-1">
+                                    {displayName}
+                                  </label>
+                                  <Switch
+                                    checked={isSelected}
+                                    onCheckedChange={(checked) => {
+                                      if (!formData) return;
+                                      
+                                      let currentCategories = formData.category ? formData.category.split(',').map(c => c.trim()) : [];
+                                      
+                                      if (checked) {
+                                        // Add category if not already present
+                                        if (!currentCategories.includes(tag)) {
+                                          currentCategories.push(tag);
+                                        }
+                                      } else {
+                                        // Remove category
+                                        currentCategories = currentCategories.filter(c => c !== tag);
+                                      }
+                                      
+                                      const updatedCategory = currentCategories.join(', ');
+                                      handleFieldChange('category', updatedCategory);
+                                    }}
+                                  />
+                                </div>
+                              );
+                            })}
+                          </div>
+                           {formData?.category && (
+                             <div className="text-xs text-muted-foreground">
+                               Selected: {formData.category.split(',').map((c: string) => tagToDisplayName(c.trim())).join(', ')}
+                            </div>
+                          )}
                         </div>
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Duration</label>
