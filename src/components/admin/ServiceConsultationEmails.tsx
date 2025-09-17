@@ -1,10 +1,8 @@
 "use client";
-import { useState, useMemo } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { saveWithTimeout } from "@/lib/saveWithTimeout";
-import { toast } from "@/components/ui/sonner";
+import { useState, useMemo, useEffect } from "react";
+import { useDebouncedSave } from "@/hooks/useDebouncedSave";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail } from "lucide-react";
+import { Mail, Check, AlertCircle } from "lucide-react";
 
 function normalizeEmails(input: string | string[]): string[] {
   const asArray = Array.isArray(input) ? input : input.split(/[,\n]/);
@@ -30,52 +28,31 @@ export const ServiceConsultationEmails = ({
 }: ServiceConsultationEmailsProps) => {
   const [value, setValue] = useState(initialEmails.join(", "));
   const emails = useMemo(() => normalizeEmails(value), [value]);
-  const [saving, setSaving] = useState(false);
+  const { debouncedSave, isSaving } = useDebouncedSave();
 
-  async function handleSave() {
-    console.log("🔄 Saving consultation emails:", { serviceId, emails });
-    setSaving(true);
-    try {
+  // Auto-save when emails change
+  useEffect(() => {
+    if (emails.length > 0) {
       // Validate emails before saving
-      const filtered = (emails || [])
-        .map((e) => (e || "").trim().toLowerCase())
+      const filtered = emails
+        .map((e) => e.trim().toLowerCase())
         .filter(Boolean);
 
       const invalid = filtered.filter((e) => !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(e));
-      if (invalid.length) {
-        toast.error(`Invalid email address${invalid.length > 1 ? "es" : ""}: ${invalid.join(", ")}`);
-        return;
+      
+      if (invalid.length === 0) {
+        // Only save if all emails are valid
+        const unique = Array.from(new Set(filtered)).slice(0, 4);
+        debouncedSave(serviceId, { consultation_emails: unique });
       }
-
-      const unique = Array.from(new Set(filtered)).slice(0, 4);
-
-      console.log("📤 Making Supabase update call...", { unique });
-      
-      // Use the existing saveWithTimeout utility for reliability
-      await saveWithTimeout(async () => {
-        const { data, error } = await supabase
-          .from("services")
-          .update({ consultation_emails: unique })
-          .eq("id", serviceId)
-          .select();
-        
-        if (error) throw error;
-        return data;
-      });
-      
-      console.log("✅ Save successful");
-      toast.success("Consultation emails saved");
-    } catch (e: any) {
-      console.error("❌ Save failed:", e);
-      // Helpful message if RLS/permissions issue
-      const msg = e?.message?.includes("permission") 
-        ? "Permission denied: need admin access to update emails" 
-        : e?.message;
-      toast.error(msg || "Failed to save emails");
-    } finally {
-      setSaving(false);
+    } else if (value.trim() === "") {
+      // Clear emails if input is empty
+      debouncedSave(serviceId, { consultation_emails: [] });
     }
-  }
+  }, [emails, value, serviceId, debouncedSave]);
+
+  const invalid = emails.filter((e) => !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(e));
+  const hasInvalidEmails = invalid.length > 0;
 
   return (
     <Card>
@@ -95,16 +72,29 @@ export const ServiceConsultationEmails = ({
             onChange={e => setValue(e.target.value)}
             rows={3}
           />
-          <div className="text-xs text-muted-foreground">
-            Will save: {emails.join(", ") || "None"}
+          <div className="flex items-center justify-between">
+            <div className="text-xs text-muted-foreground">
+              Will save: {emails.join(", ") || "None"}
+              {hasInvalidEmails && (
+                <span className="text-destructive ml-2">
+                  • Invalid: {invalid.join(", ")}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-1 text-xs">
+              {isSaving ? (
+                <>
+                  <AlertCircle className="w-3 h-3 text-blue-500" />
+                  <span className="text-blue-600">Saving...</span>
+                </>
+              ) : (
+                <>
+                  <Check className="w-3 h-3 text-green-500" />
+                  <span className="text-green-600">Auto-saved</span>
+                </>
+              )}
+            </div>
           </div>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="rounded-md bg-primary px-3 py-2 text-primary-foreground text-sm disabled:opacity-60 hover:bg-primary/90"
-          >
-            {saving ? "Saving…" : "Save"}
-          </button>
         </div>
       </CardContent>
     </Card>
