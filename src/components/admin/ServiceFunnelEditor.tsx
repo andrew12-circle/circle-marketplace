@@ -298,13 +298,15 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
                 }
               });
               
-              // Handle funnel content fields (headline, subHeadline)
-              if (data.headline !== undefined || data.subHeadline !== undefined) {
+              // Handle funnel content fields (headline, subHeadline, duration, setup_time)
+              if (data.headline !== undefined || data.subHeadline !== undefined || data.duration !== undefined || data.setup_time !== undefined) {
                 const currentFunnelContent = funnelData || {};
                 const updatedFunnelContent = {
                   ...currentFunnelContent,
                   ...(data.headline !== undefined && { headline: data.headline }),
-                  ...(data.subHeadline !== undefined && { subheadline: data.subHeadline })
+                  ...(data.subHeadline !== undefined && { subheadline: data.subHeadline }),
+                  ...(data.duration !== undefined && { duration: data.duration }),
+                  ...(data.setup_time !== undefined && { setup_time: data.setup_time })
                 };
                 handleDataChange('funnel_content', updatedFunnelContent);
               }
