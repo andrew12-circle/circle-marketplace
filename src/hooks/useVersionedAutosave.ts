@@ -31,6 +31,15 @@ export function useVersionedAutosave<T extends object>({
 
   useEffect(() => {
     const patch = diff(value, prev);
+    
+    console.log('[useVersionedAutosave] Change detection:', { 
+      hasChanges: Object.keys(patch).length > 0,
+      patch,
+      currentValue: value,
+      previousValue: prev,
+      patchKeys: Object.keys(patch)
+    });
+    
     if (Object.keys(patch).length === 0) return;
 
     if (timeoutRef.current) {
@@ -38,14 +47,17 @@ export function useVersionedAutosave<T extends object>({
     }
 
     timeoutRef.current = setTimeout(async () => {
+      console.log('[useVersionedAutosave] Starting save with patch:', patch);
       setIsSaving(true);
       try {
         const result = await saveFn(patch, currentVersion);
+        console.log('[useVersionedAutosave] Save completed:', result);
         setPrev(value);
         setCurrentVersion(result.version);
         onVersionUpdate?.(result.version);
         setShowConflictBanner(false);
       } catch (error: any) {
+        console.error('[useVersionedAutosave] Save failed:', error);
         if (error.message === 'VERSION_CONFLICT') {
           setShowConflictBanner(true);
         } else {

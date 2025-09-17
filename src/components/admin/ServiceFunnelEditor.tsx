@@ -107,14 +107,15 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     });
   }, [service.id]);
   
-  // Versioned autosave for funnel content only
+  // Versioned autosave for funnel content only (NOT pricing tiers)
   const { isSaving, showConflictBanner, refreshAndRetry } = useVersionedAutosave({
-    value: { funnel_content: funnelData, pricing_tiers: pricingTiers },
+    value: { funnel_content: funnelData },
     version: service.funnel_version || 1,
     saveFn: async (patch, version) => {
       console.log('[Funnel Autosave] Saving patch:', { serviceId: service.id, patch, version });
       console.log('[Funnel Autosave] Current funnelData:', funnelData);
       console.log('[Funnel Autosave] Current pricingTiers:', pricingTiers);
+      console.log('[Funnel Autosave] Patch contains pricing_tiers?', 'pricing_tiers' in patch);
       
       // Check if patch is empty or meaningless
       const hasRealChanges = Object.keys(patch).some(key => {
@@ -152,10 +153,21 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     setFunnelData(prev => ({ ...prev, [key]: value }));
   }, []);
 
-  // Handle pricing changes  
+  // Handle pricing changes via parent update (not autosave)
   const handlePricingChange = useCallback(async (tiers: any[]) => {
+    console.log('[ServiceFunnelEditor] handlePricingChange called:', { 
+      newTiersCount: tiers.length, 
+      currentTiersCount: pricingTiers.length,
+      tiers 
+    });
     setPricingTiers(tiers);
-  }, []);
+    
+    // Update parent immediately with new pricing tiers
+    const updatedService = { ...service, pricing_tiers: tiers };
+    onUpdate(updatedService);
+    
+    console.log('[ServiceFunnelEditor] Updated parent with new pricing tiers');
+  }, [service, onUpdate, pricingTiers.length]);
 
   // Handle pricing field changes
   const handlePricingFieldChange = useCallback(async (field: string, value: string | number) => {

@@ -1058,18 +1058,49 @@ export const ServiceManagementPanel = () => {
                 <div className="space-y-4">
                   <ServiceFunnelEditor 
                     service={selectedService} 
-                    onUpdate={updatedService => {
+                    onUpdate={async (updatedService) => {
                       dlog("[ServiceManagementPanel] Received updated service from funnel editor:", {
                         id: updatedService.id,
                         retail_price: updatedService.retail_price,
                         pro_price: updatedService.pro_price,
-                        co_pay_price: updatedService.co_pay_price
+                        co_pay_price: updatedService.co_pay_price,
+                        pricing_tiers_count: (updatedService as any).pricing_tiers?.length || 0
                       });
 
-                      // Update services state
-                      setServices(prev => prev.map(s => s.id === updatedService.id ? updatedService as Service : s));
+                      // Determine what changed and save it
+                      const changes: Record<string, any> = {};
+                      
+                      // Check for pricing tier changes
+                      const oldTiers = selectedService.pricing_tiers;
+                      const newTiers = (updatedService as any).pricing_tiers;
+                      if (JSON.stringify(oldTiers) !== JSON.stringify(newTiers)) {
+                        changes.pricing_tiers = newTiers;
+                        console.log('[ServiceManagementPanel] Pricing tiers changed, will save:', { 
+                          oldCount: oldTiers?.length || 0, 
+                          newCount: newTiers?.length || 0 
+                        });
+                      }
+                      
+                      // Check for funnel content changes
+                      const oldFunnel = selectedService.funnel_content;
+                      const newFunnel = (updatedService as any).funnel_content;
+                      if (JSON.stringify(oldFunnel) !== JSON.stringify(newFunnel)) {
+                        changes.funnel_content = newFunnel;
+                      }
+                      
+                      // Save changes if any
+                      if (Object.keys(changes).length > 0) {
+                        console.log('[ServiceManagementPanel] Saving funnel changes via unified save:', changes);
+                        try {
+                          await save(selectedService.id, changes, 'funnel-editor');
+                          console.log('[ServiceManagementPanel] Funnel changes saved successfully');
+                        } catch (error) {
+                          console.error('[ServiceManagementPanel] Failed to save funnel changes:', error);
+                        }
+                      }
 
-                      // Update selected service if it matches
+                      // Update local state regardless
+                      setServices(prev => prev.map(s => s.id === updatedService.id ? updatedService as Service : s));
                       setSelectedService(prev => prev && prev.id === updatedService.id ? updatedService as Service : prev);
                       
                       // Update form data to sync with the new selected service data
@@ -1077,7 +1108,7 @@ export const ServiceManagementPanel = () => {
                         setFormData(updatedService as Service);
                       }
                       
-                      dlog("[ServiceManagementPanel] Updated services state with fresh pricing data");
+                      dlog("[ServiceManagementPanel] Updated services state with fresh data");
                     }} 
                   />
                 </div>
