@@ -1212,12 +1212,12 @@ export const ServiceFunnelModal = ({
                                        {pkgPro ? fmt(pkgPro) + period : 'Request Pricing'}
                                      </span>
                                    </div>
-                                   <Button 
-                                     size="sm" 
-                                     variant="outline"
-                                     className="w-full h-7 text-xs border-yellow-300 text-yellow-700 hover:bg-yellow-50"
-                                     onClick={() => window.open('/upgrade', '_blank')}
-                                   >
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline"
+                                      className="w-full h-7 text-xs border-yellow-300 text-yellow-700 hover:bg-yellow-50"
+                                      onClick={() => window.open('/pricing', '_blank')}
+                                    >
                                      <Crown className="w-3 h-3 mr-1" />
                                      Upgrade for Pro Pricing
                                    </Button>
