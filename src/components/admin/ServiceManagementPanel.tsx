@@ -66,7 +66,6 @@ interface Service {
   respa_split_limit?: number;
   max_split_percentage_non_ssp?: number;
   estimated_roi?: number;
-  duration?: string;
   setup_time?: string;
   tags?: string[];
   rating?: number;
@@ -556,7 +555,7 @@ export const ServiceManagementPanel = () => {
         subheadline: merged.subheadline ?? merged.subHeadline ?? merged.sub_headline ?? (service.description || ''),
         heroDescription: merged.heroDescription ?? merged.hero_description ?? merged.description ?? (service.description || ''),
         estimatedRoi: typeof merged.estimatedRoi === 'number' ? merged.estimatedRoi : service.estimated_roi || 0,
-        duration: merged.duration ?? (service.duration || '')
+        duration: merged.duration ?? ''
       };
       setFunnelContent(normalized);
     } else {
@@ -566,7 +565,7 @@ export const ServiceManagementPanel = () => {
         subheadline: service.description || '',
         heroDescription: service.description || '',
         estimatedRoi: service.estimated_roi || 0,
-        duration: service.duration || ''
+        duration: ''
       });
     }
 
@@ -853,14 +852,6 @@ export const ServiceManagementPanel = () => {
                             </div>
                           )}
                         </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium">Duration</label>
-                          <Input
-                            value={formData?.duration || ''}
-                            onChange={e => handleFieldChange('duration', e.target.value)}
-                            placeholder="e.g., 30 days, 1 hour"
-                          />
-                        </div>
                       </div>
                       
                       <div className="grid grid-cols-3 gap-4">
@@ -1030,7 +1021,6 @@ export const ServiceManagementPanel = () => {
                         <h4 className="font-medium">Basic Information</h4>
                         <p className="text-sm text-muted-foreground">Title: {selectedService.title}</p>
                         <p className="text-sm text-muted-foreground">Category: {selectedService.category || 'Not set'}</p>
-                        <p className="text-sm text-muted-foreground">Duration: {selectedService.duration || 'Not set'}</p>
                         <p className="text-sm text-muted-foreground">ROI: {selectedService.estimated_roi || 0}%</p>
                       </div>
                       <div>
