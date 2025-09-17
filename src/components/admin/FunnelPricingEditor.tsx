@@ -97,6 +97,7 @@ export const FunnelPricingEditor = ({
 
   const removeTier = (index: number) => {
     const updatedTiers = tiers.filter((_, i) => i !== index);
+    console.log('[FunnelPricingEditor] Removing tier:', { index, before: tiers.length, after: updatedTiers.length });
     setTiers(updatedTiers);
     onChange(updatedTiers);
   };
