@@ -288,7 +288,11 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
               title: service.title,
               description: service.description,
               website_url: service.website_url,
-              duration: service.funnel_content?.duration || service.duration,
+              duration: (service.funnel_content?.duration && service.funnel_content.duration !== '30 days') 
+                ? service.funnel_content.duration 
+                : (service.duration && service.duration !== '30 days') 
+                  ? service.duration 
+                  : 'TBD',
               setup_time: service.funnel_content?.setup_time || service.setup_time,
               image_url: service.image_url,
               logo_url: service.logo_url,
