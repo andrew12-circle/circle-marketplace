@@ -792,15 +792,6 @@ export const ServiceManagementPanel = () => {
                     {/* Basic Service Information */}
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Service Title</label>
-                        <Input
-                          value={formData?.title || ''}
-                          onChange={e => handleFieldChange('title', e.target.value)}
-                          placeholder="Enter service title"
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
                         <label className="text-sm font-medium">Description</label>
                         <Textarea
                           value={formData?.description || ''}
