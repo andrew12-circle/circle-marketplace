@@ -171,8 +171,19 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
 
   // Handle pricing field changes
   const handlePricingFieldChange = useCallback(async (field: string, value: string | number) => {
-    setLocalPricing(prev => ({ ...prev, [field]: value }));
-  }, []);
+    // Handle duration and setup_time as funnel content fields
+    if (field === 'duration' || field === 'setup_time') {
+      const currentFunnelContent = funnelData || {};
+      const updatedFunnelContent = {
+        ...currentFunnelContent,
+        [field]: value
+      };
+      handleDataChange('funnel_content', updatedFunnelContent);
+    } else {
+      // Handle other pricing fields normally
+      setLocalPricing(prev => ({ ...prev, [field]: value }));
+    }
+  }, [funnelData, handleDataChange]);
 
   // Create preview service object with required fields
   const previewService = {
@@ -277,8 +288,8 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
               title: service.title,
               description: service.description,
               website_url: service.website_url,
-              duration: service.duration,
-              setup_time: service.setup_time,
+              duration: service.funnel_content?.duration || service.duration,
+              setup_time: service.funnel_content?.setup_time || service.setup_time,
               image_url: service.image_url,
               logo_url: service.logo_url,
               profile_image_url: service.profile_image_url,
