@@ -42,6 +42,7 @@ function App() {
             >
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/marketplace" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/health" element={<Health />} />
                 <Route path="/funnel/:serviceId" element={<FunnelPage />} />
