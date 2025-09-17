@@ -450,14 +450,15 @@ export const ServiceManagementPanel = () => {
 
   // Set baseline and form data when service changes
   useEffect(() => {
-    if (selectedService) {
-      // Create stable baseline for dirty detection
+    if (selectedService && !isEditingDetails) {
+      // Only reset form data if we're not currently editing
+      // This prevents the form from reverting during active editing sessions
       const baseline = JSON.parse(JSON.stringify(selectedService));
       setBaseline(baseline);
       setFormData(selectedService);
       setOriginalData(selectedService); // Set original data for unified save
     }
-  }, [selectedService?.id, setOriginalData]); // Only reset when switching to different service
+  }, [selectedService?.id, setOriginalData, isEditingDetails]); // Only reset when switching to different service or not editing
 
   // Compute dirty state from stable baseline
   const isDirty = useMemo(() => {
