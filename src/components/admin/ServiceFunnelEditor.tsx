@@ -275,23 +275,32 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
               subHeadline: service.funnel_content?.subheadline || service.funnel_content?.subHeadline || service.description
             }}
             onChange={(data) => {
-              // Update service fields, mapping back to correct field names
-              const serviceUpdates = { ...data };
+              // Handle core service fields that need auto-save
+              const coreFields = ['title', 'description', 'website_url', 'duration', 'setup_time', 'image_url', 'logo_url', 'profile_image_url'];
+              const coreUpdates: any = {};
               
-              // Handle funnel content separately 
-              if (data.headline || data.subHeadline) {
-                serviceUpdates.funnel_content = {
-                  ...service.funnel_content,
-                  headline: data.headline,
-                  subheadline: data.subHeadline // Map back to lowercase
+              // Extract core service fields
+              coreFields.forEach(field => {
+                if (data[field] !== undefined) {
+                  coreUpdates[field] = data[field];
+                }
+              });
+              
+              // Handle funnel content fields (headline, subHeadline)
+              if (data.headline !== undefined || data.subHeadline !== undefined) {
+                const currentFunnelContent = funnelData || {};
+                const updatedFunnelContent = {
+                  ...currentFunnelContent,
+                  ...(data.headline !== undefined && { headline: data.headline }),
+                  ...(data.subHeadline !== undefined && { subheadline: data.subHeadline })
                 };
-                
-                // Remove these from direct service updates since they go in funnel_content
-                delete serviceUpdates.headline;
-                delete serviceUpdates.subHeadline;
+                handleDataChange('funnel_content', updatedFunnelContent);
               }
               
-              onUpdate({ ...service, ...serviceUpdates });
+              // Save core fields if any exist
+              if (Object.keys(coreUpdates).length > 0) {
+                onUpdate({ ...service, ...coreUpdates });
+              }
             }}
             onPricingChange={handlePricingFieldChange}
           />
