@@ -1078,6 +1078,14 @@ export const ServiceManagementPanel = () => {
                         changes.funnel_content = newFunnel;
                       }
                       
+                      // Check for core service field changes
+                      const coreFields = ['title', 'description', 'website_url', 'duration', 'setup_time', 'image_url', 'logo_url', 'profile_image_url'];
+                      coreFields.forEach(field => {
+                        if (updatedService[field] !== selectedService[field]) {
+                          changes[field] = updatedService[field];
+                        }
+                      });
+                      
                       // Save changes if any
                       if (Object.keys(changes).length > 0) {
                         console.log('[ServiceManagementPanel] Saving funnel changes via unified save:', changes);
