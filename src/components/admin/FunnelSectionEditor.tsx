@@ -60,7 +60,13 @@ export const FunnelSectionEditor = ({ data, onChange, onPricingChange }: FunnelS
 
           <div className="space-y-2">
             <Label htmlFor="duration">Time to Results</Label>
-            <Select value={data.duration || ""} onValueChange={(value) => handleBasicInfoChange('duration', value)}>
+            <Select value={data.duration || ""} onValueChange={(value) => {
+              handleBasicInfoChange('duration', value);
+              // Also update it in funnel_content for consistency
+              if (onPricingChange) {
+                onPricingChange('duration', value);
+              }
+            }}>
               <SelectTrigger>
                 <SelectValue placeholder="Select timeframe" />
               </SelectTrigger>
@@ -77,7 +83,13 @@ export const FunnelSectionEditor = ({ data, onChange, onPricingChange }: FunnelS
 
           <div className="space-y-2">
             <Label htmlFor="setup_time">Setup Time</Label>
-            <Select value={data.setup_time || ""} onValueChange={(value) => handleBasicInfoChange('setup_time', value)}>
+            <Select value={data.setup_time || ""} onValueChange={(value) => {
+              handleBasicInfoChange('setup_time', value);
+              // Also update it via pricing change handler for consistency
+              if (onPricingChange) {
+                onPricingChange('setup_time', value);
+              }
+            }}>
               <SelectTrigger>
                 <SelectValue placeholder="Select setup time" />
               </SelectTrigger>
