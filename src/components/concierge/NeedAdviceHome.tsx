@@ -266,7 +266,8 @@ export default function NeedAdviceHome() {
                 <SmartSearchAutocomplete
                   placeholder="Search or ask us anything…"
                   onSearch={(query) => openChatFromSearch(query)}
-                  className="h-14 pl-12 pr-24 rounded-full shadow-sm placeholder:text-sm md:placeholder:text-base"
+                  hideSearchIcon={true}
+                  inputClassName="h-14 pl-12 pr-24 rounded-full shadow-sm placeholder:text-sm md:placeholder:text-base"
                 />
                 <Button
                   variant="ghost"
