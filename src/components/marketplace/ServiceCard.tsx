@@ -869,10 +869,18 @@ export const ServiceCard = ({
                      <div className="space-y-1">
                        <Tooltip delayDuration={0}>
                          <TooltipTrigger asChild>
-                            <div className="space-y-2 p-2 bg-green-50 rounded-lg border border-green-200 opacity-75 cursor-pointer hover:opacity-100 transition-opacity" data-tour="copay-badge">
-                              <div className="flex items-center gap-1 mb-2">
-                                <Lock className="w-3 h-3 text-green-600" />
-                                <span className="text-sm font-medium text-green-600">Marketing Coverage</span>
+                             <div className="space-y-2 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-2 border-green-200 opacity-75 cursor-pointer hover:opacity-100 transition-all hover:shadow-lg hover:border-green-300 relative overflow-hidden" data-tour="copay-badge">
+                               {/* Premium overlay effect */}
+                               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                               
+                               <div className="flex items-center justify-between mb-2">
+                                 <div className="flex items-center gap-2">
+                                   <div className="flex items-center gap-1">
+                                     <Lock className="w-4 h-4 text-green-600" />
+                                     <span className="text-sm font-semibold text-green-700">💰 Marketing Coverage</span>
+                                   </div>
+                                   <div className="px-2 py-1 bg-green-600 text-white text-xs font-bold rounded-full">PRO ONLY</div>
+                                 </div>
                                <button 
                                  className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors"
                                  onMouseEnter={() => {
