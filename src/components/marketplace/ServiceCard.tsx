@@ -790,7 +790,7 @@ export const ServiceCard = ({
                     </div>
                   ) : effectivePricing.retail > 0 ? (
                     <div className="flex items-center justify-between mt-4">
-                      <span className="text-sm text-muted-foreground">{t('serviceCard.listPrice')}</span>
+                      <span className="text-sm text-muted-foreground">Retail Price:</span>
                       <span className="text-xl font-bold text-foreground">
                          {formatPrice(effectivePricing.retail, service.price_duration || 'month')}
                       </span>
