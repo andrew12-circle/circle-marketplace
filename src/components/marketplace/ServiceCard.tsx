@@ -808,7 +808,7 @@ export const ServiceCard = ({
                               <span className="text-sm font-medium text-circle-primary">Pro Price:</span>
                               <Crown className="w-4 h-4 text-circle-primary" />
                             </div>
-                            <span className="text-lg font-bold text-circle-primary">
+                            <span className="text-lg font-bold text-circle-primary line-through">
                                {formatPrice(effectivePricing.pro, service.price_duration || 'month')}
                             </span>
                           </div>
