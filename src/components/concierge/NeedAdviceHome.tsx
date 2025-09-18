@@ -262,7 +262,7 @@ export default function NeedAdviceHome() {
               className="flex items-center gap-2"
             >
               <div className="relative flex-1">
-                <Brain className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-sky-600" />
+                <Brain className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-sky-600 z-10" />
                 <SmartSearchAutocomplete
                   placeholder="Search or ask us anything…"
                   onSearch={(query) => openChatFromSearch(query)}
