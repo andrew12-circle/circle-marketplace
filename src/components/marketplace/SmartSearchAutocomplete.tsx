@@ -36,16 +36,12 @@ interface SmartSearchProps {
   onSearch: (query: string) => void;
   placeholder?: string;
   className?: string;
-  hideSearchIcon?: boolean;
-  inputClassName?: string;
 }
 
 export const SmartSearchAutocomplete = ({ 
   onSearch, 
   placeholder = "Search services, vendors, or categories...",
-  className = "",
-  hideSearchIcon = false,
-  inputClassName = ""
+  className = ""
 }: SmartSearchProps) => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
@@ -265,9 +261,7 @@ export const SmartSearchAutocomplete = ({
   return (
     <div className={`relative w-full ${className}`}>
       <div className="relative">
-        {!hideSearchIcon && (
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-        )}
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
         <Input
           ref={inputRef}
           placeholder={placeholder}
@@ -282,7 +276,7 @@ export const SmartSearchAutocomplete = ({
             }
           }}
           onFocus={() => setShowSuggestions(true)}
-          className={inputClassName || (hideSearchIcon ? "pr-10" : "pl-10 pr-10")}
+          className="pl-10 pr-10"
         />
         {query && (
           <Button

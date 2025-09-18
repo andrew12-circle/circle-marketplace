@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { SmartSearchAutocomplete } from "@/components/marketplace/SmartSearchAutocomplete";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -105,25 +105,23 @@ export default function NeedAdviceHome() {
     }
   }
 
-  function openChatFromSearch(searchQuery?: string) {
-    const queryToUse = searchQuery || query;
-    if (!queryToUse.trim()) return;
+  function openChatFromSearch() {
+    if (!query.trim()) return;
+    const q = query;
+    setQuery("");
     
-    console.log('🔍 openChatFromSearch called with query:', queryToUse);
+    console.log('🔍 openChatFromSearch called with query:', q);
     
     // Trigger the global modal to open with this search query
     const event = new CustomEvent('openConciergeModal', { 
       detail: { 
-        initialMessage: queryToUse,
+        initialMessage: q,
         expandToken: Date.now()
       }
     });
     
     console.log('📤 Dispatching openConciergeModal event:', event.detail);
     window.dispatchEvent(event);
-    
-    // Clear the query state after use
-    setQuery("");
   }
 
   function hasSpeech() {
@@ -262,12 +260,15 @@ export default function NeedAdviceHome() {
               className="flex items-center gap-2"
             >
               <div className="relative flex-1">
-                <Brain className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-sky-600 z-10" />
-                <SmartSearchAutocomplete
+                <Brain className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-sky-600" />
+                <Input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") openChatFromSearch();
+                  }}
                   placeholder="Search or ask us anything…"
-                  onSearch={(query) => openChatFromSearch(query)}
-                  hideSearchIcon={true}
-                  inputClassName="h-14 pl-12 pr-24 rounded-full shadow-sm placeholder:text-sm md:placeholder:text-base"
+                  className="h-14 pl-12 pr-24 rounded-full shadow-sm placeholder:text-sm md:placeholder:text-base"
                 />
                 <Button
                   variant="ghost"
@@ -281,7 +282,13 @@ export default function NeedAdviceHome() {
                   variant="default"
                   className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-10 w-10 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700"
                   aria-label="Send message"
-                  onClick={() => openChatFromSearch(query)}
+                  onClick={() => {
+                    if (query.trim()) {
+                      openChatFromSearch();
+                    } else {
+                      openChatFromSearch();
+                    }
+                  }}
                 >
                   <Send className="h-5 w-5 text-white" />
                 </Button>

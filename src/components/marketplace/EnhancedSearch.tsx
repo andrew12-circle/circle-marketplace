@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Search, Filter, X, DollarSign, Star, ChevronDown, TrendingUp, Clock, RotateCw } from "lucide-react";
-import { SmartSearchAutocomplete } from "@/components/marketplace/SmartSearchAutocomplete";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -449,10 +449,12 @@ export const EnhancedSearch = ({
         {/* Search Input with Clear Category Button */}
         <div className="flex items-center gap-2 w-full sm:flex-1 sm:max-w-xl">
           <div className="relative flex-1">
-            <SmartSearchAutocomplete
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
               placeholder={getSearchPlaceholder()}
-              onSearch={(query) => updateFilters('query', query)}
-              className="h-10 sm:h-9"
+              value={filters.query}
+              onChange={(e) => updateFilters('query', e.target.value)}
+              className="pl-10 pr-4 h-10 sm:h-9"
             />
           </div>
           
