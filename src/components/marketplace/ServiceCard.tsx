@@ -903,7 +903,7 @@ export const ServiceCard = ({
                                     </div>
                                      <div className="text-xs bg-green-100 p-2 rounded border border-green-300">
                                        <span className="text-gray-600">Settlement Service Provider: </span>
-                                       <span className="font-bold text-green-700 text-xl ml-2">
+                                       <span className={`font-bold text-green-700 text-xl ml-2 ${!isProMember ? 'line-through' : ''}`}>
                                          {sspAgentPays !== null ? formatPrice(sspAgentPays, service.price_duration || 'mo') : 'Not eligible'}
                                        </span>
                                      </div>
