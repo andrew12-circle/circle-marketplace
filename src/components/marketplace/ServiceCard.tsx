@@ -902,7 +902,7 @@ export const ServiceCard = ({
                                        We have vendors with their hand raised wanting to help reduce your bill.
                                      </div>
                                      <div className="text-xs bg-green-100 p-2 rounded border border-green-300 flex items-center justify-between">
-                                       <span className="text-gray-600">Lender's, Title, HOI, Warranty Etc.:</span>
+                                       <span className="text-gray-600">With Vendor help your bill could be much less.</span>
                                        <span className={`font-bold text-green-700 text-xl ${!isProMember ? 'line-through' : ''}`}>
                                          {sspAgentPays !== null ? formatPrice(sspAgentPays, service.price_duration || 'mo') : 'Not eligible'}
                                        </span>
