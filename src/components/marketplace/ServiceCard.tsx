@@ -899,7 +899,7 @@ export const ServiceCard = ({
                                return (
                                   <div className="space-y-1">
                                     <div className="text-xs text-gray-600 mb-2">
-                                      Get help with vendors waiting to help. Bill can be as low as $700 or even less with non-SSPs.
+                                      We have vendors lined up willing to help reduce your bill.
                                     </div>
                                     <div className="text-xs">
                                       <span className="text-gray-600">Settlement Service Provider: </span>
