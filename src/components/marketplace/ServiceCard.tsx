@@ -962,9 +962,10 @@ export const ServiceCard = ({
 
             {/* Pro Savings Guarantee for non-pro members */}
             {!isProMember && service.is_verified && effectivePricing.pro > 0 && (
-              <div className="p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20 mt-2">
-                <p className="text-xs text-circle-primary font-medium">
-                  <span className="font-semibold">Pro Savings Guarantee.</span> If your first month Pro credits and coverage do not equal or exceed your membership fee we credit the difference as marketplace credit.
+              <div className="p-2 bg-green-50 rounded-lg border border-green-200 mt-2">
+                <p className="text-xs">
+                  <span className="font-semibold text-gray-800">Pro Savings Guarantee.</span>
+                  <span className="text-blue-600"> If your first month Pro credits and coverage do not equal or exceed your membership fee we credit the difference as marketplace credit.</span>
                 </p>
               </div>
             )}
