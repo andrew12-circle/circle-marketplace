@@ -901,12 +901,12 @@ export const ServiceCard = ({
                                     <div className="text-xs text-gray-600 mb-2">
                                       We have vendors lined up willing to help reduce your bill.
                                     </div>
-                                    <div className="text-xs">
-                                      <span className="text-gray-600">Settlement Service Provider: </span>
-                                      <span className="font-medium text-green-600">
-                                        {sspAgentPays !== null ? formatPrice(sspAgentPays, service.price_duration || 'mo') : 'Not eligible'}
-                                      </span>
-                                    </div>
+                                     <div className="text-xs bg-green-100 p-2 rounded border border-green-300">
+                                       <span className="text-gray-600">Settlement Service Provider: </span>
+                                       <span className="font-bold text-green-700 text-sm">
+                                         {sspAgentPays !== null ? formatPrice(sspAgentPays, service.price_duration || 'mo') : 'Not eligible'}
+                                       </span>
+                                     </div>
                                     <div className="text-xs">
                                       <span className="text-gray-600">Non Settlement Service Provider: </span>
                                       <span className="font-medium text-blue-600">
