@@ -818,15 +818,6 @@ export const ServiceCard = ({
                            <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
                          </TooltipContent>
                        </Tooltip>
-                       
-                       {/* Pro Savings Guarantee for non-pro members */}
-                       {!isProMember && (
-                         <div className="p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20">
-                           <p className="text-xs text-circle-primary font-medium">
-                             <span className="font-semibold">Pro Savings Guarantee.</span> If your first month Pro credits and coverage do not equal or exceed your membership fee we credit the difference as marketplace credit.
-                           </p>
-                         </div>
-                       )}
                      </div>
                    )}
                   
@@ -968,6 +959,15 @@ export const ServiceCard = ({
                 <span className="sm:hidden">More</span>
               </Button>
             </div>
+
+            {/* Pro Savings Guarantee for non-pro members */}
+            {!isProMember && service.is_verified && effectivePricing.pro > 0 && (
+              <div className="p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20 mt-2">
+                <p className="text-xs text-circle-primary font-medium">
+                  <span className="font-semibold">Pro Savings Guarantee.</span> If your first month Pro credits and coverage do not equal or exceed your membership fee we credit the difference as marketplace credit.
+                </p>
+              </div>
+            )}
           </CardContent>
           
           {/* Full Card Overlay for Disclaimer */}
