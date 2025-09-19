@@ -898,9 +898,9 @@ export const ServiceCard = ({
                                
                                return (
                                   <div className="space-y-1">
-                                    <div className="text-xs text-gray-600 mb-2">
-                                      We have vendors lined up willing to help reduce your bill.
-                                    </div>
+                                     <div className="text-xs text-gray-600 mb-2">
+                                       We have vendors with their hand raised wanting to help reduce your bill.
+                                     </div>
                                      <div className="text-xs bg-green-100 p-2 rounded border border-green-300 flex items-center justify-between">
                                        <span className="text-gray-600">Lender's, Title, HOI, Warranty Etc.:</span>
                                        <span className={`font-bold text-green-700 text-xl ${!isProMember ? 'line-through' : ''}`}>
