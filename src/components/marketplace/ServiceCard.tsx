@@ -797,29 +797,38 @@ export const ServiceCard = ({
                     </div>
                    ) : null}
                     
-                  {/* Always show Circle Pro price for verified services with pro pricing */}
-                  {service.is_verified && effectivePricing.pro > 0 && (
-                    <div className="space-y-1">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="flex items-center justify-between p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20 opacity-75 cursor-pointer">
-                            <div className="flex items-center gap-1">
-                              <Lock className="w-3 h-3 text-circle-primary" />
-                              <span className="text-sm font-medium text-circle-primary">Unlock Wholesale Price</span>
-                              <Crown className="w-4 h-4 text-circle-primary" />
-                            </div>
-                            <span className="text-lg font-bold text-circle-primary line-through">
-                               {formatPrice(effectivePricing.pro, service.price_duration || 'month')}
-                            </span>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent className="w-40 sm:w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
-                          <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
-                          <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  )}
+                   {/* Always show Circle Pro price for verified services with pro pricing */}
+                   {service.is_verified && effectivePricing.pro > 0 && (
+                     <div className="space-y-1">
+                       <Tooltip>
+                         <TooltipTrigger asChild>
+                           <div className="flex items-center justify-between p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20 opacity-75 cursor-pointer">
+                             <div className="flex items-center gap-1">
+                               <Lock className="w-3 h-3 text-circle-primary" />
+                               <span className="text-sm font-medium text-circle-primary">Unlock Wholesale Price</span>
+                               <Crown className="w-4 h-4 text-circle-primary" />
+                             </div>
+                             <span className="text-lg font-bold text-circle-primary line-through">
+                                {formatPrice(effectivePricing.pro, service.price_duration || 'month')}
+                             </span>
+                           </div>
+                         </TooltipTrigger>
+                         <TooltipContent className="w-40 sm:w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
+                           <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
+                           <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
+                         </TooltipContent>
+                       </Tooltip>
+                       
+                       {/* Pro Savings Guarantee for non-pro members */}
+                       {!isProMember && (
+                         <div className="p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20">
+                           <p className="text-xs text-circle-primary font-medium">
+                             <span className="font-semibold">Pro Savings Guarantee.</span> If your first month Pro credits and coverage do not equal or exceed your membership fee we credit the difference as marketplace credit.
+                           </p>
+                         </div>
+                       )}
+                     </div>
+                   )}
                   
                   {/* Show discount pending upvote section only for non-verified services */}
                   {showDiscountPending && !service.is_verified && service.vendor?.contact_email && (
