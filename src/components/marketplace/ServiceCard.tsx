@@ -805,7 +805,7 @@ export const ServiceCard = ({
                           <div className="flex items-center justify-between p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20 opacity-75 cursor-pointer">
                             <div className="flex items-center gap-1">
                               <Lock className="w-3 h-3 text-circle-primary" />
-                              <span className="text-sm font-medium text-circle-primary">Unlock Wholesale Pro Price</span>
+                              <span className="text-sm font-medium text-circle-primary">Unlock Wholesale Price</span>
                               <Crown className="w-4 h-4 text-circle-primary" />
                             </div>
                             <span className="text-lg font-bold text-circle-primary line-through">
