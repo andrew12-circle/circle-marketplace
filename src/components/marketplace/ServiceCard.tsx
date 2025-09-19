@@ -897,20 +897,23 @@ export const ServiceCard = ({
                                const nonSspAgentPays = nonSspPct > 0 ? basePrice * (1 - nonSspPct / 100) : null;
                                
                                return (
-                                 <div className="space-y-1">
-                                   <div className="text-xs">
-                                     <span className="text-gray-600">Settlement Service Provider: </span>
-                                     <span className="font-medium text-green-600">
-                                       {sspAgentPays !== null ? formatPrice(sspAgentPays, service.price_duration || 'mo') : 'Not eligible'}
-                                     </span>
-                                   </div>
-                                   <div className="text-xs">
-                                     <span className="text-gray-600">Non Settlement Service Provider: </span>
-                                     <span className="font-medium text-blue-600">
-                                       {nonSspAgentPays !== null ? formatPrice(nonSspAgentPays, service.price_duration || 'mo') : 'Not shown'}
-                                     </span>
-                                   </div>
-                                 </div>
+                                  <div className="space-y-1">
+                                    <div className="text-xs text-gray-600 mb-2">
+                                      Get help with vendors waiting to help. Bill can be as low as $700 or even less with non-SSPs.
+                                    </div>
+                                    <div className="text-xs">
+                                      <span className="text-gray-600">Settlement Service Provider: </span>
+                                      <span className="font-medium text-green-600">
+                                        {sspAgentPays !== null ? formatPrice(sspAgentPays, service.price_duration || 'mo') : 'Not eligible'}
+                                      </span>
+                                    </div>
+                                    <div className="text-xs">
+                                      <span className="text-gray-600">Non Settlement Service Provider: </span>
+                                      <span className="font-medium text-blue-600">
+                                        {nonSspAgentPays !== null ? formatPrice(nonSspAgentPays, service.price_duration || 'mo') : 'Not shown'}
+                                      </span>
+                                    </div>
+                                  </div>
                                );
                              })()}
                            </div>
