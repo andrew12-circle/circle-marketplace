@@ -187,3 +187,12 @@ verify_jwt = true
 
 [functions.match-engine]
 verify_jwt = false
+
+[functions.lender-match-engine]
+verify_jwt = false
+
+[functions.lender-notify-orchestrator]
+verify_jwt = false
+
+[functions.lender-sla-worker]
+verify_jwt = false

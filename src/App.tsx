@@ -15,6 +15,7 @@ const Auth = lazy(() => import("./pages/Auth"));
 const Admin = lazy(() => import("./pages/Admin"));
 const Health = lazy(() => import("./pages/Health"));
 const FunnelPage = lazy(() => import("./pages/FunnelPage"));
+const LenderMarketplace = lazy(() => import("./pages/LenderMarketplace"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,6 +44,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/marketplace" element={<Index />} />
+                <Route path="/lender" element={<LenderMarketplace />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/health" element={<Health />} />
                 <Route path="/funnel/:serviceId" element={<FunnelPage />} />
