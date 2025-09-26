@@ -5550,6 +5550,114 @@ export type Database = {
         }
         Relationships: []
       }
+      match_candidate: {
+        Row: {
+          created_at: string
+          disqualification_reason: string | null
+          disqualified: boolean | null
+          distance_miles: number | null
+          eligibility_reasons: Json | null
+          eligibility_score: number
+          final_rank: number
+          id: string
+          request_id: string
+          review_score: number | null
+          roster_id: string | null
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          disqualification_reason?: string | null
+          disqualified?: boolean | null
+          distance_miles?: number | null
+          eligibility_reasons?: Json | null
+          eligibility_score?: number
+          final_rank: number
+          id?: string
+          request_id: string
+          review_score?: number | null
+          roster_id?: string | null
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          disqualification_reason?: string | null
+          disqualified?: boolean | null
+          distance_miles?: number | null
+          eligibility_reasons?: Json | null
+          eligibility_score?: number
+          final_rank?: number
+          id?: string
+          request_id?: string
+          review_score?: number | null
+          roster_id?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_candidate_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_candidate_roster_id_fkey"
+            columns: ["roster_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_roster"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      match_routing: {
+        Row: {
+          created_at: string
+          id: string
+          notification_sent_at: string | null
+          request_id: string
+          routing_algorithm: string
+          routing_reasons: Json | null
+          selected_candidate_id: string | null
+          tie_breaker_applied: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notification_sent_at?: string | null
+          request_id: string
+          routing_algorithm?: string
+          routing_reasons?: Json | null
+          selected_candidate_id?: string | null
+          tie_breaker_applied?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notification_sent_at?: string | null
+          request_id?: string
+          routing_algorithm?: string
+          routing_reasons?: Json | null
+          selected_candidate_id?: string | null
+          tie_breaker_applied?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_routing_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_routing_selected_candidate_id_fkey"
+            columns: ["selected_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "match_candidate"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mobile_tracking_events: {
         Row: {
           affiliate_id: string | null
@@ -6763,6 +6871,60 @@ export type Database = {
           token?: string
           user_id?: string | null
           vendor_id?: string | null
+        }
+        Relationships: []
+      }
+      request: {
+        Row: {
+          agent_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          loan_amount: number | null
+          loan_type: string | null
+          metadata: Json | null
+          property_address: string | null
+          property_city: string | null
+          property_state: string | null
+          property_zip: string | null
+          service_id: string | null
+          status: Database["public"]["Enums"]["request_status"]
+          updated_at: string
+          urgency_level: string | null
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          loan_amount?: number | null
+          loan_type?: string | null
+          metadata?: Json | null
+          property_address?: string | null
+          property_city?: string | null
+          property_state?: string | null
+          property_zip?: string | null
+          service_id?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          updated_at?: string
+          urgency_level?: string | null
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          loan_amount?: number | null
+          loan_type?: string | null
+          metadata?: Json | null
+          property_address?: string | null
+          property_city?: string | null
+          property_state?: string | null
+          property_zip?: string | null
+          service_id?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          updated_at?: string
+          urgency_level?: string | null
         }
         Relationships: []
       }
@@ -9805,6 +9967,66 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_decision: {
+        Row: {
+          counter_offer_amount: number | null
+          counter_terms: Json | null
+          created_at: string
+          decided_at: string
+          decided_by_email: string | null
+          decision_notes: string | null
+          decision_type: Database["public"]["Enums"]["decision_type"]
+          expires_at: string | null
+          id: string
+          request_id: string
+          roster_id: string | null
+          vendor_id: string
+        }
+        Insert: {
+          counter_offer_amount?: number | null
+          counter_terms?: Json | null
+          created_at?: string
+          decided_at?: string
+          decided_by_email?: string | null
+          decision_notes?: string | null
+          decision_type: Database["public"]["Enums"]["decision_type"]
+          expires_at?: string | null
+          id?: string
+          request_id: string
+          roster_id?: string | null
+          vendor_id: string
+        }
+        Update: {
+          counter_offer_amount?: number | null
+          counter_terms?: Json | null
+          created_at?: string
+          decided_at?: string
+          decided_by_email?: string | null
+          decision_notes?: string | null
+          decision_type?: Database["public"]["Enums"]["decision_type"]
+          expires_at?: string | null
+          id?: string
+          request_id?: string
+          roster_id?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_decision_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_decision_roster_id_fkey"
+            columns: ["roster_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_roster"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_demand_signals: {
         Row: {
           avg_agent_budget: number | null
@@ -10154,6 +10376,90 @@ export type Database = {
           vendor_name?: string
           vendor_phone?: string | null
           vendor_type?: string | null
+        }
+        Relationships: []
+      }
+      vendor_roster: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          latitude: number | null
+          lo_email: string
+          lo_name: string
+          lo_nmls_id: string | null
+          lo_phone: string | null
+          longitude: number | null
+          review_count: number | null
+          review_score: number | null
+          service_radius_miles: number | null
+          specialties: string[] | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          latitude?: number | null
+          lo_email: string
+          lo_name: string
+          lo_nmls_id?: string | null
+          lo_phone?: string | null
+          longitude?: number | null
+          review_count?: number | null
+          review_score?: number | null
+          service_radius_miles?: number | null
+          specialties?: string[] | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          latitude?: number | null
+          lo_email?: string
+          lo_name?: string
+          lo_nmls_id?: string | null
+          lo_phone?: string | null
+          longitude?: number | null
+          review_count?: number | null
+          review_score?: number | null
+          service_radius_miles?: number | null
+          specialties?: string[] | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
+      vendor_rule: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          rule_type: Database["public"]["Enums"]["rule_type"]
+          rule_value: Json
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          rule_type: Database["public"]["Enums"]["rule_type"]
+          rule_value?: Json
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          rule_type?: Database["public"]["Enums"]["rule_type"]
+          rule_value?: Json
+          updated_at?: string
+          vendor_id?: string
         }
         Relationships: []
       }
@@ -12212,7 +12518,23 @@ export type Database = {
         | "course"
         | "playbook"
         | "channel"
+      decision_type: "approve" | "counter" | "decline"
       quote_status: "submitted" | "approved" | "rejected"
+      request_status:
+        | "searching"
+        | "awaiting_vendor"
+        | "approved"
+        | "countered"
+        | "declined"
+        | "expired"
+        | "cancelled"
+      rule_type:
+        | "min_buyers_12m"
+        | "min_listings_12m"
+        | "min_closings_12m"
+        | "max_budget"
+        | "geo_scope"
+        | "auto_approve_threshold"
       sponsored_status: "active" | "pending" | "expired" | "cancelled"
       sponsored_tier: "featured" | "premium" | "top_ranked"
     }
@@ -12387,7 +12709,25 @@ export const Constants = {
         "playbook",
         "channel",
       ],
+      decision_type: ["approve", "counter", "decline"],
       quote_status: ["submitted", "approved", "rejected"],
+      request_status: [
+        "searching",
+        "awaiting_vendor",
+        "approved",
+        "countered",
+        "declined",
+        "expired",
+        "cancelled",
+      ],
+      rule_type: [
+        "min_buyers_12m",
+        "min_listings_12m",
+        "min_closings_12m",
+        "max_budget",
+        "geo_scope",
+        "auto_approve_threshold",
+      ],
       sponsored_status: ["active", "pending", "expired", "cancelled"],
       sponsored_tier: ["featured", "premium", "top_ranked"],
     },
