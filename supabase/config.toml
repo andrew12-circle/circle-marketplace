@@ -184,3 +184,6 @@ verify_jwt = false
 
 [functions.send-consultation-alert]
 verify_jwt = true
+
+[functions.match-engine]
+verify_jwt = false
