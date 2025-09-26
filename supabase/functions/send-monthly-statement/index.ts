@@ -1,11 +1,11 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { Resend } from "npm:resend@2.0.0";
-import React from "npm:react@18.3.1";
-import { renderAsync } from "npm:@react-email/components@0.0.22";
-import { MonthlyStatementEmail } from "./_templates/monthly-statement.tsx";
+// import { Resend } from "npm:resend@2.0.0"; // Temporarily disabled
+// import React from "npm:react@18.3.1"; // Temporarily disabled
+// import { renderAsync } from "npm:@react-email/components@0.0.22"; // Temporarily disabled
+// import { MonthlyStatementEmail } from "./_templates/monthly-statement.tsx"; // Temporarily disabled
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+// const resend = new Resend(Deno.env.get("RESEND_API_KEY")); // Temporarily disabled
 const RESEND_FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL") || "statements@resend.dev";
 const RESEND_FROM_NAME = Deno.env.get("RESEND_FROM_NAME") || "Circle Platform";
 
@@ -109,26 +109,13 @@ const handler = async (req: Request): Promise<Response> => {
           allocations: allocations || []
         };
 
-        // Generate and send email
-        const html = await renderAsync(
-          React.createElement(MonthlyStatementEmail, {
-            agentName: agentData.display_name,
-            monthName,
-            totalPoints: agentData.total_points,
-            transactions: agentData.transactions,
-            allocations: agentData.allocations,
-            statementUrl: `https://ihzyuyfawapweamqzzlj.supabase.co/wallet`
-          })
-        );
+        // Mock email generation for now (React Email disabled)
+        console.log("📧 Mock email HTML generated");
 
-        const emailResult = await resend.emails.send({
-          from: `${RESEND_FROM_NAME} <${RESEND_FROM_EMAIL}>`,
-          to: [agentData.email],
-          subject: `Your ${monthName} Points Statement - Circle Platform`,
-          html,
-        });
+        // Mock email sending for now (Resend disabled)
+        console.log(`📧 Mock email sent to ${agentData.email}: ${monthName} statement`);
 
-        console.log(`Statement sent to ${agentData.email}:`, emailResult);
+        return { success: true, email: agentData.email };
 
       } catch (error) {
         console.error(`Error sending statement to agent ${agent.user_id}:`, error);

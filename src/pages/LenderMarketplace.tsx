@@ -1,7 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Building2, Inbox, BarChart3, Send } from "lucide-react";
+import { Building2, Inbox, BarChart3, Send, Database } from "lucide-react";
 import { LenderRequestForm } from "@/components/lender/LenderRequestForm";
 import { VendorInbox } from "@/components/lender/VendorInbox";
+import { LenderRequestDashboard } from "@/components/lender/LenderRequestDashboard";
 
 export default function LenderMarketplace() {
   return (
@@ -14,10 +15,14 @@ export default function LenderMarketplace() {
       </div>
 
       <Tabs defaultValue="requests" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="requests" className="flex items-center gap-2">
             <Send className="h-4 w-4" />
-            Agent Requests
+            Create Request
+          </TabsTrigger>
+          <TabsTrigger value="dashboard" className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            Request Dashboard
           </TabsTrigger>
           <TabsTrigger value="inbox" className="flex items-center gap-2">
             <Inbox className="h-4 w-4" />
@@ -35,6 +40,10 @@ export default function LenderMarketplace() {
 
         <TabsContent value="requests">
           <LenderRequestForm />
+        </TabsContent>
+
+        <TabsContent value="dashboard">
+          <LenderRequestDashboard />
         </TabsContent>
 
         <TabsContent value="inbox">

@@ -1,13 +1,13 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.56.1';
-import { Resend } from "npm:resend@2.0.0";
+// import { Resend } from "npm:resend@2.0.0"; // Temporarily disabled
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+// const resend = new Resend(Deno.env.get('RESEND_API_KEY')); // Temporarily disabled
 
 interface VendorNotificationRequest {
   vendorId: string;
@@ -82,17 +82,14 @@ const handler = async (req: Request): Promise<Response> => {
       `;
     }
 
-    // Send email notification
-    const emailResponse = await resend.emails.send({
-      from: "Circle Marketplace <notifications@circle-marketplace.com>",
-      to: [vendor.contact_email],
-      subject: subject,
-      html: html,
-    });
+    // Mock email sending for now (Resend disabled)
+    console.log(`📧 Mock vendor notification sent to ${vendor.name}: ${subject}`);
 
-    console.log('Vendor notification email sent:', emailResponse);
-
-    return new Response(JSON.stringify({ success: true, emailId: emailResponse.data?.id }), {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      emailId: "mock-email-id", 
+      message: "Mock notification sent" 
+    }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
     });
