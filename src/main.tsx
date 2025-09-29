@@ -29,6 +29,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 // Lazy load non-critical pages
+const LenderMarketplace = lazy(() => import("./pages/LenderMarketplace"));
 const Marketplace = lazy(() => import("./pages/Marketplace").then(m => ({ default: m.Marketplace })));
 const Academy = lazy(() => import("./pages/Academy").then(m => ({ default: m.Academy })));
 const CreatorDashboard = lazy(() => import("./pages/CreatorDashboard").then(m => ({ default: m.CreatorDashboard })));
@@ -234,6 +235,9 @@ root.render(
                 
                 {/* DISC Test route */}
                 <Route path="/disc-test" element={<DiscTest />} />
+                
+                {/* Lender Marketplace route */}
+                <Route path="/lender" element={<LenderMarketplace />} />
                 
                 {/* Profile settings alternate path */}
                 <Route path="/profile" element={<ProfileSettings />} />
