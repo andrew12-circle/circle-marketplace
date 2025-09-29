@@ -231,7 +231,7 @@ export const PaymentChoiceModal = ({
                       Upgrade to Pro to Access
                     </>
                   ) : (
-                    `Add to Cart - {proPrice}/mo`
+                    "Add to Cart"
                   )}
                 </Button>
                 {!user && (
