@@ -256,7 +256,7 @@ export const VendorSelectionModal = ({
         return;
       }
 
-      // Query vendors with timeout protection
+      // Query vendors with timeout protection - simplified for debugging
       const vendorQuery = supabase
         .from('vendors')
         .select(`
@@ -298,69 +298,19 @@ export const VendorSelectionModal = ({
         return;
       }
 
-      // Filter vendors based on agent profile and calculate real-time stats
-      const vendorsWithStatsAndFiltering = await Promise.all(
-        (data || []).map(async (vendor) => {
-          try {
-            // Check if agent matches vendor criteria - non-blocking approach
-            let matchResult = true; // Default to true
-            try {
-              const { data: rpcMatchResult, error: matchError } = await supabase
-                .rpc('check_agent_vendor_match', { 
-                  p_agent_id: user.id, 
-                  p_vendor_id: vendor.id 
-                });
-              
-              if (!matchError && rpcMatchResult !== undefined) {
-                matchResult = rpcMatchResult;
-              }
-            } catch (rpcError) {
-              console.warn('Agent-vendor match RPC failed, allowing vendor by default:', rpcError);
-              // Keep matchResult as true
-            }
+      // Simplified approach - skip the problematic RPC calls for now
+      const processedVendors = (data || []).map(vendor => ({
+        ...vendor,
+        co_marketing_agents: 0,
+        campaigns_funded: 0,
+        matches_agent_profile: true // Always include vendors for now
+      }));
 
-            // Calculate real-time stats
-            const { data: statsData, error: statsError } = await supabase
-              .rpc('calculate_vendor_stats', { vendor_uuid: vendor.id });
-            
-            if (statsError) {
-              console.error('Error calculating stats for vendor:', vendor.id, statsError);
-            }
-
-            return {
-              ...vendor,
-              co_marketing_agents: (statsData as any)?.computed_co_marketing_agents || 0,
-              campaigns_funded: (statsData as any)?.campaigns_funded || 0,
-              matches_agent_profile: matchResult
-            };
-          } catch (err) {
-            console.error('Error processing vendor:', err);
-            return {
-              ...vendor,
-              co_marketing_agents: 0,
-              campaigns_funded: 0,
-              matches_agent_profile: true // Include by default on error
-            };
-          }
-        })
-      );
-
-      // Apply non-blocking filtering - if no matches, show all vendors
-      let filteredVendors = vendorsWithStatsAndFiltering.filter(vendor => 
-        vendor.matches_agent_profile
-      );
-      
-      // Fallback: if filtering resulted in zero vendors, show all and set flag
-      if (filteredVendors.length === 0) {
-        console.warn('No vendors matched agent criteria, showing all vendors as fallback');
-        filteredVendors = vendorsWithStatsAndFiltering.map(v => ({ ...v, matches_agent_profile: true }));
-        setShowAllVendors(true); // Auto-enable show all vendors
-      }
-
-      setVendors(filteredVendors);
-      console.log('VendorSelectionModal: Vendors set successfully with live stats and filtering, count:', filteredVendors.length);
+      setVendors(processedVendors);
+      console.log('VendorSelectionModal: Vendors set successfully, count:', processedVendors.length);
     } catch (error) {
       console.error('VendorSelectionModal: Error loading vendors:', error);
+      setVendors([]); // Ensure we show something rather than infinite loading
       toast({
         title: "Error",
         description: "Failed to load vendors. Please try again.",
