@@ -9,6 +9,7 @@ import { VendorSelectionModal } from "./VendorSelectionModal";
 import { Service } from "@/hooks/useMarketplaceData";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { calculateCopayPrice } from "@/utils/sharedPricing";
 
 interface PaymentChoiceModalProps {
   isOpen: boolean;
@@ -125,7 +126,7 @@ export const PaymentChoiceModal = ({
 
   const retailPrice = service.retail_price || service.pro_price;
   const proPrice = service.pro_price || service.retail_price;
-  const coPayPrice = service.co_pay_price;
+  const coPayPrice = calculateCopayPrice(service);
   const coPaySplit = service.respa_split_limit || 50;
   const pointsBreakdown = getPointsUsageBreakdown();
 
@@ -285,7 +286,7 @@ export const PaymentChoiceModal = ({
                     )}
                   </div>
                   <div className="text-2xl font-bold text-green-600 mb-1">
-                    {isProMember ? (coPayPrice || "$0") : "$0-50"}/mo
+                    {isProMember ? `$${Math.round(coPayPrice)}` : "$0-50"}/mo
                   </div>
                   <div className="text-sm text-muted-foreground mb-4">SSP</div>
                   <p className="text-sm text-muted-foreground mb-4">
