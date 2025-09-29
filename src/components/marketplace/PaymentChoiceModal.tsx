@@ -208,7 +208,7 @@ export const PaymentChoiceModal = ({
                     </Badge>
                   )}
                 </div>
-                <div className="text-2xl font-bold text-primary mb-2">{proPrice}/mo</div>
+                <div className="text-2xl font-bold text-primary mb-2">${proPrice}/mo</div>
                 <p className="text-sm text-muted-foreground mb-4">
                   {isProMember 
                     ? "Pay your discounted member price and get started immediately."
