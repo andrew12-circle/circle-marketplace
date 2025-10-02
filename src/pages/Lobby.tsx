@@ -51,38 +51,43 @@ const Lobby = () => {
         <Header showCart={false} showTourButton={false} />
       </div>
 
-      {/* Hero Section */}
-      <section className="py-16 md:py-24 px-4">
-        <div className="container mx-auto max-w-6xl text-center">
-          <motion.h1
+      {/* Advice Engine Section - Top */}
+      <section className="py-12 md:py-16 px-4 bg-gradient-to-b from-primary/5 to-background">
+        <div className="container mx-auto max-w-5xl">
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-4xl md:text-6xl font-bold tracking-tight mb-6"
           >
-            Choose Your Marketplace
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto"
-          >
-            Explore wholesale pricing, verified ROI, and real reviews across industries.
-          </motion.p>
+            <NeedAdviceHome />
+          </motion.div>
         </div>
       </section>
 
-      {/* Category Grid */}
-      <section className="py-8 px-4 pb-24">
+      {/* Category Selection Section */}
+      <section className="py-12 md:py-16 px-4">
         <div className="container mx-auto max-w-7xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Choose Your Marketplace
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Explore wholesale pricing, verified ROI, and real reviews across industries.
+            </p>
+          </motion.div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {categories.map((category, index) => (
               <motion.div
                 key={category.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
+                transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
               >
                 <Link to={category.route}>
                   <div className="group relative bg-card border border-border rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 hover:border-primary/50 h-full flex flex-col">
@@ -123,13 +128,6 @@ const Lobby = () => {
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Advice Engine Section */}
-      <section className="py-16 px-4 bg-muted/30">
-        <div className="container mx-auto max-w-6xl">
-          <NeedAdviceHome />
         </div>
       </section>
 
