@@ -51,8 +51,8 @@ const Lobby = () => {
         <Header showCart={false} showTourButton={false} />
       </div>
 
-      {/* Advice Engine Section - Top */}
-      <section className="py-12 md:py-16 px-4 bg-gradient-to-b from-primary/5 to-background">
+      {/* Advice Engine Section - Main Content */}
+      <section className="flex-1 py-12 md:py-16 px-4">
         <div className="container mx-auto max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -61,73 +61,6 @@ const Lobby = () => {
           >
             <NeedAdviceHome />
           </motion.div>
-        </div>
-      </section>
-
-      {/* Category Selection Section */}
-      <section className="py-12 md:py-16 px-4">
-        <div className="container mx-auto max-w-7xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Choose Your Marketplace
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Explore wholesale pricing, verified ROI, and real reviews across industries.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {categories.map((category, index) => (
-              <motion.div
-                key={category.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
-              >
-                <Link to={category.route}>
-                  <div className="group relative bg-card border border-border rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 hover:border-primary/50 h-full flex flex-col">
-                    {/* Icon */}
-                    <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
-                      <category.icon className="w-8 h-8 text-primary" />
-                    </div>
-
-                    {/* Title */}
-                    <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors">
-                      {category.title}
-                    </h3>
-
-                    {/* Description */}
-                    <p className="text-sm text-muted-foreground leading-relaxed flex-grow">
-                      {category.description}
-                    </p>
-
-                    {/* Hover Arrow */}
-                    <div className="mt-6 flex items-center text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className="text-sm font-medium">Explore</span>
-                      <svg
-                        className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
         </div>
       </section>
 
