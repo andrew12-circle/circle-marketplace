@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Home, Briefcase, Heart, Users, Zap } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { LegalFooter } from "@/components/LegalFooter";
+import NeedAdviceHome from "@/components/concierge/NeedAdviceHome";
 import { motion } from "framer-motion";
 
 const categories = [
@@ -122,6 +123,13 @@ const Lobby = () => {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Advice Engine Section */}
+      <section className="py-16 px-4 bg-muted/30">
+        <div className="container mx-auto max-w-6xl">
+          <NeedAdviceHome />
         </div>
       </section>
 
