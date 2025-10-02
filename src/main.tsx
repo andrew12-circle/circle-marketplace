@@ -27,6 +27,7 @@ import "./i18n";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Lobby from "./pages/Lobby";
 
 // Lazy load non-critical pages
 const LenderMarketplace = lazy(() => import("./pages/LenderMarketplace"));
@@ -235,6 +236,9 @@ root.render(
                 
                 {/* DISC Test route */}
                 <Route path="/disc-test" element={<DiscTest />} />
+                
+                {/* Lobby route */}
+                <Route path="/lobby" element={<Lobby />} />
                 
                 {/* Lender Marketplace route */}
                 <Route path="/lender" element={<LenderMarketplace />} />
