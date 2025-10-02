@@ -138,8 +138,8 @@ export const QUERY_KEYS = {
   serviceById: (serviceId: string) => ['marketplace', 'service', serviceId],
 } as const;
 
-// Helper: timeout wrapper with retry for auth issues - INCREASED TIMEOUT FOR STABILITY
-const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 30000, label?: string): Promise<T> => {
+// Helper: timeout wrapper with retry for auth issues - MUCH LONGER TIMEOUT FOR STABILITY
+const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 60000, label?: string): Promise<T> => {
   let timer: number | undefined;
   
   const timeoutPromise = new Promise<T>((_, reject) => {
@@ -151,8 +151,11 @@ const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 30000, label?: stri
       promise as Promise<T>,
       timeoutPromise,
     ]);
+    if (timer) window.clearTimeout(timer);
     return result;
   } catch (error: any) {
+    if (timer) window.clearTimeout(timer);
+    
     // Handle auth errors by refreshing session
     if (error?.message?.includes('JWT') || error?.message?.includes('auth') || error?.message?.includes('401')) {
       try {
@@ -169,8 +172,6 @@ const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 30000, label?: stri
       }
     }
     throw error;
-  } finally {
-    if (timer) window.clearTimeout(timer);
   }
 };
 
@@ -188,8 +189,8 @@ const fetchServices = async (): Promise<Service[]> => {
       supabase
         .from('services')
         .select('*', { count: 'exact', head: true })
-        .eq('is_active', true), // Apply same filter as main query
-      10000,
+        .eq('is_active', true),
+      20000,
       'services-count'
     );
     if (!error && typeof count === 'number') {
@@ -207,8 +208,8 @@ const fetchServices = async (): Promise<Service[]> => {
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
-      .limit(200), // Reasonable limit for performance
-      30000, // Increased timeout for stability
+      .limit(200),
+      60000, // Increased timeout for stability
       'fetchServices'
     );
 
@@ -278,8 +279,8 @@ const fetchVendors = async (): Promise<Vendor[]> => {
       .in('approval_status', ['approved', 'auto_approved', 'pending'])
       .order('sort_order', { ascending: true })
       .order('rating', { ascending: false })
-      .limit(20), // Reduced limit for faster queries
-      30000, // Increased timeout for stability
+      .limit(20),
+      60000, // Increased timeout for stability
       'fetchVendors'
     );
 
@@ -352,7 +353,7 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
       logger.log('🔍 Trying edge function for marketplace data...');
       const edgeFunctionResult = await withTimeout(
         supabase.functions.invoke('get-marketplace-data'),
-        10000, // Increased edge function timeout
+        30000, // Increased edge function timeout
         'edge_function'
       );
 
@@ -436,7 +437,7 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
             .eq('cache_key', 'marketplace_data')
             .gt('expires_at', new Date().toISOString())
             .maybeSingle(),
-          3000,
+          10000,
           'marketplace_cache'
         )
       );
