@@ -9,6 +9,7 @@ import { WebAnalyticsTracker } from "@/components/analytics/WebAnalyticsTracker"
 
 // Lazy load pages for better performance
 import { lazy, Suspense } from "react";
+import Lobby from "./pages/Lobby";
 
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -16,10 +17,6 @@ const Admin = lazy(() => import("./pages/Admin"));
 const Health = lazy(() => import("./pages/Health"));
 const FunnelPage = lazy(() => import("./pages/FunnelPage"));
 const LenderMarketplace = lazy(() => import("./pages/LenderMarketplace"));
-const Lobby = lazy(() => import("./pages/Lobby").then(module => {
-  console.log('Lobby module loaded:', module);
-  return module;
-}));
 
 const queryClient = new QueryClient({
   defaultOptions: {
