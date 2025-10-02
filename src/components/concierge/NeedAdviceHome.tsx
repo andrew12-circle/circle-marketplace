@@ -6,29 +6,26 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   Mic,
   MicOff,
-  Sparkles,
-  BarChart3,
-  Users,
-  GraduationCap,
-  BadgeCheck,
-  Megaphone,
-  ShoppingCart,
-  Brain,
-  PhoneCall,
   Send,
+  PhoneCall,
+  Home,
+  Briefcase,
+  Heart,
+  Users,
+  Zap,
+  Brain,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { ConsultationBookingModal } from "@/components/marketplace/ConsultationBookingModal";
 
 const categories = [
-  { label: "CRM", icon: Users, color: "bg-sky-100 text-sky-600" },
-  { label: "Marketing Tools", icon: Megaphone, color: "bg-pink-100 text-pink-600" },
-  { label: "Lead Generation", icon: Sparkles, color: "bg-purple-100 text-purple-600" },
-  { label: "Real Estate Schools", icon: GraduationCap, color: "bg-green-100 text-green-600" },
-  { label: "Licensing", icon: BadgeCheck, color: "bg-orange-100 text-orange-600" },
-  { label: "Coaching", icon: BarChart3, color: "bg-indigo-100 text-indigo-600" },
-  { label: "Marketplace", icon: ShoppingCart, color: "bg-yellow-100 text-yellow-600" },
+  { label: "Home & Property", icon: Home, color: "bg-sky-100 text-sky-600" },
+  { label: "Business & Professional", icon: Briefcase, color: "bg-pink-100 text-pink-600" },
+  { label: "Healthcare & Wellness", icon: Heart, color: "bg-purple-100 text-purple-600" },
+  { label: "Community & Lifestyle", icon: Users, color: "bg-green-100 text-green-600" },
+  { label: "Growth & Emerging", icon: Zap, color: "bg-orange-100 text-orange-600" },
 ];
 
 interface ShortcutProps {
