@@ -89,7 +89,7 @@ export const VendorReferralModal = ({ isOpen, onClose, serviceTitle }: VendorRef
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md z-[150]">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto z-[150]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="w-5 h-5 text-green-600" />
