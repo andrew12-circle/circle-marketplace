@@ -12505,10 +12505,10 @@ export type Database = {
       }
       admin_review_draft: {
         Args: {
-          action: string
-          draft_id: string
-          draft_table: string
-          rejection_reason?: string
+          p_action: string
+          p_draft_id: string
+          p_draft_table: string
+          p_rejection_reason?: string
         }
         Returns: Json
       }
