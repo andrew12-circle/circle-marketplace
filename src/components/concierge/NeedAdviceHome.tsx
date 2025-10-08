@@ -8,13 +8,14 @@ import {
   MicOff,
   Send,
   PhoneCall,
-  Home,
-  Briefcase,
-  Heart,
-  Users,
-  Zap,
-  Brain,
+  Database,
+  Megaphone,
   Sparkles,
+  GraduationCap,
+  BadgeCheck,
+  TrendingUp,
+  ShoppingCart,
+  Brain,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -22,34 +23,46 @@ import { ConsultationBookingModal } from "@/components/marketplace/ConsultationB
 
 const categories = [
   { 
-    label: "Home & Property", 
-    icon: Home, 
+    label: "CRM", 
+    icon: Database, 
     color: "bg-sky-100 text-sky-600",
-    sectors: "Realtors, Loan Officers, Insurance, Contractors, Moving, Staging, Pest Control, Security"
+    sectors: "Customer Management"
   },
   { 
-    label: "Business & Professional", 
-    icon: Briefcase, 
+    label: "Marketing Tools", 
+    icon: Megaphone, 
     color: "bg-pink-100 text-pink-600",
-    sectors: "B2B Insurance, Financial Advisors, Accounting, LegalTech, Marketing, IT, HR, Corporate Training"
+    sectors: "Marketing & Advertising"
   },
   { 
-    label: "Healthcare & Wellness", 
-    icon: Heart, 
+    label: "Lead Generation", 
+    icon: Sparkles, 
     color: "bg-purple-100 text-purple-600",
-    sectors: "Healthcare Staffing, Dental & Outpatient, Senior Care, Behavioral Health, Alternative Medicine, Medical Devices, Fitness"
+    sectors: "Lead & Prospecting Tools"
   },
   { 
-    label: "Community & Lifestyle", 
-    icon: Users, 
+    label: "Real Estate Schools", 
+    icon: GraduationCap, 
     color: "bg-green-100 text-green-600",
-    sectors: "Nonprofit/Faith-Based, Education/Tutoring, Childcare, Event Services"
+    sectors: "Education & Training"
   },
   { 
-    label: "Growth & Emerging", 
-    icon: Zap, 
+    label: "Licensing", 
+    icon: BadgeCheck, 
     color: "bg-orange-100 text-orange-600",
-    sectors: "Green Energy (Solar, EV), Commercial Construction, Logistics & Fleet, Specialty Vehicle Upfits"
+    sectors: "Licensing & Compliance"
+  },
+  { 
+    label: "Coaching", 
+    icon: TrendingUp, 
+    color: "bg-blue-100 text-blue-600",
+    sectors: "Coaching & Mentorship"
+  },
+  { 
+    label: "Marketplace", 
+    icon: ShoppingCart, 
+    color: "bg-yellow-100 text-yellow-600",
+    sectors: "Browse All Services"
   },
 ];
 
