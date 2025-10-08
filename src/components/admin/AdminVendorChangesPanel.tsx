@@ -100,7 +100,8 @@ export const AdminVendorChangesPanel: React.FC = () => {
         *,
         services!inner(title, category)
       `)
-      .order('created_at', { ascending: false });
+      .in('state', ['DRAFT', 'SUBMITTED', 'CHANGES_REQUESTED'])
+      .order('version_number', { ascending: false });
 
     if (error) throw error;
     setServiceDrafts(data || []);
@@ -113,7 +114,8 @@ export const AdminVendorChangesPanel: React.FC = () => {
         *,
         vendors!inner(name)
       `)
-      .order('created_at', { ascending: false });
+      .in('state', ['DRAFT', 'SUBMITTED', 'CHANGES_REQUESTED'])
+      .order('version_number', { ascending: false });
 
     if (error) throw error;
     setVendorDrafts(data || []);
@@ -178,14 +180,16 @@ export const AdminVendorChangesPanel: React.FC = () => {
     setReviewModalOpen(true);
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (state: string) => {
     const statusConfig = {
-      pending: { color: 'yellow', icon: Clock, text: 'Pending' },
-      approved: { color: 'green', icon: CheckCircle, text: 'Approved' },
-      rejected: { color: 'red', icon: X, text: 'Rejected' }
+      DRAFT: { color: 'gray', icon: Clock, text: 'Draft' },
+      SUBMITTED: { color: 'yellow', icon: Clock, text: 'Submitted' },
+      CHANGES_REQUESTED: { color: 'orange', icon: AlertTriangle, text: 'Changes Requested' },
+      APPROVED: { color: 'green', icon: CheckCircle, text: 'Approved' },
+      PUBLISHED: { color: 'blue', icon: CheckCircle, text: 'Published' }
     };
 
-    const config = statusConfig[status as keyof typeof statusConfig];
+    const config = statusConfig[state as keyof typeof statusConfig];
     if (!config) return null;
 
     const Icon = config.icon;
@@ -222,8 +226,8 @@ export const AdminVendorChangesPanel: React.FC = () => {
   };
 
   const unreadNotifications = notifications.filter(n => !n.read);
-  const pendingServiceDrafts = serviceDrafts.filter(d => d.status === 'pending');
-  const pendingVendorDrafts = vendorDrafts.filter(d => d.status === 'pending');
+  const pendingServiceDrafts = serviceDrafts.filter(d => (d as any).state === 'SUBMITTED');
+  const pendingVendorDrafts = vendorDrafts.filter(d => (d as any).state === 'SUBMITTED');
 
   return (
     <div className="space-y-6">
@@ -356,7 +360,10 @@ export const AdminVendorChangesPanel: React.FC = () => {
                         <h4 className="font-medium">
                           {(draft as any).services?.title || 'Service Update'}
                         </h4>
-                        {getStatusBadge(draft.status)}
+                        {getStatusBadge((draft as any).state || draft.status)}
+                        <Badge variant="outline" className="text-xs">
+                          v{(draft as any).version_number || 1}
+                        </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground mb-2">
                         {draft.change_summary}
@@ -370,7 +377,7 @@ export const AdminVendorChangesPanel: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    {draft.status === 'pending' && (
+                    {((draft as any).state === 'SUBMITTED' || draft.status === 'pending') && (
                       <div className="flex gap-2">
                         <Button
                           size="sm"
@@ -415,7 +422,10 @@ export const AdminVendorChangesPanel: React.FC = () => {
                         <h4 className="font-medium">
                           {(draft as any).vendors?.name || 'Profile Update'}
                         </h4>
-                        {getStatusBadge(draft.status)}
+                        {getStatusBadge((draft as any).state || draft.status)}
+                        <Badge variant="outline" className="text-xs">
+                          v{(draft as any).version_number || 1}
+                        </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground mb-2">
                         {draft.change_summary}
@@ -429,7 +439,7 @@ export const AdminVendorChangesPanel: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    {draft.status === 'pending' && (
+                    {((draft as any).state === 'SUBMITTED' || draft.status === 'pending') && (
                       <div className="flex gap-2">
                         <Button
                           size="sm"

@@ -8,9 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { AlertTriangle, Save, Clock, CheckCircle, X, Upload, Plus, Trash2, Building, Phone, Mail, Globe, MapPin, Shield } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertTriangle, Save, Clock, CheckCircle, X, Upload, Plus, Trash2, Building, Phone, Mail, Globe, MapPin, Shield, Loader2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useVersionedDraft } from '@/hooks/useVersionedDraft';
 
 const US_STATES = [
   'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware',
@@ -37,8 +39,23 @@ export const VendorProfileEditor: React.FC<VendorProfileEditorProps> = ({
 }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [pendingDraft, setPendingDraft] = useState<any>(null);
   const [currentVendor, setCurrentVendor] = useState<any>(null);
+  
+  // Use versioned draft system
+  const {
+    draftState,
+    isSaving,
+    hasUnsavedChanges,
+    showConflictBanner,
+    lastSaved,
+    saveDraft,
+    submitDraft,
+    refreshDraft
+  } = useVersionedDraft({
+    entityId: vendorId,
+    entityType: 'vendor',
+    autosaveDelay: 5000
+  });
   
   // Form state - comprehensive vendor profile data
   const [formData, setFormData] = useState({
@@ -65,14 +82,19 @@ export const VendorProfileEditor: React.FC<VendorProfileEditorProps> = ({
   const [newServiceState, setNewServiceState] = useState('');
   const [newMlsArea, setNewMlsArea] = useState('');
   const [newLicenseState, setNewLicenseState] = useState('');
-  const [changeSummary, setChangeSummary] = useState('');
 
   useEffect(() => {
     if (open) {
       loadVendorData();
-      checkPendingDraft();
     }
   }, [open, vendorId]);
+
+  // Load draft data when available
+  useEffect(() => {
+    if (draftState?.payload) {
+      setFormData(draftState.payload);
+    }
+  }, [draftState]);
 
   const loadVendorData = async () => {
     try {
@@ -111,24 +133,11 @@ export const VendorProfileEditor: React.FC<VendorProfileEditorProps> = ({
     }
   };
 
-  const checkPendingDraft = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('vendor_drafts')
-        .select('*')
-        .eq('vendor_id', vendorId)
-        .eq('status', 'pending')
-        .maybeSingle();
-
-      if (error) throw error;
-      setPendingDraft(data);
-    } catch (error) {
-      console.error('Error checking pending draft:', error);
-    }
-  };
-
   const handleInputChange = (field: string, value: string | number | string[]) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    const updatedData = { ...formData, [field]: value };
+    setFormData(updatedData);
+    // Trigger autosave
+    saveDraft(updatedData);
   };
 
   const addServiceState = () => {
@@ -217,84 +226,10 @@ export const VendorProfileEditor: React.FC<VendorProfileEditorProps> = ({
     }
   };
 
-  const handleSaveDraft = async () => {
-    try {
-      setLoading(true);
-
-      if (!changeSummary.trim()) {
-        toast({
-          title: "Change Summary Required",
-          description: "Please provide a brief summary of your changes for admin review.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Prepare draft data
-      const draftData = {
-        vendor_id: vendorId,
-        draft_data: formData,
-        change_summary: changeSummary,
-        change_type: 'update'
-      };
-
-      // Save or update draft
-      if (pendingDraft) {
-        const { error } = await supabase
-          .from('vendor_drafts')
-          .update(draftData)
-          .eq('id', pendingDraft.id);
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('vendor_drafts')
-          .insert([draftData]);
-
-        if (error) throw error;
-      }
-
-      toast({
-        title: "Changes Saved",
-        description: "Your profile changes have been submitted for admin review.",
-      });
-
-      // Check for new pending draft
-      await checkPendingDraft();
-      onSave?.();
-      
-    } catch (error) {
-      console.error('Error saving draft:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save changes. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getStatusBadge = () => {
-    if (!pendingDraft) return null;
-    
-    const statusConfig = {
-      pending: { color: 'yellow', icon: Clock, text: 'Pending Review' },
-      approved: { color: 'green', icon: CheckCircle, text: 'Approved' },
-      rejected: { color: 'red', icon: X, text: 'Rejected' }
-    };
-
-    const config = statusConfig[pendingDraft.status as keyof typeof statusConfig];
-    if (!config) return null;
-
-    const Icon = config.icon;
-    
-    return (
-      <Badge variant="outline" className={`mb-4 bg-${config.color}-50 border-${config.color}-200 text-${config.color}-700`}>
-        <Icon className="w-3 h-3 mr-1" />
-        {config.text}
-      </Badge>
-    );
+  const handleSubmitForReview = async () => {
+    await saveDraft(formData, true); // Force immediate save
+    await submitDraft();
+    onSave?.();
   };
 
   return (
@@ -303,22 +238,36 @@ export const VendorProfileEditor: React.FC<VendorProfileEditorProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Edit Vendor Profile
-            {getStatusBadge()}
+            {draftState && (
+              <Badge variant="outline">
+                v{draftState.version_number} {draftState.state === 'DRAFT' ? '(Draft)' : '(Live)'}
+              </Badge>
+            )}
+            {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
           </DialogTitle>
         </DialogHeader>
 
-        {pendingDraft?.status === 'rejected' && (
-          <Card className="border-red-200 bg-red-50">
-            <CardHeader>
-              <CardTitle className="text-red-700 flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4" />
-                Changes Rejected
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-red-600 text-sm">{pendingDraft.rejection_reason}</p>
-            </CardContent>
-          </Card>
+        {showConflictBanner && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Draft Out of Sync</AlertTitle>
+            <AlertDescription>
+              This draft has been modified elsewhere. Refresh to see latest.
+              <Button onClick={refreshDraft} size="sm" className="ml-2">
+                Refresh Now
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {draftState?.state === 'CHANGES_REQUESTED' && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Changes Requested</AlertTitle>
+            <AlertDescription>
+              Your previous submission was rejected. Please review and resubmit.
+            </AlertDescription>
+          </Alert>
         )}
 
         <div className="space-y-6">
@@ -653,30 +602,15 @@ export const VendorProfileEditor: React.FC<VendorProfileEditorProps> = ({
             </Card>
           )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Change Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Label htmlFor="changeSummary">What changes are you making?</Label>
-              <Textarea
-                id="changeSummary"
-                placeholder="Briefly describe the changes you're making to your profile..."
-                value={changeSummary}
-                onChange={(e) => setChangeSummary(e.target.value)}
-                rows={3}
-              />
-            </CardContent>
-          </Card>
         </div>
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSaveDraft} disabled={loading}>
+          <Button onClick={handleSubmitForReview} disabled={isSaving || !hasUnsavedChanges}>
             <Save className="w-4 h-4 mr-2" />
-            {loading ? 'Saving...' : 'Submit for Review'}
+            {isSaving ? 'Saving...' : 'Submit for Review'}
           </Button>
         </div>
       </DialogContent>
