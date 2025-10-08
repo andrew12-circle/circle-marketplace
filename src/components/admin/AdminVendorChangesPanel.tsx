@@ -210,6 +210,7 @@ export const AdminVendorChangesPanel: React.FC = () => {
     setReviewModalOpen(true);
   };
 
+  const getStatusBadge = (state: string) => {
     const statusConfig = {
       DRAFT: { color: 'gray', icon: Clock, text: 'Draft' },
       SUBMITTED: { color: 'yellow', icon: Clock, text: 'Submitted' },
