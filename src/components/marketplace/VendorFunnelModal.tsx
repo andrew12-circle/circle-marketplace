@@ -296,7 +296,7 @@ export const VendorFunnelModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-[90vw] lg:max-w-6xl max-h-[90vh] p-0 bg-white flex flex-col">
+      <DialogContent className="max-w-[90vw] lg:max-w-6xl max-h-[90vh] p-0 bg-white flex flex-col z-[120]">
         
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/20 hover:scrollbar-thumb-white/40">
           
