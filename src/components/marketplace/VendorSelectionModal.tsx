@@ -482,7 +482,7 @@ export const VendorSelectionModal = ({
               </div>
             )}
           </div>
-          <div className="flex items-center space-x-2 shrink-0 mr-8">
+          <div className="flex items-center space-x-2 shrink-0 mr-4">
             <Button
               variant="outline"
               size="sm"
