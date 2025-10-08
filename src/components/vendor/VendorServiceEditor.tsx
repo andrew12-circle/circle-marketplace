@@ -8,10 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useVersionedDraft } from '@/hooks/useVersionedDraft';
 import { Switch } from '@/components/ui/switch';
-import { X, Upload, Plus, Image as ImageIcon, AlertTriangle, Save, Clock, CheckCircle } from 'lucide-react';
+import { X, Upload, Plus, Image as ImageIcon, AlertTriangle, Save, Clock, CheckCircle, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import { MediaUploadGrid } from './MediaUploadGrid';
 import { ServicePricingEditor } from './ServicePricingEditor';
 
@@ -72,6 +74,29 @@ export const VendorServiceEditor: React.FC<VendorServiceEditorProps> = ({
     mediaGallery: [] as any[]
   });
 
+  // Versioned draft hook
+  const {
+    draftState,
+    isSaving,
+    hasUnsavedChanges,
+    showConflictBanner,
+    lastSaved,
+    saveDraft,
+    submitDraft,
+    refreshDraft
+  } = useVersionedDraft({
+    entityId: service?.id || '',
+    entityType: 'service',
+    autosaveDelay: 5000,
+    onConflict: () => {
+      toast({
+        title: "Draft conflict",
+        description: "This draft was modified in another session.",
+        variant: "destructive"
+      });
+    }
+  });
+
   useEffect(() => {
     if (service && open) {
       loadServiceData();
@@ -129,11 +154,27 @@ export const VendorServiceEditor: React.FC<VendorServiceEditorProps> = ({
   };
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    const newFormData = { ...formData, [field]: value };
+    setFormData(newFormData);
+    
+    // Trigger autosave
+    const newPayload = {
+      core: newFormData,
+      funnel: funnelContent
+    };
+    saveDraft(newPayload);
   };
 
   const handleFunnelChange = (field: string, value: any) => {
-    setFunnelContent(prev => ({ ...prev, [field]: value }));
+    const newFunnelContent = { ...funnelContent, [field]: value };
+    setFunnelContent(newFunnelContent);
+    
+    // Trigger autosave
+    const newPayload = {
+      core: formData,
+      funnel: newFunnelContent
+    };
+    saveDraft(newPayload);
   };
 
   const addTag = () => {
@@ -254,11 +295,58 @@ export const VendorServiceEditor: React.FC<VendorServiceEditorProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            Edit Service: {service?.title}
-            {getStatusBadge()}
+          <DialogTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span>Edit Service: {service?.title}</span>
+              <Badge variant="outline">
+                v{draftState?.version_number || 0}
+                {draftState?.state === 'DRAFT' && ' (Draft)'}
+                {draftState?.state === 'SUBMITTED' && ' (Pending Review)'}
+                {draftState?.state === 'CHANGES_REQUESTED' && ' (Changes Requested)'}
+              </Badge>
+            </div>
+            
+            <div className="flex items-center gap-3 text-sm">
+              {isSaving && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Saving...</span>
+                </div>
+              )}
+              
+              {!isSaving && lastSaved && (
+                <span className="text-muted-foreground">
+                  Saved {new Date(lastSaved).toLocaleTimeString()}
+                </span>
+              )}
+              
+              {hasUnsavedChanges && !isSaving && (
+                <span className="text-amber-600">Unsaved changes</span>
+              )}
+
+              {draftState?.state === 'DRAFT' && (
+                <Button onClick={submitDraft} disabled={hasUnsavedChanges || isSaving} size="sm">
+                  Submit for Review
+                </Button>
+              )}
+            </div>
           </DialogTitle>
         </DialogHeader>
+
+        {/* Conflict Banner */}
+        {showConflictBanner && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Draft Out of Sync</AlertTitle>
+            <AlertDescription className="flex items-center justify-between">
+              <span>This draft was modified in another session. Please refresh to see the latest version.</span>
+              <Button onClick={refreshDraft} size="sm" variant="outline" className="ml-4">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh Now
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {pendingDraft?.status === 'rejected' && (
           <Card className="border-destructive bg-destructive/5">

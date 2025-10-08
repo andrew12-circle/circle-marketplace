@@ -6250,6 +6250,47 @@ export type Database = {
         }
         Relationships: []
       }
+      moderation_actions: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          created_at: string | null
+          diff: Json | null
+          id: string
+          reason: string | null
+          target_type: string
+          target_version_id: string
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          created_at?: string | null
+          diff?: Json | null
+          id?: string
+          reason?: string | null
+          target_type: string
+          target_version_id: string
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          created_at?: string | null
+          diff?: Json | null
+          id?: string
+          reason?: string | null
+          target_type?: string
+          target_version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_actions_actor_user_id_fkey"
+            columns: ["actor_user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       monthly_platform_revenue: {
         Row: {
           average_creator_payout: number | null
@@ -8160,57 +8201,95 @@ export type Database = {
       }
       service_drafts: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           change_summary: string | null
           change_type: string
           created_at: string
           draft_data: Json
           funnel_data: Json
           id: string
+          payload: Json | null
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          row_version: number | null
           service_id: string
+          state: string | null
           status: string
+          submitted_at: string | null
+          submitted_by: string | null
           updated_at: string
           vendor_id: string
+          version_number: number | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           change_summary?: string | null
           change_type?: string
           created_at?: string
           draft_data?: Json
           funnel_data?: Json
           id?: string
+          payload?: Json | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          row_version?: number | null
           service_id: string
+          state?: string | null
           status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
           updated_at?: string
           vendor_id: string
+          version_number?: number | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           change_summary?: string | null
           change_type?: string
           created_at?: string
           draft_data?: Json
           funnel_data?: Json
           id?: string
+          payload?: Json | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          row_version?: number | null
           service_id?: string
+          state?: string | null
           status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
           updated_at?: string
           vendor_id?: string
+          version_number?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "service_drafts_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "service_drafts_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "services"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_drafts_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -8918,6 +8997,7 @@ export type Database = {
           is_sponsored: boolean | null
           is_top_pick: boolean | null
           is_verified: boolean | null
+          live_version_id: string | null
           max_split_percentage_non_ssp: number | null
           max_split_percentage_ssp: number | null
           price_duration: string | null
@@ -8994,6 +9074,7 @@ export type Database = {
           is_sponsored?: boolean | null
           is_top_pick?: boolean | null
           is_verified?: boolean | null
+          live_version_id?: string | null
           max_split_percentage_non_ssp?: number | null
           max_split_percentage_ssp?: number | null
           price_duration?: string | null
@@ -9070,6 +9151,7 @@ export type Database = {
           is_sponsored?: boolean | null
           is_top_pick?: boolean | null
           is_verified?: boolean | null
+          live_version_id?: string | null
           max_split_percentage_non_ssp?: number | null
           max_split_percentage_ssp?: number | null
           price_duration?: string | null
@@ -10645,45 +10727,83 @@ export type Database = {
       }
       vendor_drafts: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           change_summary: string | null
           change_type: string
           created_at: string
           draft_data: Json
           id: string
+          payload: Json | null
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          row_version: number | null
+          state: string | null
           status: string
+          submitted_at: string | null
+          submitted_by: string | null
           updated_at: string
           vendor_id: string
+          version_number: number | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           change_summary?: string | null
           change_type?: string
           created_at?: string
           draft_data?: Json
           id?: string
+          payload?: Json | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          row_version?: number | null
+          state?: string | null
           status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
           updated_at?: string
           vendor_id: string
+          version_number?: number | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           change_summary?: string | null
           change_type?: string
           created_at?: string
           draft_data?: Json
           id?: string
+          payload?: Json | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          row_version?: number | null
+          state?: string | null
           status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
           updated_at?: string
           vendor_id?: string
+          version_number?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "vendor_drafts_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "vendor_drafts_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "vendor_drafts_vendor_id_fkey"
             columns: ["vendor_id"]
@@ -11154,6 +11274,7 @@ export type Database = {
           is_verified: boolean | null
           latitude: number | null
           license_states: string[] | null
+          live_version_id: string | null
           location: string | null
           logo_url: string | null
           longitude: number | null
@@ -11243,6 +11364,7 @@ export type Database = {
           is_verified?: boolean | null
           latitude?: number | null
           license_states?: string[] | null
+          live_version_id?: string | null
           location?: string | null
           logo_url?: string | null
           longitude?: number | null
@@ -11332,6 +11454,7 @@ export type Database = {
           is_verified?: boolean | null
           latitude?: number | null
           license_states?: string[] | null
+          live_version_id?: string | null
           location?: string | null
           logo_url?: string | null
           longitude?: number | null
@@ -13610,6 +13733,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      save_service_draft: {
+        Args: { p_payload: Json; p_row_version?: number; p_service_id: string }
+        Returns: Json
+      }
+      save_vendor_draft: {
+        Args: { p_payload: Json; p_row_version?: number; p_vendor_id: string }
+        Returns: Json
+      }
       secure_profile_update: {
         Args: { target_user_id: string; update_data: Json }
         Returns: Json
@@ -14710,6 +14841,14 @@ export type Database = {
       start_admin_session: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      submit_service_draft: {
+        Args: { p_service_id: string }
+        Returns: Json
+      }
+      submit_vendor_draft: {
+        Args: { p_vendor_id: string }
+        Returns: Json
       }
       svc_save_core_patch: {
         Args: { p_id: string; p_patch: Json; p_version: number }
