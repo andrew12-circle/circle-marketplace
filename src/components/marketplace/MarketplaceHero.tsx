@@ -35,7 +35,7 @@ export default function MarketplaceHero({ onExploreClick }: MarketplaceHeroProps
       <img 
         src={marketplaceHeroImage} 
         alt="Agent Marketplace - Wholesale discounts on every tool you need" 
-        className="w-full h-[calc(100vh-64px)] object-cover block"
+        className="w-full h-auto block"
         loading="eager"
       />
     </section>
