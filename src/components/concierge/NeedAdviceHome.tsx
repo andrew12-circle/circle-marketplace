@@ -79,20 +79,20 @@ function Shortcut({ label, Icon, color, sectors, onClick }: ShortcutProps) {
     <motion.button
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.98 }}
-      className="flex flex-col items-center gap-3 p-4 rounded-lg hover:bg-accent/50 transition-colors"
+      className="flex flex-col items-center gap-2 sm:gap-3 p-2 sm:p-4 rounded-lg hover:bg-accent/50 transition-colors"
       aria-label={label}
       onClick={onClick}
     >
       <div
-        className={`h-14 w-14 md:h-16 md:w-16 rounded-full shadow-md grid place-items-center ${color} ring-1 ring-black/5 hover:ring-2 hover:ring-current transition`}>
-        <Icon className="h-6 w-6 md:h-7 md:w-7" aria-hidden />
+        className={`h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 rounded-full shadow-md grid place-items-center ${color} ring-1 ring-black/5 hover:ring-2 hover:ring-current transition`}>
+        <Icon className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7" aria-hidden />
       </div>
-      <div className="flex flex-col items-center gap-1.5">
-        <span className="text-sm font-semibold text-center leading-tight">
+      <div className="flex flex-col items-center gap-1">
+        <span className="text-xs sm:text-sm font-semibold text-center leading-tight">
           {label}
         </span>
         {sectors && (
-          <span className="text-xs text-muted-foreground text-center max-w-[180px] leading-snug">
+          <span className="text-[10px] sm:text-xs text-muted-foreground text-center max-w-[120px] sm:max-w-[180px] leading-snug">
             {sectors}
           </span>
         )}
@@ -287,13 +287,13 @@ export default function NeedAdviceHome() {
             Beta
           </span>
         </motion.h1>
-        <p className="mt-3 text-sm text-muted-foreground max-w-4xl text-center px-6">
+        <p className="mt-3 text-xs sm:text-sm text-muted-foreground max-w-4xl text-center px-4 sm:px-6">
           Built on real purchase data from top agents. Buy most everything at member pricing and choose what actually works. No cold calls. No spam. Clear choices you can trust. Advice you can lean on.
         </p>
       </header>
 
       {/* Search */}
-      <main className="mx-auto max-w-4xl px-6">
+      <main className="mx-auto max-w-4xl px-4 sm:px-6">
         <Card className="border-none shadow-none bg-transparent">
           <CardContent className="p-0">
             <motion.div
@@ -351,7 +351,7 @@ export default function NeedAdviceHome() {
                   hidden: { opacity: 0, y: 6 },
                   show: { opacity: 1, y: 0, transition: { staggerChildren: 0.04 } },
                 }}
-                className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-4 md:gap-6"
+                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-3 sm:gap-4 md:gap-6"
               >
                 {categories.map((c) => (
                   <motion.div
