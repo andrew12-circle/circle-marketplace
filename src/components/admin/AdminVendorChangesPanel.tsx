@@ -15,14 +15,10 @@ import {
   FileText, 
   User, 
   AlertTriangle,
-  RefreshCw,
-  History
+  RefreshCw 
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { DraftComparisonView } from './DraftComparisonView';
-import { VersionHistoryPanel } from './VersionHistoryPanel';
-import { ModerationAuditLog } from './ModerationAuditLog';
 
 interface NotificationItem {
   id: string;
@@ -60,10 +56,8 @@ export const AdminVendorChangesPanel: React.FC = () => {
   const [vendorDrafts, setVendorDrafts] = useState<DraftItem[]>([]);
   const [selectedDraft, setSelectedDraft] = useState<DraftItem | null>(null);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [reviewAction, setReviewAction] = useState<'approve' | 'reject'>('approve');
   const [rejectionReason, setRejectionReason] = useState('');
-  const [liveEntityData, setLiveEntityData] = useState<any>(null);
 
   useEffect(() => {
     loadData();
@@ -106,8 +100,7 @@ export const AdminVendorChangesPanel: React.FC = () => {
         *,
         services!inner(title, category)
       `)
-      .in('state', ['DRAFT', 'SUBMITTED', 'CHANGES_REQUESTED'])
-      .order('version_number', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
     setServiceDrafts(data || []);
@@ -120,8 +113,7 @@ export const AdminVendorChangesPanel: React.FC = () => {
         *,
         vendors!inner(name)
       `)
-      .in('state', ['DRAFT', 'SUBMITTED', 'CHANGES_REQUESTED'])
-      .order('version_number', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
     setVendorDrafts(data || []);
@@ -180,46 +172,20 @@ export const AdminVendorChangesPanel: React.FC = () => {
     }
   };
 
-
-  const openDetailModal = async (draft: DraftItem) => {
-    setSelectedDraft(draft);
-    
-    // Load live entity data for comparison
-    try {
-      const table = 'service_id' in draft ? 'services' : 'vendors';
-      const idField = 'service_id' in draft ? draft.service_id : draft.vendor_id;
-      
-      const { data, error } = await supabase
-        .from(table)
-        .select('*')
-        .eq('id', idField)
-        .single();
-      
-      if (error) throw error;
-      setLiveEntityData(data);
-    } catch (error) {
-      console.error('Error loading live entity data:', error);
-    }
-    
-    setDetailModalOpen(true);
-  };
-
   const openReviewModal = (draft: DraftItem, action: 'approve' | 'reject') => {
     setSelectedDraft(draft);
     setReviewAction(action);
     setReviewModalOpen(true);
   };
 
-  const getStatusBadge = (state: string) => {
+  const getStatusBadge = (status: string) => {
     const statusConfig = {
-      DRAFT: { color: 'gray', icon: Clock, text: 'Draft' },
-      SUBMITTED: { color: 'yellow', icon: Clock, text: 'Submitted' },
-      CHANGES_REQUESTED: { color: 'orange', icon: AlertTriangle, text: 'Changes Requested' },
-      APPROVED: { color: 'green', icon: CheckCircle, text: 'Approved' },
-      PUBLISHED: { color: 'blue', icon: CheckCircle, text: 'Published' }
+      pending: { color: 'yellow', icon: Clock, text: 'Pending' },
+      approved: { color: 'green', icon: CheckCircle, text: 'Approved' },
+      rejected: { color: 'red', icon: X, text: 'Rejected' }
     };
 
-    const config = statusConfig[state as keyof typeof statusConfig];
+    const config = statusConfig[status as keyof typeof statusConfig];
     if (!config) return null;
 
     const Icon = config.icon;
@@ -256,8 +222,8 @@ export const AdminVendorChangesPanel: React.FC = () => {
   };
 
   const unreadNotifications = notifications.filter(n => !n.read);
-  const pendingServiceDrafts = serviceDrafts.filter(d => (d as any).state === 'SUBMITTED');
-  const pendingVendorDrafts = vendorDrafts.filter(d => (d as any).state === 'SUBMITTED');
+  const pendingServiceDrafts = serviceDrafts.filter(d => d.status === 'pending');
+  const pendingVendorDrafts = vendorDrafts.filter(d => d.status === 'pending');
 
   return (
     <div className="space-y-6">
@@ -390,10 +356,7 @@ export const AdminVendorChangesPanel: React.FC = () => {
                         <h4 className="font-medium">
                           {(draft as any).services?.title || 'Service Update'}
                         </h4>
-                        {getStatusBadge((draft as any).state || draft.status)}
-                        <Badge variant="outline" className="text-xs">
-                          v{(draft as any).version_number || 1}
-                        </Badge>
+                        {getStatusBadge(draft.status)}
                       </div>
                       <p className="text-sm text-muted-foreground mb-2">
                         {draft.change_summary}
@@ -407,16 +370,8 @@ export const AdminVendorChangesPanel: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    {((draft as any).state === 'SUBMITTED' || draft.status === 'pending') && (
+                    {draft.status === 'pending' && (
                       <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => openDetailModal(draft)}
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          Review
-                        </Button>
                         <Button
                           size="sm"
                           variant="outline"
@@ -460,10 +415,7 @@ export const AdminVendorChangesPanel: React.FC = () => {
                         <h4 className="font-medium">
                           {(draft as any).vendors?.name || 'Profile Update'}
                         </h4>
-                        {getStatusBadge((draft as any).state || draft.status)}
-                        <Badge variant="outline" className="text-xs">
-                          v{(draft as any).version_number || 1}
-                        </Badge>
+                        {getStatusBadge(draft.status)}
                       </div>
                       <p className="text-sm text-muted-foreground mb-2">
                         {draft.change_summary}
@@ -477,16 +429,8 @@ export const AdminVendorChangesPanel: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    {((draft as any).state === 'SUBMITTED' || draft.status === 'pending') && (
+                    {draft.status === 'pending' && (
                       <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => openDetailModal(draft)}
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          Review
-                        </Button>
                         <Button
                           size="sm"
                           variant="outline"
@@ -562,88 +506,6 @@ export const AdminVendorChangesPanel: React.FC = () => {
             >
               {loading ? 'Processing...' : (reviewAction === 'approve' ? 'Approve' : 'Reject')}
             </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Detail Modal with Comparison View */}
-      <Dialog open={detailModalOpen} onOpenChange={setDetailModalOpen}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <History className="h-5 w-5" />
-              Review Draft Changes
-              {selectedDraft && (
-                <Badge variant="outline">
-                  v{(selectedDraft as any).version_number || 1}
-                </Badge>
-              )}
-            </DialogTitle>
-          </DialogHeader>
-
-          <Tabs defaultValue="comparison" className="mt-4">
-            <TabsList>
-              <TabsTrigger value="comparison">Side-by-Side</TabsTrigger>
-              <TabsTrigger value="history">Version History</TabsTrigger>
-              <TabsTrigger value="audit">Audit Log</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="comparison" className="mt-4">
-              {selectedDraft && liveEntityData && (
-                <DraftComparisonView
-                  liveData={liveEntityData}
-                  draftData={(selectedDraft as any).payload || (selectedDraft as any).draft_data}
-                  entityType={'service_id' in selectedDraft ? 'service' : 'vendor'}
-                />
-              )}
-            </TabsContent>
-
-            <TabsContent value="history" className="mt-4">
-              {selectedDraft && (
-                <VersionHistoryPanel
-                  entityId={('service_id' in selectedDraft ? selectedDraft.service_id : selectedDraft.vendor_id) || ''}
-                  entityType={'service_id' in selectedDraft ? 'service' : 'vendor'}
-                />
-              )}
-            </TabsContent>
-
-            <TabsContent value="audit" className="mt-4">
-              {selectedDraft && (
-                <ModerationAuditLog
-                  entityId={selectedDraft.id}
-                  entityType={'service_id' in selectedDraft ? 'service' : 'vendor'}
-                />
-              )}
-            </TabsContent>
-          </Tabs>
-
-          <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setDetailModalOpen(false)}>
-              Close
-            </Button>
-            {selectedDraft && ((selectedDraft as any).state === 'SUBMITTED' || selectedDraft.status === 'pending') && (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setDetailModalOpen(false);
-                    openReviewModal(selectedDraft, 'reject');
-                  }}
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Reject
-                </Button>
-                <Button
-                  onClick={() => {
-                    setDetailModalOpen(false);
-                    openReviewModal(selectedDraft, 'approve');
-                  }}
-                >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Approve
-                </Button>
-              </>
-            )}
           </div>
         </DialogContent>
       </Dialog>

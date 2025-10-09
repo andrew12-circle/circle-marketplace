@@ -8,95 +8,49 @@ import {
   MicOff,
   Send,
   PhoneCall,
-  Database,
-  Megaphone,
-  Sparkles,
-  GraduationCap,
-  BadgeCheck,
-  TrendingUp,
-  ShoppingCart,
+  Home,
+  Briefcase,
+  Heart,
+  Users,
+  Zap,
   Brain,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { ConsultationBookingModal } from "@/components/marketplace/ConsultationBookingModal";
 
 const categories = [
-  { 
-    label: "CRM", 
-    icon: Database, 
-    color: "bg-sky-100 text-sky-600",
-    sectors: "Customer Management"
-  },
-  { 
-    label: "Marketing Tools", 
-    icon: Megaphone, 
-    color: "bg-pink-100 text-pink-600",
-    sectors: "Marketing & Advertising"
-  },
-  { 
-    label: "Lead Generation", 
-    icon: Sparkles, 
-    color: "bg-purple-100 text-purple-600",
-    sectors: "Lead & Prospecting Tools"
-  },
-  { 
-    label: "Real Estate Schools", 
-    icon: GraduationCap, 
-    color: "bg-green-100 text-green-600",
-    sectors: "Education & Training"
-  },
-  { 
-    label: "Licensing", 
-    icon: BadgeCheck, 
-    color: "bg-orange-100 text-orange-600",
-    sectors: "Licensing & Compliance"
-  },
-  { 
-    label: "Coaching", 
-    icon: TrendingUp, 
-    color: "bg-blue-100 text-blue-600",
-    sectors: "Coaching & Mentorship"
-  },
-  { 
-    label: "Marketplace", 
-    icon: ShoppingCart, 
-    color: "bg-yellow-100 text-yellow-600",
-    sectors: "Browse All Services"
-  },
+  { label: "Home & Property", icon: Home, color: "bg-sky-100 text-sky-600" },
+  { label: "Business & Professional", icon: Briefcase, color: "bg-pink-100 text-pink-600" },
+  { label: "Healthcare & Wellness", icon: Heart, color: "bg-purple-100 text-purple-600" },
+  { label: "Community & Lifestyle", icon: Users, color: "bg-green-100 text-green-600" },
+  { label: "Growth & Emerging", icon: Zap, color: "bg-orange-100 text-orange-600" },
 ];
 
 interface ShortcutProps {
   label: string;
   Icon: React.ComponentType<{ className?: string }>;
   color: string;
-  sectors?: string;
   onClick: () => void;
 }
 
-function Shortcut({ label, Icon, color, sectors, onClick }: ShortcutProps) {
+function Shortcut({ label, Icon, color, onClick }: ShortcutProps) {
   return (
     <motion.button
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.98 }}
-      className="flex flex-col items-center gap-3 p-4 rounded-lg hover:bg-accent/50 transition-colors"
+      className="flex flex-col items-center gap-2"
       aria-label={label}
       onClick={onClick}
     >
       <div
-        className={`h-14 w-14 md:h-16 md:w-16 rounded-full shadow-md grid place-items-center ${color} ring-1 ring-black/5 hover:ring-2 hover:ring-current transition`}>
-        <Icon className="h-6 w-6 md:h-7 md:w-7" aria-hidden />
+        className={`h-12 w-12 md:h-16 md:w-16 rounded-full shadow-md grid place-items-center ${color} ring-1 ring-black/5 hover:ring-2 hover:ring-current transition`}>
+        <Icon className="h-5 w-5 md:h-7 md:w-7" aria-hidden />
       </div>
-      <div className="flex flex-col items-center gap-1.5">
-        <span className="text-sm font-semibold text-center leading-tight">
-          {label}
-        </span>
-        {sectors && (
-          <span className="text-xs text-muted-foreground text-center max-w-[180px] leading-snug">
-            {sectors}
-          </span>
-        )}
-      </div>
+      <span className="text-sm font-medium text-center max-w-[8rem] leading-tight">
+        {label}
+      </span>
     </motion.button>
   );
 }
@@ -351,7 +305,7 @@ export default function NeedAdviceHome() {
                   hidden: { opacity: 0, y: 6 },
                   show: { opacity: 1, y: 0, transition: { staggerChildren: 0.04 } },
                 }}
-                className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-4 md:gap-6"
+                className="grid grid-cols-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-y-10 gap-x-6 justify-items-center"
               >
                 {categories.map((c) => (
                   <motion.div
@@ -362,7 +316,6 @@ export default function NeedAdviceHome() {
                       label={c.label}
                       Icon={c.icon}
                       color={c.color}
-                      sectors={c.sectors}
                       onClick={() => startConversation(c.label)}
                     />
                   </motion.div>
