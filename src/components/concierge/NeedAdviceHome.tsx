@@ -79,20 +79,20 @@ function Shortcut({ label, Icon, color, sectors, onClick }: ShortcutProps) {
     <motion.button
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.98 }}
-      className="flex flex-col items-center gap-2 sm:gap-3 p-2 sm:p-4 rounded-lg hover:bg-accent/50 transition-colors"
+      className="flex flex-col items-center gap-1 sm:gap-3 p-1 sm:p-4 rounded-lg hover:bg-accent/50 transition-colors"
       aria-label={label}
       onClick={onClick}
     >
       <div
-        className={`h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 rounded-full shadow-md grid place-items-center ${color} ring-1 ring-black/5 hover:ring-2 hover:ring-current transition`}>
-        <Icon className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7" aria-hidden />
+        className={`h-10 w-10 sm:h-14 sm:w-14 md:h-16 md:w-16 rounded-full shadow-sm grid place-items-center ${color} ring-1 ring-black/5 hover:ring-2 hover:ring-current transition`}>
+        <Icon className="h-4 w-4 sm:h-6 sm:w-6 md:h-7 md:w-7" aria-hidden />
       </div>
-      <div className="flex flex-col items-center gap-1">
-        <span className="text-xs sm:text-sm font-semibold text-center leading-tight">
+      <div className="flex flex-col items-center gap-0.5">
+        <span className="text-[10px] sm:text-sm font-semibold text-center leading-tight">
           {label}
         </span>
         {sectors && (
-          <span className="text-[10px] sm:text-xs text-muted-foreground text-center max-w-[120px] sm:max-w-[180px] leading-snug">
+          <span className="hidden sm:block text-xs text-muted-foreground text-center max-w-[180px] leading-snug">
             {sectors}
           </span>
         )}
