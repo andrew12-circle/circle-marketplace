@@ -31,15 +31,13 @@ export default function MarketplaceHero({ onExploreClick }: MarketplaceHeroProps
   };
 
   return (
-    <section className="bg-gradient-to-br from-gray-50 to-white py-8 sm:py-12 px-4 sm:px-6">
-      <div className="max-w-7xl mx-auto">
-        <img 
-          src={marketplaceHeroImage} 
-          alt="Agent Marketplace - Wholesale discounts on every tool you need" 
-          className="w-full h-auto"
-          loading="eager"
-        />
-      </div>
+    <section className="w-full">
+      <img 
+        src={marketplaceHeroImage} 
+        alt="Agent Marketplace - Wholesale discounts on every tool you need" 
+        className="w-full h-auto block"
+        loading="eager"
+      />
     </section>
   )
 }
