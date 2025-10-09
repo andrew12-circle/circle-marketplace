@@ -181,7 +181,7 @@ const Index = () => {
         {/* Main Content */}
         <main>
           {/* Onboarding Resume Banner */}
-          <div className="container mx-auto px-3 sm:px-4 pt-6">
+          <div className="container mx-auto">
             <OnboardingResumeBanner />
           </div>
           
