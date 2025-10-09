@@ -705,7 +705,7 @@ export const MarketplaceGrid = () => {
   return (
     <>
       <div className="min-h-screen bg-background" data-testid="marketplace-grid">
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        <div className="container mx-auto px-3 sm:px-4 pb-4 sm:pb-8">
           {/* QA Mode Indicator and Controls */}
           {isQAMode && (
             <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
