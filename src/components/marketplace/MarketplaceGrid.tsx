@@ -705,10 +705,7 @@ export const MarketplaceGrid = () => {
   return (
     <>
       <div className="min-h-screen bg-background" data-testid="marketplace-grid">
-        {/* Hero Section - Full Width */}
-        <MarketplaceHero onExploreClick={scrollToServicesGrid} />
-        
-        <div className="container mx-auto pb-4 sm:pb-8">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
           {/* QA Mode Indicator and Controls */}
           {isQAMode && (
             <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
@@ -736,6 +733,9 @@ export const MarketplaceGrid = () => {
               onRecoveryComplete={handleRecoveryComplete}
             />
           )}
+
+          {/* Hero Section */}
+          <MarketplaceHero onExploreClick={scrollToServicesGrid} />
           
           {/* QA Diagnostics in Hero when in QA mode */}
           {isQAMode && (

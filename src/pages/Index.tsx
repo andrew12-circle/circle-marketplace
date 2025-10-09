@@ -181,7 +181,9 @@ const Index = () => {
         {/* Main Content */}
         <main>
           {/* Onboarding Resume Banner */}
-          <OnboardingResumeBanner />
+          <div className="container mx-auto px-3 sm:px-4 pt-6">
+            <OnboardingResumeBanner />
+          </div>
           
           
           <Marketplace />
