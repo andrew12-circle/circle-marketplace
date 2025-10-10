@@ -40,15 +40,15 @@ function Shortcut({ label, Icon, color, onClick }: ShortcutProps) {
     <motion.button
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.98 }}
-      className="flex flex-col items-center gap-3"
+      className="flex flex-col items-center gap-2"
       aria-label={label}
       onClick={onClick}
     >
       <div
-        className={`h-16 w-16 md:h-20 md:w-20 rounded-full shadow-md grid place-items-center ${color} ring-1 ring-black/5 hover:ring-2 hover:ring-current transition`}>
-        <Icon className="h-7 w-7 md:h-9 md:w-9" aria-hidden />
+        className={`h-14 w-14 rounded-full shadow-md grid place-items-center ${color} ring-1 ring-black/5 hover:ring-2 hover:ring-current transition`}>
+        <Icon className="h-6 w-6" aria-hidden />
       </div>
-      <span className="text-sm md:text-base font-medium text-center max-w-[9rem] leading-tight">
+      <span className="text-xs font-medium text-center max-w-[5rem] leading-tight">
         {label}
       </span>
     </motion.button>
