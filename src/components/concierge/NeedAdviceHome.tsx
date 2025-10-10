@@ -21,12 +21,13 @@ import { useToast } from "@/hooks/use-toast";
 import { ConsultationBookingModal } from "@/components/marketplace/ConsultationBookingModal";
 
 const categories = [
+  { label: "CRM", icon: Home, color: "bg-blue-100 text-blue-600" },
   { label: "Marketing Tools", icon: Briefcase, color: "bg-sky-100 text-sky-600" },
   { label: "Lead Generation", icon: Sparkles, color: "bg-pink-100 text-pink-600" },
   { label: "Real Estate Schools", icon: Brain, color: "bg-green-100 text-green-600" },
   { label: "Licensing", icon: Zap, color: "bg-orange-100 text-orange-600" },
   { label: "Coaching", icon: Users, color: "bg-purple-100 text-purple-600" },
-  { label: "Marketplace", icon: Home, color: "bg-yellow-100 text-yellow-600" },
+  { label: "Marketplace", icon: Heart, color: "bg-yellow-100 text-yellow-600" },
 ];
 
 interface ShortcutProps {
