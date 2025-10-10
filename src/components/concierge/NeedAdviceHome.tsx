@@ -299,7 +299,7 @@ export default function NeedAdviceHome() {
             </div>
 
             {/* Shortcuts row */}
-            <section className="mt-10 overflow-x-auto pb-4">
+            <section className="mt-10 overflow-x-auto pb-4 pt-2">
               <motion.div
                 initial="hidden"
                 animate="show"
@@ -307,7 +307,7 @@ export default function NeedAdviceHome() {
                   hidden: { opacity: 0, y: 6 },
                   show: { opacity: 1, y: 0, transition: { staggerChildren: 0.04 } },
                 }}
-                className="flex gap-6 justify-center min-w-max px-4"
+                className="flex gap-8 justify-center min-w-max px-4"
               >
                 {categories.map((c) => (
                   <motion.div
