@@ -32,7 +32,7 @@ export default function MarketplaceHero({ onExploreClick }: MarketplaceHeroProps
   };
 
   return (
-    <section className="bg-gradient-to-br from-gray-50 to-white py-8 sm:py-20 px-4 sm:px-6 text-center">
+    <section className="bg-background py-8 sm:py-20 px-4 sm:px-6 text-center">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl sm:text-6xl font-bold tracking-tight mb-3 sm:mb-4 max-w-xs sm:max-w-none mx-auto leading-tight sm:leading-none -mt-4 sm:mt-0">
           {t('heroTitle')}<br />
