@@ -31,72 +31,108 @@ export default function MarketplaceHero({ onExploreClick }: MarketplaceHeroProps
     }
   };
 
+  const handleCreateAccount = () => {
+    navigate('/pricing');
+  };
+
   return (
-    <section className="bg-background py-8 sm:py-20 px-4 sm:px-6 text-center">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl sm:text-6xl font-bold tracking-tight mb-3 sm:mb-4 max-w-xs sm:max-w-none mx-auto leading-tight sm:leading-none -mt-4 sm:mt-0">
-          {t('heroTitle')}<br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500">{t('heroSubtitle')}</span>
-        </h1>
-        <p className="text-sm sm:text-lg text-gray-600 mb-6 sm:mb-8 max-w-sm sm:max-w-none mx-auto leading-relaxed">
-          {t('heroDescription')}
-        </p>
+    <section className="bg-background py-12 sm:py-20 px-4 sm:px-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Three Column Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-center mb-16">
+          
+          {/* Left Column - Text Content */}
+          <div className="text-left space-y-6">
+            <div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight mb-4">
+                Find the perfect service for your real estate business
+              </h1>
+              <p className="text-lg sm:text-xl text-primary font-semibold mb-2">
+                Wholesale discounts
+              </p>
+              <p className="text-muted-foreground text-base sm:text-lg">
+                Every tool you need—faster, cheaper, without the awkward sales calls.
+              </p>
+            </div>
+            <Button
+              onClick={handleCreateAccount}
+              size="lg"
+              className="text-base px-8 py-6"
+            >
+              Create Free Account
+            </Button>
+          </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-10">
-          <Card className="rounded-2xl shadow-sm">
-            <CardContent className="flex flex-col items-center p-4 sm:p-6">
-              <Percent className="w-6 h-6 sm:w-8 sm:h-8 text-green-500 mb-2" />
-              <p className="text-xs sm:text-sm font-medium">Save up to 80% on EVERYTHING to power your business at wholesale pricing</p>
-            </CardContent>
-          </Card>
+          {/* Center Column - Visual Mockup */}
+          <div className="relative">
+            <div className="relative mx-auto max-w-md lg:max-w-none">
+              {/* Laptop Frame */}
+              <div className="relative rounded-lg border-4 border-border bg-muted/20 shadow-2xl overflow-hidden aspect-[4/3]">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5 flex items-center justify-center">
+                  <div className="text-center space-y-4 p-8">
+                    <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-2xl">🏢</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Marketplace Preview</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-          <Card className="rounded-2xl shadow-sm">
-            <CardContent className="flex flex-col items-center p-4 sm:p-6">
-              <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 mb-2" />
-              <p className="text-xs sm:text-sm font-medium">Agent Advice backed by nationwide data on what top realtors use</p>
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-2xl shadow-sm">
-            <CardContent className="flex flex-col items-center p-4 sm:p-6">
-              <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-purple-500 mb-2" />
-              <p className="text-xs sm:text-sm font-medium">Vendors lined up ready to help cover up to 50% of your costs</p>
-            </CardContent>
-          </Card>
+          {/* Right Column - Benefits */}
+          <div className="space-y-8">
+            <div className="flex gap-4">
+              <div className="text-4xl font-bold text-primary flex-shrink-0">01</div>
+              <div>
+                <p className="text-sm sm:text-base">
+                  Save up to 80% on everything to power your business
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <div className="text-4xl font-bold text-primary flex-shrink-0">02</div>
+              <div>
+                <p className="text-sm sm:text-base">
+                  Agent advice backed by nationwide data on what top realtors use
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <div className="text-4xl font-bold text-primary flex-shrink-0">03</div>
+              <div>
+                <p className="text-sm sm:text-base">
+                  Vendors lined up ready to help cover up to 50% of your costs
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
-          <Button 
-            size="default" 
-            className="bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-md sm:text-base text-sm"
+        {/* Bottom Section - Trust Bar */}
+        <div className="text-center space-y-6">
+          <p className="text-sm text-muted-foreground font-medium">
+            Interviewed 700+ agents and counting
+          </p>
+          
+          {/* Media Logos */}
+          <div className="flex justify-center">
+            <img 
+              src="https://storage.googleapis.com/msgsndr/UjxJODh2Df0UKjTnKpcP/media/6879b4f857dd60a40d8545af.png" 
+              alt="As Seen On Media Bar" 
+              className="max-h-[60px] w-auto opacity-60"
+              loading="lazy"
+            />
+          </div>
+
+          {/* Scroll Down Arrow */}
+          <button
             onClick={handleExploreClick}
+            className="mx-auto w-10 h-10 rounded-full border-2 border-primary/20 flex items-center justify-center hover:bg-primary/5 transition-colors"
+            aria-label="Scroll to marketplace"
           >
-            {t('exploreMarketplace')}
-          </Button>
-          <Button 
-            size="default" 
-            variant="outline" 
-            className="rounded-2xl sm:text-base text-sm"
-            onClick={() => navigate('/pricing')}
-          >
-            Create Free Account
-          </Button>
-        </div>
-
-        <p className="mt-4 sm:mt-6 text-xs sm:text-sm text-gray-400 italic">
-          {t('trustedByAgents')}
-        </p>
-      </div>
-      
-      {/* Media Logos */}
-      <div className="max-w-6xl mx-auto px-6 py-6">
-        <div className="flex justify-center">
-          <img 
-            src="https://storage.googleapis.com/msgsndr/UjxJODh2Df0UKjTnKpcP/media/6879b4f857dd60a40d8545af.png" 
-            alt="As Seen On Media Bar" 
-            className="max-h-[60px] w-auto"
-            loading="lazy"
-          />
+            <span className="text-primary text-xl">↓</span>
+          </button>
         </div>
       </div>
     </section>
