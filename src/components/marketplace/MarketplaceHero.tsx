@@ -191,7 +191,7 @@ export default function MarketplaceHero({
                 </div>
               </div>
               <div>
-                <p className="text-sm sm:text-base font-medium">Vendors lined up ready to build new relationships & reduce your costs</p>
+                <p className="text-sm sm:text-base font-medium">Trusted vendors are ready — lenders, title, insurance, and more — or add your own partner with one click.</p>
               </div>
             </div>
           </motion.div>
