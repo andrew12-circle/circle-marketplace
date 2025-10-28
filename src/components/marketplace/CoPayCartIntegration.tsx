@@ -67,7 +67,7 @@ export const CoPayCartIntegration = ({ cartItems, totalAmount, onCheckout }: CoP
       
       toast({
         title: "Checkout Successful! 🎉",
-        description: `You saved $${totalCoPaySavings.toFixed(2)} with co-pay assistance!`,
+        description: `You saved $${totalCoPaySavings.toFixed(2)} with Circle Match assistance!`,
       });
     } catch (error) {
       console.error('Checkout error:', error);
@@ -92,8 +92,8 @@ export const CoPayCartIntegration = ({ cartItems, totalAmount, onCheckout }: CoP
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">No Co-Pay Assistance Available</p>
-              <p className="text-sm text-gray-600">No approved co-pay requests for these services.</p>
+              <p className="font-medium">No Circle Match Assistance Available</p>
+              <p className="text-sm text-gray-600">No approved Circle Match requests for these services.</p>
             </div>
             <div className="space-y-2">
               {facilitatorCheckoutEnabled && cartItems.length === 1 && (
@@ -125,7 +125,7 @@ export const CoPayCartIntegration = ({ cartItems, totalAmount, onCheckout }: CoP
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-green-800">
             <CheckCircle className="w-5 h-5" />
-            Co-Pay Assistance Available
+            Circle Match Assistance Available
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -156,7 +156,7 @@ export const CoPayCartIntegration = ({ cartItems, totalAmount, onCheckout }: CoP
           <div className="border-t pt-3 mt-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-gray-900">Total Co-Pay Savings</p>
+                <p className="font-medium text-gray-900">Total Circle Match Savings</p>
                 <p className="text-sm text-gray-600">Applied to your cart</p>
               </div>
               <p className="text-xl font-bold text-green-600">
@@ -176,7 +176,7 @@ export const CoPayCartIntegration = ({ cartItems, totalAmount, onCheckout }: CoP
               <span>${totalAmount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm text-green-600">
-              <span>Co-Pay Assistance:</span>
+              <span>Circle Match Assistance:</span>
               <span>-${totalCoPaySavings.toFixed(2)}</span>
             </div>
             <div className="flex justify-between font-bold text-lg border-t pt-2">
@@ -192,7 +192,7 @@ export const CoPayCartIntegration = ({ cartItems, totalAmount, onCheckout }: CoP
             size="lg"
           >
             <DollarSign className="w-4 h-4 mr-2" />
-            {isProcessing ? 'Processing...' : `Checkout with Co-Pay (Save $${totalCoPaySavings.toFixed(2)})`}
+            {isProcessing ? 'Processing...' : `Checkout with Circle Match (Save $${totalCoPaySavings.toFixed(2)})`}
           </Button>
 
           {facilitatorCheckoutEnabled && cartItems.length === 1 && (
@@ -208,7 +208,7 @@ export const CoPayCartIntegration = ({ cartItems, totalAmount, onCheckout }: CoP
           )}
           
           <p className="text-xs text-center text-gray-500 mt-2">
-            Your approved co-pay assistance will be automatically applied
+            Your approved Circle Match assistance will be automatically applied
           </p>
         </CardContent>
       </Card>

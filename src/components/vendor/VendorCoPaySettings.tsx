@@ -89,7 +89,7 @@ export const VendorCoPaySettings = ({ vendorId }: { vendorId: string }) => {
       console.error('Error loading settings:', error);
       toast({
         title: "Error",
-        description: "Failed to load co-pay settings",
+        description: "Failed to load Circle Match settings",
         variant: "destructive",
       });
     } finally {
@@ -124,13 +124,13 @@ export const VendorCoPaySettings = ({ vendorId }: { vendorId: string }) => {
 
       toast({
         title: "Settings Saved! ✅",
-        description: "Your co-pay rules have been updated successfully.",
+        description: "Your Circle Match rules have been updated successfully.",
       });
     } catch (error) {
       console.error('Error saving settings:', error);
       toast({
         title: "Error",
-        description: "Failed to save co-pay settings",
+        description: "Failed to save Circle Match settings",
         variant: "destructive",
       });
     } finally {
@@ -152,15 +152,15 @@ export const VendorCoPaySettings = ({ vendorId }: { vendorId: string }) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Settings className="w-5 h-5" />
-          Co-Pay Rules & Settings
+          Circle Match Rules & Settings
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Active Toggle */}
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <Label className="text-base font-medium">Accept Co-Pay Requests</Label>
-            <p className="text-sm text-gray-600">Allow agents to request co-payment assistance for your services</p>
+            <Label className="text-base font-medium">Accept Circle Match Requests</Label>
+            <p className="text-sm text-gray-600">Allow agents to request Circle Match assistance for your services</p>
           </div>
           <Switch
             checked={settings.is_active}
@@ -182,7 +182,7 @@ export const VendorCoPaySettings = ({ vendorId }: { vendorId: string }) => {
                 <div>
                   <h4 className="font-medium text-blue-900">Custom RESPA Limit Set</h4>
                   <p className="text-sm text-blue-800">
-                    Your maximum co-pay coverage has been set to {maxAllowed}% based on your specific service categories and RESPA compliance requirements.
+                    Your maximum Circle Match coverage has been set to {maxAllowed}% based on your specific service categories and RESPA compliance requirements.
                   </p>
                   {vendorProfile.respa_notes && (
                     <p className="text-xs text-blue-700 mt-1 italic">
@@ -208,7 +208,7 @@ export const VendorCoPaySettings = ({ vendorId }: { vendorId: string }) => {
                 <div>
                   <h4 className="font-medium text-amber-900">RESPA Compliance Notice</h4>
                   <p className="text-sm text-amber-800">
-                    As a settlement service provider, your maximum co-pay coverage is limited to {maxAllowed}% 
+                    As a settlement service provider, your maximum Circle Match coverage is limited to {maxAllowed}% 
                     to comply with RESPA regulations. This helps ensure all arrangements are for true advertising value only.
                   </p>
                 </div>
@@ -223,7 +223,7 @@ export const VendorCoPaySettings = ({ vendorId }: { vendorId: string }) => {
                 <div>
                   <h4 className="font-medium text-green-900">Non-RESPA Service</h4>
                   <p className="text-sm text-green-800">
-                    Your service type is not subject to RESPA restrictions, allowing for flexible co-pay arrangements up to 100%.
+                    Your service type is not subject to RESPA restrictions, allowing for flexible Circle Match arrangements up to 100%.
                   </p>
                 </div>
               </div>
@@ -285,7 +285,7 @@ export const VendorCoPaySettings = ({ vendorId }: { vendorId: string }) => {
                 <Percent className="w-4 h-4 absolute right-3 top-3 text-gray-400" />
               </div>
               <p className="text-xs text-gray-500">
-                Maximum co-pay percentage you'll accept (limit: {getMaxAllowedPercentage()}% based on service type)
+                Maximum Circle Match percentage you'll accept (limit: {getMaxAllowedPercentage()}% based on service type)
               </p>
             </div>
           </div>
@@ -326,12 +326,12 @@ export const VendorCoPaySettings = ({ vendorId }: { vendorId: string }) => {
         {/* Rule Summary */}
         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
           <h4 className="font-medium text-blue-900 mb-2">Current Rules Summary</h4>
-          <div className="space-y-1 text-sm text-blue-800">
+            <div className="space-y-1 text-sm text-blue-800">
             <div className="flex items-center gap-2">
               <Badge variant={settings.is_active ? "default" : "secondary"}>
                 {settings.is_active ? "Active" : "Inactive"}
               </Badge>
-              <span>Co-pay requests are {settings.is_active ? "enabled" : "disabled"}</span>
+              <span>Circle Match requests are {settings.is_active ? "enabled" : "disabled"}</span>
             </div>
             {settings.is_active && (
               <>

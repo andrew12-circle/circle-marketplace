@@ -107,7 +107,7 @@ export const CoPayRequestsManager = () => {
       console.error('Error fetching co-pay requests:', error);
       toast({
         title: "Error",
-        description: "Failed to load co-pay requests",
+        description: "Failed to load Circle Match requests",
         variant: "destructive"
       });
     } finally {
@@ -139,8 +139,8 @@ export const CoPayRequestsManager = () => {
       toast({
         title: action === 'approved' ? "Request Approved! ✅" : "Request Denied",
         description: action === 'approved' 
-          ? `Co-pay request approved with ${splitPercentage || 'original'}% split. Now pending compliance review.`
-          : "Co-pay request has been denied",
+          ? `Circle Match request approved with ${splitPercentage || 'original'}% split. Now pending compliance review.`
+          : "Circle Match request has been denied",
         variant: action === 'approved' ? "default" : "destructive"
       });
 
@@ -152,7 +152,7 @@ export const CoPayRequestsManager = () => {
       console.error('Error updating co-pay request:', error);
       toast({
         title: "Error",
-        description: "Failed to update co-pay request",
+        description: "Failed to update Circle Match request",
         variant: "destructive"
       });
     } finally {
@@ -211,8 +211,8 @@ export const CoPayRequestsManager = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Co-Pay Requests</h2>
-          <p className="text-gray-600">Manage agent co-payment requests for your services</p>
+          <h2 className="text-2xl font-bold text-gray-900">Circle Match Requests</h2>
+          <p className="text-gray-600">Manage agent Circle Match requests for your services</p>
         </div>
         <Badge variant="outline" className="px-3 py-1">
           {pendingRequests.length} Pending
@@ -267,7 +267,7 @@ export const CoPayRequestsManager = () => {
                     <div className="text-lg font-bold text-green-600">
                       ${calculateCoPayAmount(request.service?.retail_price || '0', request.requested_split_percentage)}
                     </div>
-                    <div className="text-sm text-gray-500">Co-pay amount</div>
+                    <div className="text-sm text-gray-500">Circle Match amount</div>
                     <Badge className={`mt-2 ${getStatusColor(request.status)}`}>
                       {getStatusIcon(request.status)}
                       <span className="ml-1 capitalize">{request.status}</span>
@@ -285,8 +285,8 @@ export const CoPayRequestsManager = () => {
         <Card className="text-center py-12">
           <CardContent>
             <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Co-Pay Requests</h3>
-            <p className="text-gray-600">When agents request co-pay assistance, they'll appear here for your review.</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Circle Match Requests</h3>
+            <p className="text-gray-600">When agents request Circle Match assistance, they'll appear here for your review.</p>
           </CardContent>
         </Card>
       )}
@@ -297,7 +297,7 @@ export const CoPayRequestsManager = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <User className="w-5 h-5" />
-              Co-Pay Request Details
+              Circle Match Request Details
             </DialogTitle>
           </DialogHeader>
           
@@ -341,7 +341,7 @@ export const CoPayRequestsManager = () => {
                   <p className="text-gray-900">${selectedRequest.service?.retail_price}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Co-Pay Amount</label>
+                  <label className="text-sm font-medium text-gray-700">Circle Match Amount</label>
                   <p className="text-green-600 font-semibold">
                     ${calculateCoPayAmount(selectedRequest.service?.retail_price || '0', editingSplitPercentage)}
                   </p>

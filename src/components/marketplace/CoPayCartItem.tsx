@@ -142,7 +142,7 @@ export const CoPayCartItem = ({
               <div className="flex items-center gap-2 mb-2">
                 <User className="w-3 h-3 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">
-                  Co-pay partner: {item.vendor.name}
+                  Circle Match partner: {item.vendor.name}
                 </span>
               </div>
             )}
@@ -150,7 +150,7 @@ export const CoPayCartItem = ({
             {/* Pricing Info */}
             <div className="space-y-1 mb-2">
               <div className="text-xs">
-                <span className="text-muted-foreground">Your co-pay: </span>
+                <span className="text-muted-foreground">Your Circle Match: </span>
                 <span className="font-semibold text-green-600">
                   ${item.co_pay_amount.toFixed(2)}
                 </span>

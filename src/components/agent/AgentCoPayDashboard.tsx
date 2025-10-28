@@ -99,7 +99,7 @@ export const AgentCoPayDashboard = () => {
               <CardContent className="p-8 text-center">
                 <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">No Pending Requests</h3>
-                <p className="text-gray-600">All your co-pay requests have been processed.</p>
+                <p className="text-gray-600">All your Circle Match requests have been processed.</p>
               </CardContent>
             </Card>
           ) : (
@@ -115,7 +115,7 @@ export const AgentCoPayDashboard = () => {
               <CardContent className="p-8 text-center">
                 <CheckCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">No Approved Requests</h3>
-                <p className="text-gray-600">You don't have any approved co-pay requests yet.</p>
+                <p className="text-gray-600">You don't have any approved Circle Match requests yet.</p>
               </CardContent>
             </Card>
           ) : (
@@ -130,8 +130,8 @@ export const AgentCoPayDashboard = () => {
             <Card>
               <CardContent className="p-8 text-center">
                 <DollarSign className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Co-Pay Requests</h3>
-                <p className="text-gray-600">You haven't made any co-pay requests yet.</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Circle Match Requests</h3>
+                <p className="text-gray-600">You haven't made any Circle Match requests yet.</p>
               </CardContent>
             </Card>
           ) : (
@@ -222,7 +222,7 @@ const RequestCard = ({ request, onRemove }: RequestCardProps) => {
               <div className="text-lg font-bold text-green-600">
                 ${calculateCoPayAmount(request.services?.retail_price || '0', request.requested_split_percentage)}
               </div>
-              <div className="text-sm text-gray-500">Co-pay amount</div>
+              <div className="text-sm text-gray-500">Circle Match amount</div>
             </div>
             {onRemove && (
               <Button
