@@ -1,24 +1,27 @@
-import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
-import { useAuth } from "@/contexts/AuthContext"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { CheckCircle, Percent, DollarSign } from "lucide-react"
-
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { CheckCircle, Percent, DollarSign } from "lucide-react";
 interface MarketplaceHeroProps {
   onExploreClick?: () => void;
 }
-
-export default function MarketplaceHero({ onExploreClick }: MarketplaceHeroProps) {
-  const { t } = useTranslation();
+export default function MarketplaceHero({
+  onExploreClick
+}: MarketplaceHeroProps) {
+  const {
+    t
+  } = useTranslation();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  
+  const {
+    user
+  } = useAuth();
+
   // Don't show hero section if user is logged in
   if (user) {
     return null;
   }
-  
   const handleExploreClick = () => {
     if (onExploreClick) {
       onExploreClick();
@@ -26,17 +29,17 @@ export default function MarketplaceHero({ onExploreClick }: MarketplaceHeroProps
       // Default scroll behavior if no callback provided
       const servicesGrid = document.getElementById('services-grid');
       if (servicesGrid) {
-        servicesGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        servicesGrid.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
       }
     }
   };
-
   const handleCreateAccount = () => {
     navigate('/pricing');
   };
-
-  return (
-    <section className="bg-background py-12 sm:py-20 px-4 sm:px-6">
+  return <section className="bg-background py-12 sm:py-20 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
         {/* Three Column Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-center mb-16">
@@ -44,9 +47,7 @@ export default function MarketplaceHero({ onExploreClick }: MarketplaceHeroProps
           {/* Left Column - Text Content */}
           <div className="text-left space-y-6">
             <div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight mb-4">
-                Find the perfect service for your real estate business
-              </h1>
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight mb-4 lg:text-3xl">Find the perfect tool for your real estate business</h1>
               <p className="text-lg sm:text-xl text-primary font-semibold mb-2">
                 Wholesale discounts
               </p>
@@ -54,11 +55,7 @@ export default function MarketplaceHero({ onExploreClick }: MarketplaceHeroProps
                 Every tool you need—faster, cheaper, without the awkward sales calls.
               </p>
             </div>
-            <Button
-              onClick={handleCreateAccount}
-              size="lg"
-              className="text-base px-8 py-6"
-            >
+            <Button onClick={handleCreateAccount} size="lg" className="text-base px-8 py-6">
               Create Free Account
             </Button>
           </div>
@@ -117,24 +114,14 @@ export default function MarketplaceHero({ onExploreClick }: MarketplaceHeroProps
           
           {/* Media Logos */}
           <div className="flex justify-center">
-            <img 
-              src="https://storage.googleapis.com/msgsndr/UjxJODh2Df0UKjTnKpcP/media/6879b4f857dd60a40d8545af.png" 
-              alt="As Seen On Media Bar" 
-              className="max-h-[60px] w-auto opacity-60"
-              loading="lazy"
-            />
+            <img src="https://storage.googleapis.com/msgsndr/UjxJODh2Df0UKjTnKpcP/media/6879b4f857dd60a40d8545af.png" alt="As Seen On Media Bar" className="max-h-[60px] w-auto opacity-60" loading="lazy" />
           </div>
 
           {/* Scroll Down Arrow */}
-          <button
-            onClick={handleExploreClick}
-            className="mx-auto w-10 h-10 rounded-full border-2 border-primary/20 flex items-center justify-center hover:bg-primary/5 transition-colors"
-            aria-label="Scroll to marketplace"
-          >
+          <button onClick={handleExploreClick} className="mx-auto w-10 h-10 rounded-full border-2 border-primary/20 flex items-center justify-center hover:bg-primary/5 transition-colors" aria-label="Scroll to marketplace">
             <span className="text-primary text-xl">↓</span>
           </button>
         </div>
       </div>
-    </section>
-  )
+    </section>;
 }
