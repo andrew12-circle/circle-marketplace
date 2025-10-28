@@ -194,19 +194,6 @@ export default function MarketplaceHero({
                 <p className="text-sm sm:text-base font-medium">Vendors lined up ready to build new relationships & reduce your costs</p>
               </div>
             </div>
-
-            {/* Duplicate CTA */}
-            <div className="pt-4 space-y-3">
-              <Button 
-                onClick={handleCreateAccount} 
-                size="lg" 
-                className="w-full text-base px-8 py-6 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all group"
-              >
-                Create Free Account
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <p className="text-xs text-center text-muted-foreground">Join 700+ agents already saving</p>
-            </div>
           </motion.div>
         </div>
 
