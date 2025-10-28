@@ -217,27 +217,6 @@ export default function MarketplaceHero({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
         >
-          {/* Testimonial */}
-          <div className="max-w-2xl mx-auto mb-8">
-            <Card className="bg-primary/5 border-primary/10">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-center gap-1 mb-3">
-                  <Star className="w-4 h-4 fill-primary text-primary" />
-                  <Star className="w-4 h-4 fill-primary text-primary" />
-                  <Star className="w-4 h-4 fill-primary text-primary" />
-                  <Star className="w-4 h-4 fill-primary text-primary" />
-                  <Star className="w-4 h-4 fill-primary text-primary" />
-                </div>
-                <p className="text-base sm:text-lg italic text-foreground mb-3">
-                  "Finally, a platform that saves me money and time. The wholesale pricing is incredible!"
-                </p>
-                <p className="text-sm text-muted-foreground font-medium">
-                  — Jessica P., REALTOR®
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
           {/* Enhanced Social Proof */}
           <div className="border-t border-border pt-8">
             <p className="text-sm text-muted-foreground font-medium mb-4">
