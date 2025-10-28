@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, Percent, DollarSign } from "lucide-react";
+import marketplacePreview from "@/assets/marketplace-preview.png";
 interface MarketplaceHeroProps {
   onExploreClick?: () => void;
 }
@@ -64,15 +65,13 @@ export default function MarketplaceHero({
           <div className="relative">
             <div className="relative mx-auto max-w-md lg:max-w-none">
               {/* Laptop Frame */}
-              <div className="relative rounded-lg border-4 border-border bg-muted/20 shadow-2xl overflow-hidden aspect-[4/3]">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5 flex items-center justify-center">
-                  <div className="text-center space-y-4 p-8">
-                    <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-2xl">🏢</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Marketplace Preview</p>
-                  </div>
-                </div>
+              <div className="relative rounded-lg border-4 border-border bg-background shadow-2xl overflow-hidden">
+                <img 
+                  src={marketplacePreview} 
+                  alt="Circle Marketplace Preview showing vendor cards" 
+                  className="w-full h-auto object-cover"
+                  loading="lazy"
+                />
               </div>
             </div>
           </div>
