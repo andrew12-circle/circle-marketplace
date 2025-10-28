@@ -19,7 +19,7 @@ export const CircleProBanner = () => {
               <h3 className="text-lg sm:text-xl font-bold leading-tight">
                 Unlock up to 80% savings. Partner with vendors. Discover what agents nationwide are using.
               </h3>
-              <p className="text-xs sm:text-sm text-white/80 mt-1">Circle Pro: Exclusive discounts. Vendor support unlocked. Growth made affordable with co-pay.</p>
+              <p className="text-xs sm:text-sm text-white/80 mt-1">Circle Pro: Exclusive discounts. Vendor support unlocked. Growth made affordable with Circle Match.</p>
             </div>
           </div>
           

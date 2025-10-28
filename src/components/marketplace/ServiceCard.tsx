@@ -872,7 +872,7 @@ export const ServiceCard = ({
                             <div className="space-y-2 p-2 bg-green-50 rounded-lg border border-green-200 opacity-75 cursor-pointer hover:opacity-100 transition-opacity" data-tour="copay-badge">
                               <div className="flex items-center gap-1 mb-2">
                                 <Lock className="w-3 h-3 text-green-600" />
-                                <span className="text-sm font-medium text-green-600">Unlock Co-Pay</span>
+                                <span className="text-sm font-medium text-green-600">Unlock Circle Match</span>
                                <button 
                                  className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors"
                                  onMouseEnter={() => {
