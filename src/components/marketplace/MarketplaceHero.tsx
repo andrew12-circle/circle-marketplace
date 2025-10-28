@@ -66,12 +66,7 @@ export default function MarketplaceHero({
             <div className="relative mx-auto max-w-md lg:max-w-none">
               {/* Laptop Frame */}
               <div className="relative rounded-lg border-4 border-border bg-background shadow-2xl overflow-hidden">
-                <img 
-                  src={marketplacePreview} 
-                  alt="Circle Marketplace Preview showing vendor cards" 
-                  className="w-full h-auto object-cover"
-                  loading="lazy"
-                />
+                <img src={marketplacePreview} alt="Circle Marketplace Preview showing vendor cards" className="w-full h-auto object-cover" loading="lazy" />
               </div>
             </div>
           </div>
@@ -81,9 +76,7 @@ export default function MarketplaceHero({
             <div className="flex gap-4">
               <div className="text-4xl font-bold text-primary flex-shrink-0">01</div>
               <div>
-                <p className="text-sm sm:text-base">
-                  Save up to 80% on everything to power your business
-                </p>
+                <p className="text-sm sm:text-base">Save up to 20-80% on everything to power your business</p>
               </div>
             </div>
             <div className="flex gap-4">
@@ -97,9 +90,7 @@ export default function MarketplaceHero({
             <div className="flex gap-4">
               <div className="text-4xl font-bold text-primary flex-shrink-0">03</div>
               <div>
-                <p className="text-sm sm:text-base">
-                  Vendors lined up ready to help cover up to 50% of your costs
-                </p>
+                <p className="text-sm sm:text-base">Vendors lined up ready to build new relationships & Reduce your costs</p>
               </div>
             </div>
           </div>
