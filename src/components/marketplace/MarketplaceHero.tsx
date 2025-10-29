@@ -113,51 +113,51 @@ export default function MarketplaceHero({
 
           {/* Right Column - Benefits with Enhanced Design */}
           <motion.div 
-            className="relative space-y-4"
+            className="relative space-y-2"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <div className="mb-4">
-              <h2 className="text-xl sm:text-2xl font-bold mb-1">AI Marketplace</h2>
-              <p className="text-xs sm:text-sm text-foreground/80">
+            <div className="mb-2">
+              <h2 className="text-lg sm:text-xl font-bold mb-0.5">AI Marketplace</h2>
+              <p className="text-[10px] sm:text-xs text-foreground/80">
                 Predictive Pathways, driven by AI Intelligence data, on how to close the gap of your competitors
               </p>
             </div>
             
-            <div className="relative flex gap-3 group z-10">
+            <div className="relative flex gap-2 group z-10">
               <div className="relative">
-                <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-md group-hover:blur-lg transition-all" />
-                <div className="relative text-2xl font-bold text-blue-600 dark:text-blue-400 flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-sm group-hover:blur-md transition-all" />
+                <div className="relative text-lg font-bold text-blue-600 dark:text-blue-400 flex-shrink-0 w-9 h-9 rounded-full bg-blue-500/10 flex items-center justify-center">
                   01
                 </div>
               </div>
               <div>
-                <p className="text-xs sm:text-sm font-medium">Save up to 20-80% on everything to power your business</p>
+                <p className="text-[10px] sm:text-xs font-medium">Save up to 20-80% on everything to power your business</p>
               </div>
             </div>
-            <div className="relative flex gap-3 group z-10">
+            <div className="relative flex gap-2 group z-10">
               <div className="relative">
-                <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-md group-hover:blur-lg transition-all" />
-                <div className="relative text-2xl font-bold text-blue-600 dark:text-blue-400 flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-sm group-hover:blur-md transition-all" />
+                <div className="relative text-lg font-bold text-blue-600 dark:text-blue-400 flex-shrink-0 w-9 h-9 rounded-full bg-blue-500/10 flex items-center justify-center">
                   02
                 </div>
               </div>
               <div>
-                <p className="text-xs sm:text-sm font-medium">
+                <p className="text-[10px] sm:text-xs font-medium">
                   Agent advice backed by nationwide data on what top realtors use
                 </p>
               </div>
             </div>
-            <div className="relative flex gap-3 group z-10">
+            <div className="relative flex gap-2 group z-10">
               <div className="relative">
-                <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-md group-hover:blur-lg transition-all" />
-                <div className="relative text-2xl font-bold text-blue-600 dark:text-blue-400 flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-sm group-hover:blur-md transition-all" />
+                <div className="relative text-lg font-bold text-blue-600 dark:text-blue-400 flex-shrink-0 w-9 h-9 rounded-full bg-blue-500/10 flex items-center justify-center">
                   03
                 </div>
               </div>
               <div>
-                <p className="text-xs sm:text-sm font-medium">Trusted vendors are ready — lenders, title, insurance, and more — or add your own partner with one click.</p>
+                <p className="text-[10px] sm:text-xs font-medium">Trusted vendors are ready — lenders, title, insurance, and more — or add your own partner with one click.</p>
               </div>
             </div>
           </motion.div>
