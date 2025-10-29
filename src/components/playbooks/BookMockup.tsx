@@ -35,14 +35,11 @@ export const BookMockup = () => {
           transition: { duration: 0.3 },
         }}
       >
-        <img
-          src={playbookCover}
-          alt="The Agent Playbook - Real Stories, Real Systems, Real Results"
-          className="w-full h-auto rounded-lg shadow-2xl"
-          style={{
-            filter: "drop-shadow(20px 20px 30px rgba(0, 0, 0, 0.3))",
-          }}
-        />
+      <img
+        src={playbookCover}
+        alt="The Agent Playbook - Real Stories, Real Systems, Real Results"
+        className="w-full h-auto"
+      />
       </motion.div>
       
       {/* Animated shadow that moves with floating */}
