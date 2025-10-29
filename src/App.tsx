@@ -11,6 +11,7 @@ import { WebAnalyticsTracker } from "@/components/analytics/WebAnalyticsTracker"
 import { lazy, Suspense } from "react";
 import Lobby from "./pages/Lobby";
 import Playbooks from "./pages/Playbooks";
+import UploadPlaybookCovers from "./pages/UploadPlaybookCovers";
 
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -51,6 +52,7 @@ function App() {
                 <Route path="/lender" element={<LenderMarketplace />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/health" element={<Health />} />
+                <Route path="/upload-covers" element={<UploadPlaybookCovers />} />
                 <Route path="/funnel/:serviceId" element={<FunnelPage />} />
                 <Route 
                   path="/admin/*" 
