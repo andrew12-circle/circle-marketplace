@@ -4,7 +4,7 @@ import playbookCover from "@/assets/playbook-cover.jpg";
 export const BookMockup = () => {
   return (
     <motion.div
-      className="relative w-full max-w-md mx-auto perspective-1000"
+      className="relative w-full max-w-[280px] mx-auto perspective-1000"
       initial={{ opacity: 0, x: -50 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
