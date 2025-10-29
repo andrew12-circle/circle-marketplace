@@ -899,8 +899,8 @@ export const ServiceCard = ({
                                return (
                                   <div className="space-y-1">
                                      <div className="text-xs text-gray-600 mb-2">
-                                       We have vendors lined up: Lender's, Title, HOI, Warrenty, Moving Etc. one click away waiting to help reduce your bill
-                                     </div>
+                                        Trusted vendors are ready — lenders, title, insurance, and more — or add your own partner with one click.
+                                      </div>
                                      <div className="text-xs bg-green-100 p-2 rounded border border-green-300 flex items-center justify-between">
                                        <span className="text-gray-600">With Vendor Help:</span>
                                        <span className={`font-bold text-green-700 text-xl ${!isProMember ? 'line-through' : ''}`}>
