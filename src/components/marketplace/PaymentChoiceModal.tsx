@@ -122,6 +122,25 @@ export const PaymentChoiceModal = ({
   const coPayPrice = calculateCopayPrice(service);
   const coPaySplit = service.respa_split_limit || 50;
   const pointsBreakdown = getPointsUsageBreakdown();
+
+  // Calculate base price for Circle Match calculations
+  const extractNumericPrice = (price: string | number | undefined): number => {
+    if (typeof price === 'number') return price;
+    if (!price) return 0;
+    const cleaned = String(price).replace(/[^0-9.]/g, '');
+    return parseFloat(cleaned) || 0;
+  };
+
+  const basePrice = service.is_verified && service.pro_price
+    ? extractNumericPrice(service.pro_price)
+    : extractNumericPrice(service.retail_price || '0');
+
+  // Calculate SSP and Non-SSP agent costs
+  const sspSplitPct = service.respa_split_limit || 0;
+  const nonSspSplitPct = service.max_split_percentage_non_ssp || 0;
+  
+  const sspAgentCost = sspSplitPct > 0 ? Math.round(basePrice * (1 - sspSplitPct / 100)) : null;
+  const nonSspAgentCost = nonSspSplitPct > 0 ? Math.round(basePrice * (1 - nonSspSplitPct / 100)) : null;
   return <>
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
@@ -213,7 +232,7 @@ export const PaymentChoiceModal = ({
             </Card>
 
             {/* Co-Pay Option - Pro Only */}
-            {(coPayPrice || !isProMember) && <Card className={!isProMember ? "opacity-75 border-dashed" : ""}>
+            {service.copay_allowed !== false && (sspAgentCost !== null || nonSspAgentCost !== null || !isProMember) && <Card className={!isProMember ? "opacity-75 border-dashed" : ""}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
@@ -228,19 +247,55 @@ export const PaymentChoiceModal = ({
                         Pro Only
                       </Badge>}
                   </div>
-                  <div className="text-2xl font-bold text-green-600 mb-1">
-                    {isProMember ? `$${Math.round(coPayPrice)}` : "$0-50"}/mo
-                  </div>
-                  <div className="text-sm text-muted-foreground mb-4">SSP</div>
+
+                  {isProMember ? (
+                    <div className="space-y-3 mb-4">
+                      {/* SSP Pricing */}
+                      {sspAgentCost !== null && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-medium text-green-700">SSP (Lenders/Title)</span>
+                            <span className="text-sm text-green-600">{sspSplitPct}% covered</span>
+                          </div>
+                          <div className="text-xl font-bold text-green-700">
+                            You pay: ${sspAgentCost}/mo
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Non-SSP Pricing */}
+                      {nonSspAgentCost !== null && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-medium text-blue-700">Non-SSP (Others)</span>
+                            <span className="text-sm text-blue-600">{nonSspSplitPct}% covered</span>
+                          </div>
+                          <div className="text-xl font-bold text-blue-700">
+                            You pay: ${nonSspAgentCost}/mo
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="mb-4">
+                      <div className="text-2xl font-bold text-green-600 mb-1">$0-50/mo</div>
+                      <div className="text-sm text-muted-foreground">Based on vendor type</div>
+                    </div>
+                  )}
+
                   <p className="text-sm text-muted-foreground mb-4">
-                    {isProMember ? "Get connected with a vendor partner. SSP vendors limited to 20% by RESPA compliance." : "Connect with vetted vendor partners who can help with service costs."}
+                    {isProMember 
+                      ? "Connect with vendor partners. Final pricing depends on vendor type (SSP or Non-SSP)." 
+                      : "Connect with vetted vendor partners who can help with service costs."}
                   </p>
+
                   {isProMember && <div className="bg-orange-50 border border-orange-200 rounded p-3 mb-4">
                       <div className="flex items-center gap-2 text-orange-600 text-sm">
                         <span className="text-orange-500">⚠</span>
                         Final pricing depends on vendor approval and compliance requirements.
                       </div>
                     </div>}
+
                   <Button onClick={handleCoPayChoice} variant="outline" className="w-full" disabled={!user || !isProMember}>
                     {!user ? <>
                         <UserPlus className="w-4 h-4 mr-2" />
@@ -250,6 +305,7 @@ export const PaymentChoiceModal = ({
                         Upgrade to Pro for Vendor Network
                       </> : "Find Vendor Partner"}
                   </Button>
+
                   {!user && <div className="mt-2 text-center">
                       <p className="text-sm text-muted-foreground">
                         Please{" "}
