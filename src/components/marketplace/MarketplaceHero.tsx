@@ -94,9 +94,9 @@ export default function MarketplaceHero({
             <div className="relative mx-auto w-full">
               {/* Laptop with Brain Image */}
               <motion.div 
-                className="relative scale-125 lg:scale-150"
+                className="relative scale-150 lg:scale-[1.8]"
                 whileHover={{ 
-                  scale: 1.3,
+                  scale: 1.85,
                   transition: { duration: 0.3 }
                 }}
               >
