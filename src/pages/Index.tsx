@@ -105,6 +105,31 @@ const Index = () => {
                   </div>
                 </div>
                 
+                {/* Mobile Navigation Buttons */}
+                <div className="flex gap-2">
+                  <Button
+                    asChild
+                    variant={location.pathname === "/" ? "default" : "outline"}
+                    size="sm"
+                    className="flex-1"
+                  >
+                    <Link to="/" className="gap-2">
+                      <Store className="w-4 h-4" />
+                      Marketplace
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    variant={location.pathname === "/playbooks" ? "default" : "outline"}
+                    size="sm"
+                    className="flex-1"
+                  >
+                    <Link to="/playbooks" className="gap-2">
+                      <BookOpen className="w-4 h-4" />
+                      Playbooks
+                    </Link>
+                  </Button>
+                </div>
               </div>
             ) : (
               // Desktop Header Layout (unchanged)
@@ -128,7 +153,26 @@ const Index = () => {
                 
                 {/* Tour Discovery Button - Desktop */}
                 <div className="flex flex-1 justify-center items-center gap-4">
-                  <TourDiscoveryButton />
+                  <Button
+                    asChild
+                    variant={location.pathname === "/" ? "default" : "ghost"}
+                    size="sm"
+                  >
+                    <Link to="/" className="gap-2">
+                      <Store className="w-4 h-4" />
+                      Marketplace
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    variant={location.pathname === "/playbooks" ? "default" : "ghost"}
+                    size="sm"
+                  >
+                    <Link to="/playbooks" className="gap-2">
+                      <BookOpen className="w-4 h-4" />
+                      Playbooks
+                    </Link>
+                  </Button>
                 </div>
                 
                 <div className="flex items-center gap-2 sm:gap-4">

@@ -6831,6 +6831,87 @@ export type Database = {
           },
         ]
       }
+      playbooks: {
+        Row: {
+          agent_headshot_url: string | null
+          agent_name: string | null
+          cover_url: string | null
+          created_at: string | null
+          duration_minutes: number | null
+          highlights: Json | null
+          id: string
+          market_city: string | null
+          market_state: string | null
+          member_price_usd: number | null
+          niches: Json | null
+          outcomes: Json | null
+          preview_video_url: string | null
+          price_usd: number | null
+          production_units_l12m: number | null
+          production_volume_l12m: number | null
+          slug: string
+          status: string | null
+          team_size: string | null
+          teaser_one_liner: string | null
+          tier_label: string | null
+          title: string
+          tools_used: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          agent_headshot_url?: string | null
+          agent_name?: string | null
+          cover_url?: string | null
+          created_at?: string | null
+          duration_minutes?: number | null
+          highlights?: Json | null
+          id?: string
+          market_city?: string | null
+          market_state?: string | null
+          member_price_usd?: number | null
+          niches?: Json | null
+          outcomes?: Json | null
+          preview_video_url?: string | null
+          price_usd?: number | null
+          production_units_l12m?: number | null
+          production_volume_l12m?: number | null
+          slug: string
+          status?: string | null
+          team_size?: string | null
+          teaser_one_liner?: string | null
+          tier_label?: string | null
+          title: string
+          tools_used?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          agent_headshot_url?: string | null
+          agent_name?: string | null
+          cover_url?: string | null
+          created_at?: string | null
+          duration_minutes?: number | null
+          highlights?: Json | null
+          id?: string
+          market_city?: string | null
+          market_state?: string | null
+          member_price_usd?: number | null
+          niches?: Json | null
+          outcomes?: Json | null
+          preview_video_url?: string | null
+          price_usd?: number | null
+          production_units_l12m?: number | null
+          production_volume_l12m?: number | null
+          slug?: string
+          status?: string | null
+          team_size?: string | null
+          teaser_one_liner?: string | null
+          tier_label?: string | null
+          title?: string
+          tools_used?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       point_allocations: {
         Row: {
           agent_id: string
@@ -7336,6 +7417,41 @@ export type Database = {
           vendor_id?: string
         }
         Relationships: []
+      }
+      purchases: {
+        Row: {
+          created_at: string | null
+          id: string
+          payment_intent_id: string | null
+          playbook_id: string | null
+          price_paid: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          payment_intent_id?: string | null
+          playbook_id?: string | null
+          price_paid?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          payment_intent_id?: string | null
+          playbook_id?: string | null
+          price_paid?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchases_playbook_id_fkey"
+            columns: ["playbook_id"]
+            isOneToOne: false
+            referencedRelation: "playbooks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       qbo_connections: {
         Row: {
