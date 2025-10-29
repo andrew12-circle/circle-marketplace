@@ -242,23 +242,22 @@ export const VendorSelectionModal = ({
     setIsLoading(true);
     
     try {
-      // Add timeout wrapper to prevent infinite loading
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 10000)
-      );
-      
-      const authPromise = supabase.auth.getUser();
-      const { data: { user }, error: userError } = await Promise.race([authPromise, timeoutPromise]);
+      // Get user first
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
       
       if (userError || !user) {
         console.error('Authentication error:', userError);
-        // Show empty state instead of infinite loading
         setVendors([]);
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to view vendors.",
+          variant: "destructive",
+        });
         return;
       }
 
-      // Query vendors with timeout protection - simplified for debugging
-      const vendorQuery = supabase
+      // Simplified query without timeout wrapper - let Supabase handle timeouts naturally
+      const { data, error } = await supabase
         .from('vendors')
         .select(`
           id, 
@@ -278,12 +277,6 @@ export const VendorSelectionModal = ({
         .order('sort_order', { ascending: true })
         .order('rating', { ascending: false })
         .limit(500);
-
-      const vendorTimeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Vendor query timeout')), 8000)
-      );
-
-      const { data, error } = await Promise.race([vendorQuery, vendorTimeoutPromise]);
 
       console.log('VendorSelectionModal: Supabase response:', { data, error, dataLength: data?.length });
 
