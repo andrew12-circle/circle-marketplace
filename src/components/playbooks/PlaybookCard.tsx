@@ -56,8 +56,8 @@ export const PlaybookCard = ({ playbook, onClick }: PlaybookCardProps) => {
       className={cn(
         "group relative cursor-pointer",
         "rounded-2xl overflow-hidden",
-        "bg-card border border-border/40",
-        "hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-out",
+        "bg-gradient-to-br from-card via-card to-card/80 border border-border/40",
+        "hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-500 ease-out",
         "aspect-[2/3]"
       )}
     >
@@ -78,7 +78,7 @@ export const PlaybookCard = ({ playbook, onClick }: PlaybookCardProps) => {
       {/* Tier Badge - Top Left */}
       {playbook.tier_label && (
         <div className="absolute top-4 left-4 z-10">
-          <Badge className="text-xs font-medium bg-white/95 text-foreground hover:bg-white backdrop-blur-sm shadow-lg">
+          <Badge className="text-xs font-medium bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 hover:from-blue-600 hover:to-purple-600 backdrop-blur-sm shadow-lg">
             {playbook.tier_label}
           </Badge>
         </div>
