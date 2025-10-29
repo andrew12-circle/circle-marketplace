@@ -750,11 +750,10 @@ export const ServiceCard = ({
                               const basePrice = service.is_verified 
                                 ? effectivePricing.pro
                                 : effectivePricing.retail;
-                              const sspAllowed = service.ssp_allowed !== false;
-                              const sspPct = service.max_split_percentage_ssp || 0;
+                              const sspPct = service.respa_split_limit || 0;
                               const nonSspPct = service.max_split_percentage_non_ssp || 0;
                               
-                              const sspAgentPays = sspAllowed && sspPct > 0 ? basePrice * (1 - sspPct / 100) : null;
+                              const sspAgentPays = sspPct > 0 ? basePrice * (1 - sspPct / 100) : null;
                               const nonSspAgentPays = nonSspPct > 0 ? basePrice * (1 - nonSspPct / 100) : null;
                               
                               return (
@@ -762,20 +761,40 @@ export const ServiceCard = ({
                                   <p className="text-xs text-gray-700 leading-relaxed">
                                     Trusted vendors are ready — lenders, title, insurance, and more — or add your own partner with one click.
                                   </p>
-                                  <div className="bg-white p-2.5 rounded border border-green-300">
-                                    <div className="flex items-center justify-between">
-                                      <span className="text-xs text-gray-600">With Vendor Help:</span>
-                                      <span className="font-bold text-green-700" style={{ fontSize: '1.125rem' }}>
-                                        {sspAgentPays !== null ? formatPrice(sspAgentPays, service.price_duration || 'mo') : 'Not eligible'}
-                                      </span>
+                                  
+                                  {sspAgentPays !== null && (
+                                    <div className="bg-white p-2.5 rounded border border-green-300">
+                                      <div className="flex items-center justify-between">
+                                        <span className="text-xs text-gray-600 flex items-center gap-1">
+                                          SSP Vendors:
+                                          <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded">Lenders/Title</span>
+                                        </span>
+                                        <span className="font-bold text-green-700" style={{ fontSize: '1.125rem' }}>
+                                          {formatPrice(sspAgentPays, service.price_duration || 'mo')}
+                                        </span>
+                                      </div>
                                     </div>
-                                  </div>
-                                  <div className="text-xs text-gray-600">
-                                    <span>Non Settlement Service Provider: </span>
-                                    <span className="font-semibold text-blue-600">
-                                      {nonSspAgentPays !== null ? formatPrice(nonSspAgentPays, service.price_duration || 'mo') : 'Not shown'}
-                                    </span>
-                                  </div>
+                                  )}
+                                  
+                                  {nonSspAgentPays !== null && (
+                                    <div className="bg-white p-2.5 rounded border border-blue-300">
+                                      <div className="flex items-center justify-between">
+                                        <span className="text-xs text-gray-600 flex items-center gap-1">
+                                          Non-SSP:
+                                          <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">Others</span>
+                                        </span>
+                                        <span className="font-bold text-blue-700" style={{ fontSize: '1.125rem' }}>
+                                          {formatPrice(nonSspAgentPays, service.price_duration || 'mo')}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {!sspAgentPays && !nonSspAgentPays && (
+                                    <div className="text-xs text-gray-500 text-center py-2">
+                                      Configure split percentages in admin
+                                    </div>
+                                  )}
                                 </div>
                               );
                             })()}

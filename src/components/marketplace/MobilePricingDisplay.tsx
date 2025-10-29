@@ -9,6 +9,7 @@ interface MobilePricingDisplayProps {
     pro_price?: string;
     copay_allowed?: boolean;
     respa_split_limit?: number;
+    max_split_percentage_non_ssp?: number;
     is_verified?: boolean;
     price_duration?: string;
   };
@@ -27,11 +28,13 @@ export const MobilePricingDisplay = ({
 
   const retailPrice = service.retail_price ? extractNumericPrice(service.retail_price) : 0;
   const proPrice = service.pro_price ? extractNumericPrice(service.pro_price) : 0;
-  const coPayAmount = service.respa_split_limit && isProMember && service.is_verified
-    ? Math.round(proPrice * (service.respa_split_limit / 100))
-    : service.respa_split_limit && !isProMember 
-    ? Math.round(retailPrice * (service.respa_split_limit / 100))
-    : 0;
+  const basePrice = isProMember && service.is_verified ? proPrice : retailPrice;
+  
+  const sspPct = service.respa_split_limit || 0;
+  const nonSspPct = service.max_split_percentage_non_ssp || 0;
+  
+  const sspAgentPays = sspPct > 0 ? basePrice * (1 - sspPct / 100) : null;
+  const nonSspAgentPays = nonSspPct > 0 ? basePrice * (1 - nonSspPct / 100) : null;
 
   return (
     <div className="space-y-3">
@@ -61,33 +64,46 @@ export const MobilePricingDisplay = ({
         )}
       </div>
 
-      {/* Co-Pay Option - Prominent Mobile Display */}
-      {service.copay_allowed && service.respa_split_limit && coPayAmount > 0 && (
+      {/* Circle Match Option - Prominent Mobile Display */}
+      {service.copay_allowed && (sspAgentPays !== null || nonSspAgentPays !== null) && (
         <div 
           className="bg-green-50 border-2 border-green-200 rounded-lg p-3 cursor-pointer hover:bg-green-100 transition-colors"
           onClick={onCoPayClick}
         >
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-2 text-lg font-bold text-green-700 mb-1">
+          <div className="space-y-2">
+            <div className="flex items-center justify-center gap-2 text-sm font-bold text-green-700">
               <span>Circle Match Available</span>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Info className="w-4 h-4 cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
-                  <p>Eligible agents can have up to {service.respa_split_limit}% of the service cost covered by the vendor through our RESPA-compliant co-marketing program.</p>
+                  <p>Partner with vendors who help cover service costs. SSP vendors (lenders/title) typically {sspPct}%, Non-SSP vendors up to {nonSspPct}%.</p>
                 </TooltipContent>
               </Tooltip>
             </div>
-            <div className="text-green-600 font-medium">
-              Your potential cost: {formatPrice(
-                (isProMember && service.is_verified ? proPrice : retailPrice) - coPayAmount,
-                service.price_duration || 'mo'
-              )}
-            </div>
-            <div className="text-xs text-green-600 mt-1">
-              Up to {formatPrice(coPayAmount, service.price_duration || 'mo')} vendor contribution
-            </div>
+            
+            {sspAgentPays !== null && (
+              <div className="bg-white p-2 rounded border border-green-300">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-gray-600">SSP (Lenders/Title):</span>
+                  <span className="font-bold text-green-700 text-base">
+                    {formatPrice(sspAgentPays, service.price_duration || 'mo')}
+                  </span>
+                </div>
+              </div>
+            )}
+            
+            {nonSspAgentPays !== null && (
+              <div className="bg-white p-2 rounded border border-blue-300">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-gray-600">Non-SSP (Others):</span>
+                  <span className="font-bold text-blue-700 text-base">
+                    {formatPrice(nonSspAgentPays, service.price_duration || 'mo')}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
