@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, MapPin, Star, Users, TrendingUp, Building, Plus, CheckCircle, Info, AlertTriangle } from "lucide-react";
 import confirmationImage from "@/assets/confirmation-image.png";
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -537,7 +538,7 @@ export const VendorSelectionModal = ({
               </div>
             </div>
 
-           <div className="max-h-[60vh] overflow-y-auto relative">
+           <ScrollArea className="h-[60vh] relative">
             {isSelectingVendor && (
               <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
                 <div className="flex flex-col items-center gap-3">
@@ -790,7 +791,7 @@ export const VendorSelectionModal = ({
                 })()}
               </div>
             )}
-          </div>
+           </ScrollArea>
 
             <div className="flex justify-end pt-4">
               <Button variant="outline" onClick={onClose}>
