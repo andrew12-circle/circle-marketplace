@@ -41,11 +41,11 @@ export default function MarketplaceHero({
   const handleCreateAccount = () => {
     navigate('/pricing');
   };
-  return <section className="relative bg-background py-12 sm:py-20 px-4 sm:px-6 overflow-hidden w-full">
+  return <section className="relative bg-background py-6 sm:py-10 px-4 sm:px-6 overflow-hidden w-full">
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Three Column Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 items-center mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 items-center mb-8">
           
           {/* Left Column - Text Content */}
           <motion.div 
