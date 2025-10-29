@@ -1,0 +1,1 @@
+UPDATE playbooks SET cover_url = '/images/playbook-first-time-buyer.jpg' WHERE title LIKE '%First-Time Buyer%';
