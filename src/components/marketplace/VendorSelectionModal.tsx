@@ -194,7 +194,7 @@ export const VendorSelectionModal = ({
       setFunnelVendor(null);
       setExpandedCompanyId(null);
       setPledgedPointsMap({});
-      setShowAllVendors(false); // Default to Non-SSP preferred
+      setShowAllVendors(true); // Default to showing all vendors
       
       loadVendors();
     }
