@@ -980,6 +980,18 @@ export const ServiceManagementPanel = () => {
                             disabled={isSaving}
                           />
                         </div>
+
+                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <label className="text-sm font-medium">Enable Circle Match</label>
+                            <p className="text-xs text-muted-foreground">Allow vendors to co-pay</p>
+                          </div>
+                          <Switch
+                            checked={formData?.copay_allowed || false}
+                            onCheckedChange={(checked) => handleFieldChange('copay_allowed', checked)}
+                            disabled={isSaving}
+                          />
+                        </div>
                       </div>
                     </div>
 
