@@ -59,7 +59,7 @@ export default function MarketplaceHero({
                 The Smart Marketplace for Real Estate Pros
               </h1>
               <p className="text-sm sm:text-base text-foreground/90 mb-3">
-                The one-stop marketplace for agents to find the tools top producers actually use — at wholesale prices.
+                Compare top-rated tools. Find trusted vendors. Safer. Faster. Smarter. The marketplace built for agents who are done guessing — all in one place.
               </p>
             </div>
             <div className="space-y-2">
