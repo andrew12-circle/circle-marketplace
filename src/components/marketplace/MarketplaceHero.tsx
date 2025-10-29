@@ -41,34 +41,7 @@ export default function MarketplaceHero({
   const handleCreateAccount = () => {
     navigate('/pricing');
   };
-  return <section className="relative bg-background py-12 sm:py-20 px-4 sm:px-6 overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5 pointer-events-none" />
-      <motion.div 
-        className="absolute top-20 right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.3, 0.5, 0.3],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      />
-      <motion.div 
-        className="absolute bottom-20 left-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none"
-        animate={{
-          scale: [1, 1.3, 1],
-          opacity: [0.2, 0.4, 0.2],
-        }}
-        transition={{
-          duration: 10,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 1
-        }}
-      />
+  return <section className="relative bg-background py-12 sm:py-20 px-4 sm:px-6 overflow-hidden w-full">
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Three Column Grid */}
@@ -154,12 +127,26 @@ export default function MarketplaceHero({
 
           {/* Right Column - Benefits with Enhanced Design */}
           <motion.div 
-            className="space-y-6"
+            className="relative space-y-6 p-6 rounded-lg"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <div className="flex gap-4 group">
+            {/* Blue hue background contained to features area */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-lg pointer-events-none" />
+            <motion.div 
+              className="absolute inset-0 bg-primary/5 rounded-lg blur-2xl pointer-events-none"
+              animate={{
+                opacity: [0.3, 0.5, 0.3],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+            
+            <div className="relative flex gap-4 group z-10">
               <div className="relative">
                 <div className="absolute inset-0 bg-primary/10 rounded-full blur-md group-hover:blur-lg transition-all" />
                 <div className="relative text-4xl font-bold text-primary flex-shrink-0 w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center">
@@ -170,7 +157,7 @@ export default function MarketplaceHero({
                 <p className="text-sm sm:text-base font-medium">Save up to 20-80% on everything to power your business</p>
               </div>
             </div>
-            <div className="flex gap-4 group">
+            <div className="relative flex gap-4 group z-10">
               <div className="relative">
                 <div className="absolute inset-0 bg-primary/10 rounded-full blur-md group-hover:blur-lg transition-all" />
                 <div className="relative text-4xl font-bold text-primary flex-shrink-0 w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center">
@@ -183,7 +170,7 @@ export default function MarketplaceHero({
                 </p>
               </div>
             </div>
-            <div className="flex gap-4 group">
+            <div className="relative flex gap-4 group z-10">
               <div className="relative">
                 <div className="absolute inset-0 bg-primary/10 rounded-full blur-md group-hover:blur-lg transition-all" />
                 <div className="relative text-4xl font-bold text-primary flex-shrink-0 w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center">
