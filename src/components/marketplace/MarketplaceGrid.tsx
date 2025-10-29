@@ -205,15 +205,30 @@ export const MarketplaceGrid = () => {
     handleReloadDataQuick();
   }, [handleReloadDataQuick]);
 
-  // Memoize extracted data to prevent unnecessary re-renders
-  const services = useMemo(() => (marketplaceData as {
-    services: Service[];
-    vendors: Vendor[];
-  })?.services || [], [marketplaceData]);
-  const vendors = useMemo(() => (marketplaceData as {
-    services: Service[];
-    vendors: Vendor[];
-  })?.vendors || [], [marketplaceData]);
+  // Memoize extracted data to prevent unnecessary re-renders with fallback
+  const services = useMemo(() => {
+    try {
+      return (marketplaceData as {
+        services: Service[];
+        vendors: Vendor[];
+      })?.services || [];
+    } catch (error) {
+      console.error('Error extracting services:', error);
+      return [];
+    }
+  }, [marketplaceData]);
+  
+  const vendors = useMemo(() => {
+    try {
+      return (marketplaceData as {
+        services: Service[];
+        vendors: Vendor[];
+      })?.vendors || [];
+    } catch (error) {
+      console.error('Error extracting vendors:', error);
+      return [];
+    }
+  }, [marketplaceData]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
@@ -347,63 +362,75 @@ export const MarketplaceGrid = () => {
   }, { enabled: shouldEnablePagination });
 
   const flattenServices = useMemo(() => {
-    // Prioritize paginated data when available, fallback to main marketplace data
-    const items = paginatedData?.items?.length ? paginatedData.items : services;
-    
-    // Log fallback usage for debugging
-    if (!paginatedData?.items?.length && services?.length) {
-      console.log('📊 MarketplaceGrid: Using fallback services data', { servicesCount: services.length });
-    }
-    const extractNumericPrice = (priceString?: string | null): number => {
-      if (!priceString) return 0;
-      const cleaned = priceString.replace(/[^0-9.]/g, '');
-      return parseFloat(cleaned) || 0;
-    };
-    
-    // Apply client-side filters to ensure services show even when pagination fails
-    let filteredItems = items;
-    
-    // Apply search filter
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase().trim();
-      filteredItems = filteredItems.filter(service => 
-        service.title?.toLowerCase().includes(term) ||
-        service.description?.toLowerCase().includes(term) ||
-        service.category?.toLowerCase().includes(term) ||
-        service.tags?.some(tag => tag?.toLowerCase().includes(term))
-      );
-    }
-    
-    // Apply category filter - handle both category names and cat: tags
-    if (filters.category && filters.category !== 'all' && filters.category !== 'All') {
-      filteredItems = filteredItems.filter(service => {
-        // Check if it's a "cat:" prefixed tag
-        if (filters.category.startsWith('cat:')) {
-          return service.tags?.includes(filters.category);
-        }
-        // Otherwise check category name match
-        return service.category === filters.category;
+    try {
+      // Prioritize paginated data when available, fallback to main marketplace data
+      const items = paginatedData?.items?.length ? paginatedData.items : services;
+      
+      // Log fallback usage for debugging
+      if (!paginatedData?.items?.length && services?.length) {
+        console.log('📊 MarketplaceGrid: Using fallback services data', { servicesCount: services.length });
+      }
+      
+      // Ensure we always return an array
+      if (!Array.isArray(items)) {
+        console.warn('⚠️ Items is not an array, returning empty array');
+        return [];
+      }
+      
+      const extractNumericPrice = (priceString?: string | null): number => {
+        if (!priceString) return 0;
+        const cleaned = priceString.replace(/[^0-9.]/g, '');
+        return parseFloat(cleaned) || 0;
+      };
+      
+      // Apply client-side filters to ensure services show even when pagination fails
+      let filteredItems = items;
+      
+      // Apply search filter
+      if (searchTerm.trim()) {
+        const term = searchTerm.toLowerCase().trim();
+        filteredItems = filteredItems.filter(service => 
+          service.title?.toLowerCase().includes(term) ||
+          service.description?.toLowerCase().includes(term) ||
+          service.category?.toLowerCase().includes(term) ||
+          service.tags?.some(tag => tag?.toLowerCase().includes(term))
+        );
+      }
+      
+      // Apply category filter - handle both category names and cat: tags
+      if (filters.category && filters.category !== 'all' && filters.category !== 'All') {
+        filteredItems = filteredItems.filter(service => {
+          // Check if it's a "cat:" prefixed tag
+          if (filters.category.startsWith('cat:')) {
+            return service.tags?.includes(filters.category);
+          }
+          // Otherwise check category name match
+          return service.category === filters.category;
+        });
+      }
+      
+      // Apply featured filter
+      if (filters.featured) {
+        filteredItems = filteredItems.filter(service => service.is_featured);
+      }
+      
+      // Apply co-pay eligible filter  
+      if (filters.coPayEligible) {
+        filteredItems = filteredItems.filter(service => service.copay_allowed);
+      }
+      
+      // Apply price range and verified filters
+      return filteredItems.filter(s => {
+        const price = extractNumericPrice(s.retail_price);
+        // If price is 0 (null/undefined retail_price), don't filter it out unless user specifically set a minimum price
+        const withinPrice = price === 0 || (price >= filters.priceRange[0] && price <= filters.priceRange[1]);
+        const matchesVerified = !filters.verified || !!s.vendor?.is_verified;
+        return withinPrice && matchesVerified;
       });
+    } catch (error) {
+      console.error('Error in flattenServices:', error);
+      return [];
     }
-    
-    // Apply featured filter
-    if (filters.featured) {
-      filteredItems = filteredItems.filter(service => service.is_featured);
-    }
-    
-    // Apply co-pay eligible filter  
-    if (filters.coPayEligible) {
-      filteredItems = filteredItems.filter(service => service.copay_allowed);
-    }
-    
-    // Apply price range and verified filters
-    return filteredItems.filter(s => {
-      const price = extractNumericPrice(s.retail_price);
-      // If price is 0 (null/undefined retail_price), don't filter it out unless user specifically set a minimum price
-      const withinPrice = price === 0 || (price >= filters.priceRange[0] && price <= filters.priceRange[1]);
-      const matchesVerified = !filters.verified || !!s.vendor?.is_verified;
-      return withinPrice && matchesVerified;
-    });
   }, [paginatedData, services, searchTerm, filters]);
 
   const totalServicesCount = paginatedData?.totalCount ?? 0;
@@ -816,17 +843,26 @@ export const MarketplaceGrid = () => {
               {viewMode === "services" && (
                 <>
                    <div id="services-grid" className="mobile-grid gap-4 sm:gap-6">
-                    {flattenServices.map((service, index) => (
-                      <OptimizedServiceCard 
-                        key={`service-${service.id}-${index}`} 
-                        service={service} 
-                        onSave={handleSaveService} 
-                        onViewDetails={handleViewServiceDetails} 
-                        isSaved={allSavedServiceIds.includes(service.id)} 
-                        bulkRatings={bulkRatings} 
-                      />
-                    ))}
-                  </div>
+                     {/* Show loading state only if NO data at all */}
+                     {isLoading && !marketplaceData && flattenServices.length === 0 ? (
+                       <div className="col-span-full text-center py-12">
+                         <p className="text-muted-foreground">Loading services...</p>
+                       </div>
+                     ) : flattenServices.length === 0 ? (
+                       null // Don't show anything if filtered to zero, handled below
+                     ) : (
+                       flattenServices.map((service, index) => (
+                         <OptimizedServiceCard 
+                           key={`service-${service.id}-${index}`} 
+                           service={service} 
+                           onSave={handleSaveService} 
+                           onViewDetails={handleViewServiceDetails} 
+                           isSaved={allSavedServiceIds.includes(service.id)} 
+                           bulkRatings={bulkRatings} 
+                         />
+                       ))
+                     )}
+                   </div>
                   <div className="mt-6 flex flex-col items-center gap-4">
                     <div className="flex flex-col sm:flex-row items-center gap-4">
                       <span className="text-sm text-muted-foreground">

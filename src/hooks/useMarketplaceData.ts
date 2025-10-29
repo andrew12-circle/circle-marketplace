@@ -501,6 +501,11 @@ export const useMarketplaceData = () => {
   const errorShown = useRef(false);
   
   useEffect(() => {
+    // Log data load success for debugging
+    if (query.isSuccess && query.data) {
+      logger.log(`✅ Marketplace data loaded: ${query.data.services?.length || 0} services, ${query.data.vendors?.length || 0} vendors`);
+    }
+    
     // Only show error toast for persistent failures, not during auth process
     if (query.error && !query.isLoading && !errorShown.current) {
       const isAuthPage = window.location.pathname.includes('/auth');
@@ -516,7 +521,7 @@ export const useMarketplaceData = () => {
      if (query.isSuccess && errorShown.current) {
        errorShown.current = false;
      }
-   }, [query.error, query.isLoading, query.isSuccess]);
+   }, [query.error, query.isLoading, query.isSuccess, query.data]);
 
    return {
      data: query.data || { services: [], vendors: [] }, // Always provide fallback data
@@ -526,7 +531,18 @@ export const useMarketplaceData = () => {
      refetch: query.refetch,
      hasData: !!(query.data?.services?.length || query.data?.vendors?.length),
    };
-};
+ };
+
+ // Add debug logging for marketplace data hook
+ if (typeof window !== 'undefined') {
+   const originalUseMarketplaceData = useMarketplaceData;
+   (window as any).__debugMarketplace = () => {
+     logger.log('Marketplace Debug Info:', {
+       circuitBreakerState: marketplaceCircuitBreaker.getState(),
+       cacheKeys: performance.getEntriesByType?.('resource').filter((r: any) => r.name.includes('marketplace')),
+     });
+   };
+ }
 
 /**
  * Hook for services only - optimized to use combined data
