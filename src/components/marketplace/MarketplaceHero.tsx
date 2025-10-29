@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle, Percent, DollarSign } from "lucide-react";
-import marketplacePreview from "@/assets/marketplace-preview.png";
+import { CheckCircle, Percent, DollarSign, ArrowRight, Clock, Star } from "lucide-react";
+import circlePitchDeck from "@/assets/circle-pitch-deck.png";
+import { motion } from "framer-motion";
 interface MarketplaceHeroProps {
   onExploreClick?: () => void;
 }
@@ -40,78 +41,172 @@ export default function MarketplaceHero({
   const handleCreateAccount = () => {
     navigate('/pricing');
   };
-  return <section className="bg-background py-12 sm:py-20 px-4 sm:px-6">
-      <div className="max-w-7xl mx-auto">
+  return <section className="relative bg-background py-6 sm:py-10 px-4 sm:px-6 overflow-hidden w-full">
+
+      <div className="max-w-7xl mx-auto relative z-10">
         {/* Three Column Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-center mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 items-center mb-8">
           
           {/* Left Column - Text Content */}
-          <div className="text-left space-y-6">
+          <motion.div 
+            className="text-left space-y-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
             <div>
-              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight mb-4 lg:text-3xl">Find the perfect tool for your real estate business</h1>
-              <p className="text-lg sm:text-xl text-primary font-semibold mb-2">
-                Wholesale discounts
-              </p>
-              <p className="text-muted-foreground text-base sm:text-lg">
-                Every tool you need—faster, cheaper, without the awkward sales calls.
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight leading-tight mb-3">
+                The Smart Marketplace for Real Estate Pros
+              </h1>
+              <p className="text-sm sm:text-base text-foreground/90 mb-3">
+                Compare top-rated tools. Find trusted vendors. Safer. Faster. Smarter. The marketplace built for agents who are done guessing — all in one place.
               </p>
             </div>
-            <Button onClick={handleCreateAccount} size="lg" className="text-base px-8 py-6">
-              Create Free Account
-            </Button>
-          </div>
+            <div className="space-y-2">
+              <Button 
+                onClick={handleCreateAccount} 
+                size="default"
+                className="text-sm px-6 py-4 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all group"
+              >
+                Create Free Account
+                <ArrowRight className="ml-2 w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              </Button>
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  <span>Takes less than 60 seconds</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <CheckCircle className="w-3 h-3 text-primary" />
+                  <span>No credit card required</span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
 
           {/* Center Column - Visual Mockup */}
-          <div className="relative">
-            <div className="relative mx-auto max-w-md lg:max-w-none">
-              {/* Laptop Frame */}
-              <div className="relative rounded-lg border-4 border-border bg-background shadow-2xl overflow-hidden">
-                <img src={marketplacePreview} alt="Circle Marketplace Preview showing vendor cards" className="w-full h-auto object-cover" loading="lazy" />
-              </div>
+          <motion.div 
+            className="relative lg:col-span-1"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <div className="relative mx-auto w-full">
+              {/* Laptop with Brain Image */}
+              <motion.div 
+                className="relative scale-110 lg:scale-125"
+                whileHover={{ 
+                  scale: 1.28,
+                  transition: { duration: 0.3 }
+                }}
+              >
+                <img 
+                  src={circlePitchDeck} 
+                  alt="Circle Marketplace with AI Intelligence" 
+                  className="w-full h-auto object-contain" 
+                  loading="lazy"
+                  style={{ imageRendering: 'crisp-edges' }}
+                />
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Right Column - Benefits */}
-          <div className="space-y-8">
-            <div className="flex gap-4">
-              <div className="text-4xl font-bold text-primary flex-shrink-0">Takes less than 30 seconds</div>
+          {/* Right Column - Benefits with Enhanced Design */}
+          <motion.div 
+            className="relative space-y-4"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <div className="mb-3">
+              <h2 className="text-xl sm:text-2xl font-bold mb-1.5">AI Marketplace</h2>
+              <p className="text-xs sm:text-sm text-foreground/80">
+                What if you could see exactly what top agents are using — and know it works?
+                <br />
+                Smarter, safer, faster growth — powered by AI insights from agents, vendors, and real results that keep learning to guide you toward better outcomes.
+              </p>
+            </div>
+            
+            <div className="relative flex gap-3 group z-10">
+              <div className="relative">
+                <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-md group-hover:blur-lg transition-all" />
+                <div className="relative text-xl font-bold text-blue-600 dark:text-blue-400 flex-shrink-0 w-11 h-11 rounded-full bg-blue-500/10 flex items-center justify-center">
+                  01
+                </div>
+              </div>
               <div>
-                <p className="text-sm sm:text-base">Save up to 20-80% on everything to power your business</p>
+                <p className="text-xs sm:text-sm leading-relaxed"><span className="font-bold">Save big and shop smarter.</span> Instantly compare CRMs, lead systems, and marketing tools side-by-side — all at insider pricing.</p>
               </div>
             </div>
-            <div className="flex gap-4">
-              <div className="text-4xl font-bold text-primary flex-shrink-0">02</div>
+            <div className="relative flex gap-3 group z-10">
+              <div className="relative">
+                <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-md group-hover:blur-lg transition-all" />
+                <div className="relative text-xl font-bold text-blue-600 dark:text-blue-400 flex-shrink-0 w-11 h-11 rounded-full bg-blue-500/10 flex items-center justify-center">
+                  02
+                </div>
+              </div>
               <div>
-                <p className="text-sm sm:text-base">
-                  Agent advice backed by nationwide data on what top realtors use
+                <p className="text-xs sm:text-sm leading-relaxed">
+                  <span className="font-bold">Gain a real edge.</span> See what's actually working for top agents nationwide and cut through the noise.
                 </p>
               </div>
             </div>
-            <div className="flex gap-4">
-              <div className="text-4xl font-bold text-primary flex-shrink-0">03</div>
+            <div className="relative flex gap-3 group z-10">
+              <div className="relative">
+                <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-md group-hover:blur-lg transition-all" />
+                <div className="relative text-xl font-bold text-blue-600 dark:text-blue-400 flex-shrink-0 w-11 h-11 rounded-full bg-blue-500/10 flex items-center justify-center">
+                  03
+                </div>
+              </div>
               <div>
-                <p className="text-sm sm:text-base">Vendors lined up ready to build new relationships & Reduce your costs</p>
+                <p className="text-xs sm:text-sm leading-relaxed"><span className="font-bold">Fund your marketing.</span> Partner with lenders, title, insurance, and more — or add your own with one click using Circle Matchmaking.</p>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
-        {/* Bottom Section - Trust Bar */}
-        <div className="text-center space-y-6">
-          <p className="text-sm text-muted-foreground font-medium">
-            Interviewed 700+ agents and counting
-          </p>
-          
-          {/* Media Logos */}
-          <div className="flex justify-center">
-            <img src="https://storage.googleapis.com/msgsndr/UjxJODh2Df0UKjTnKpcP/media/6879b4f857dd60a40d8545af.png" alt="As Seen On Media Bar" className="max-h-[60px] w-auto opacity-60" loading="lazy" />
+        {/* Bottom Section - Enhanced Trust Bar */}
+        <motion.div 
+          className="text-center space-y-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+        >
+          {/* Enhanced Social Proof */}
+          <div className="border-t border-border pt-8">
+            <p className="text-sm text-muted-foreground font-medium mb-4">
+              As featured in
+            </p>
+            <div className="flex justify-center">
+              <img 
+                src="https://storage.googleapis.com/msgsndr/UjxJODh2Df0UKjTnKpcP/media/6879b4f857dd60a40d8545af.png" 
+                alt="As Seen On Media Bar" 
+                className="max-h-[60px] w-auto opacity-80 hover:opacity-100 transition-opacity" 
+                loading="lazy" 
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-4">
+              Trusted by 700+ agents nationwide
+            </p>
           </div>
 
           {/* Scroll Down Arrow */}
-          <button onClick={handleExploreClick} className="mx-auto w-10 h-10 rounded-full border-2 border-primary/20 flex items-center justify-center hover:bg-primary/5 transition-colors" aria-label="Scroll to marketplace">
-            <span className="text-primary text-xl">↓</span>
-          </button>
-        </div>
+          <motion.button 
+            onClick={handleExploreClick} 
+            className="mx-auto w-12 h-12 rounded-full border-2 border-primary/30 flex items-center justify-center hover:bg-primary/10 hover:border-primary/50 transition-all group" 
+            aria-label="Scroll to marketplace"
+            animate={{
+              y: [0, 8, 0],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            <span className="text-primary text-2xl group-hover:translate-y-0.5 transition-transform">↓</span>
+          </motion.button>
+        </motion.div>
       </div>
     </section>;
 }
