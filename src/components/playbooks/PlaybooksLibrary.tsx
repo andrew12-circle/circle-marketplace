@@ -23,16 +23,18 @@ export const PlaybooksLibrary = () => {
         onFiltersChange={setFilters}
       />
       
-      <div className="container mx-auto px-4 py-8">
-        <PlaybooksFilters
-          filters={filters}
-          onFiltersChange={setFilters}
-        />
-        
-        <PlaybooksGrid
-          searchQuery={searchQuery}
-          filters={filters}
-        />
+      <div className="container mx-auto px-4 py-16 md:py-24">
+        <div className="max-w-7xl mx-auto">
+          <PlaybooksFilters
+            filters={filters}
+            onFiltersChange={setFilters}
+          />
+          
+          <PlaybooksGrid
+            searchQuery={searchQuery}
+            filters={filters}
+          />
+        </div>
       </div>
     </div>
   );

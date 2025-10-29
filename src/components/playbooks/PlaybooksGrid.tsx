@@ -34,9 +34,9 @@ export const PlaybooksGrid = ({ searchQuery, filters }: PlaybooksGridProps) => {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-          <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 md:gap-8">
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+          <Skeleton key={i} className="aspect-[2/3] rounded-2xl" />
         ))}
       </div>
     );
@@ -44,11 +44,11 @@ export const PlaybooksGrid = ({ searchQuery, filters }: PlaybooksGridProps) => {
 
   if (filteredPlaybooks.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <BookOpen className="h-16 w-16 text-muted-foreground/40 mb-4" />
-        <h3 className="text-xl font-semibold mb-2">No Playbooks Found</h3>
-        <p className="text-muted-foreground max-w-md">
-          Nothing matches that title or location. Try a nearby market or clear filters.
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <BookOpen className="h-20 w-20 text-muted-foreground/30 mb-6" />
+        <h3 className="text-2xl font-semibold mb-3">No playbooks found</h3>
+        <p className="text-muted-foreground max-w-md text-base">
+          Try adjusting your search or filters to find what you're looking for.
         </p>
       </div>
     );
@@ -56,7 +56,7 @@ export const PlaybooksGrid = ({ searchQuery, filters }: PlaybooksGridProps) => {
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 md:gap-8">
         {filteredPlaybooks.map((playbook) => (
           <PlaybookCard
             key={playbook.id}

@@ -62,13 +62,13 @@ export const PlaybooksFilters = ({
     filters.durations.length > 0;
 
   return (
-    <div className="flex flex-wrap items-center gap-3 mb-8 pb-6 border-b">
+    <div className="flex flex-wrap items-center gap-2 mb-12">
       {/* Sort By */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="gap-2">
+          <Button variant="ghost" size="sm" className="gap-1.5 text-sm font-normal rounded-full">
             {SORT_OPTIONS.find((opt) => opt.value === filters.sortBy)?.label || "Sort By"}
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown className="h-3.5 w-3.5 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-48">
@@ -91,9 +91,13 @@ export const PlaybooksFilters = ({
       {/* Tier Filter */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="gap-2">
+          <Button 
+            variant={filters.tiers.length > 0 ? "secondary" : "ghost"} 
+            size="sm" 
+            className="gap-1.5 text-sm font-normal rounded-full"
+          >
             Tier {filters.tiers.length > 0 && `(${filters.tiers.length})`}
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown className="h-3.5 w-3.5 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-48">
@@ -114,9 +118,13 @@ export const PlaybooksFilters = ({
       {/* Team Size Filter */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="gap-2">
+          <Button 
+            variant={filters.teamSizes.length > 0 ? "secondary" : "ghost"} 
+            size="sm" 
+            className="gap-1.5 text-sm font-normal rounded-full"
+          >
             Team Size {filters.teamSizes.length > 0 && `(${filters.teamSizes.length})`}
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown className="h-3.5 w-3.5 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-48">
@@ -137,9 +145,13 @@ export const PlaybooksFilters = ({
       {/* Duration Filter */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="gap-2">
+          <Button 
+            variant={filters.durations.length > 0 ? "secondary" : "ghost"} 
+            size="sm" 
+            className="gap-1.5 text-sm font-normal rounded-full"
+          >
             Duration {filters.durations.length > 0 && `(${filters.durations.length})`}
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown className="h-3.5 w-3.5 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-48">
@@ -161,6 +173,7 @@ export const PlaybooksFilters = ({
         <Button
           variant="ghost"
           size="sm"
+          className="text-sm font-normal rounded-full"
           onClick={() =>
             onFiltersChange({
               ...filters,
@@ -170,7 +183,7 @@ export const PlaybooksFilters = ({
             })
           }
         >
-          Clear filters
+          Clear all
         </Button>
       )}
     </div>

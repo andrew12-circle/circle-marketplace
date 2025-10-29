@@ -56,87 +56,91 @@ export const PlaybookCard = ({ playbook, onClick }: PlaybookCardProps) => {
       className={cn(
         "group relative cursor-pointer",
         "rounded-2xl overflow-hidden",
-        "bg-card border border-border",
-        "hover:shadow-xl hover:scale-[1.02] transition-all duration-300",
-        "aspect-[3/4]"
+        "bg-card border border-border/40",
+        "hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-out",
+        "aspect-[2/3]"
       )}
     >
       {/* Cover Image */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 bg-gradient-to-br from-muted/30 to-muted/10">
         {playbook.cover_url ? (
           <img
             src={playbook.cover_url}
             alt={playbook.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5" />
+          <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
       </div>
 
-      {/* Agent Headshot Chip */}
-      <div className="absolute top-3 right-3 z-10">
-        <Avatar className="h-12 w-12 border-2 border-white shadow-lg">
+      {/* Tier Badge - Top Left */}
+      {playbook.tier_label && (
+        <div className="absolute top-4 left-4 z-10">
+          <Badge className="text-xs font-medium bg-white/95 text-foreground hover:bg-white backdrop-blur-sm shadow-lg">
+            {playbook.tier_label}
+          </Badge>
+        </div>
+      )}
+
+      {/* Agent Headshot - Top Right */}
+      <div className="absolute top-4 right-4 z-10">
+        <Avatar className="h-10 w-10 border-2 border-white/80 shadow-xl ring-2 ring-white/20">
           <AvatarImage src={playbook.agent_headshot_url || undefined} />
-          <AvatarFallback>{getInitials(playbook.agent_name)}</AvatarFallback>
+          <AvatarFallback className="text-xs">{getInitials(playbook.agent_name)}</AvatarFallback>
         </Avatar>
       </div>
 
       {/* Content */}
-      <div className="absolute inset-x-0 bottom-0 p-4 space-y-2 z-10">
+      <div className="absolute inset-x-0 bottom-0 p-5 space-y-3 z-10">
         {/* Title */}
-        <h3 className="text-lg font-bold text-white line-clamp-2 leading-tight">
+        <h3 className="text-xl font-semibold text-white line-clamp-2 leading-snug">
           {playbook.title}
         </h3>
 
         {/* Agent Name */}
-        <p className="text-sm text-white/90 font-medium">
-          {playbook.agent_name || "Unknown Agent"}
+        <p className="text-sm text-white/80 font-normal">
+          by {playbook.agent_name || "Unknown Agent"}
         </p>
 
-        {/* Pills Row 1: Location & Production */}
-        <div className="flex flex-wrap gap-2">
+        {/* Meta Info */}
+        <div className="flex flex-wrap gap-2 text-xs text-white/70">
           {playbook.market_city && playbook.market_state && (
-            <Badge variant="secondary" className="gap-1 text-xs bg-white/20 text-white border-white/30">
+            <div className="flex items-center gap-1">
               <MapPin className="h-3 w-3" />
-              {playbook.market_city}, {playbook.market_state}
-            </Badge>
+              <span>{playbook.market_city}, {playbook.market_state}</span>
+            </div>
           )}
-          {playbook.production_units_l12m && playbook.production_volume_l12m && (
-            <Badge variant="secondary" className="gap-1 text-xs bg-white/20 text-white border-white/30">
-              <TrendingUp className="h-3 w-3" />
-              {playbook.production_units_l12m} units · {formatCurrency(playbook.production_volume_l12m)}
-            </Badge>
-          )}
-        </div>
-
-        {/* Pills Row 2: Duration & Tier */}
-        <div className="flex flex-wrap gap-2">
           {playbook.duration_minutes && (
-            <Badge variant="secondary" className="gap-1 text-xs bg-white/20 text-white border-white/30">
+            <div className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              {formatDuration(playbook.duration_minutes)}
-            </Badge>
-          )}
-          {playbook.tier_label && (
-            <Badge className="text-xs bg-primary text-primary-foreground">
-              {playbook.tier_label}
-            </Badge>
+              <span>{formatDuration(playbook.duration_minutes)}</span>
+            </div>
           )}
         </div>
 
-        {/* Preview Button (shows on hover) */}
-        <Button
-          size="sm"
-          className="w-full opacity-0 group-hover:opacity-100 transition-opacity mt-3"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClick();
-          }}
-        >
-          Preview
-        </Button>
+        {playbook.production_units_l12m && playbook.production_volume_l12m && (
+          <div className="flex items-center gap-1.5 text-xs text-white/80">
+            <TrendingUp className="h-3 w-3" />
+            <span>{playbook.production_units_l12m} units • {formatCurrency(playbook.production_volume_l12m)}</span>
+          </div>
+        )}
+
+        {/* Action (shows on hover) */}
+        <div className="pt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <Button
+            size="sm"
+            variant="secondary"
+            className="w-full bg-white/95 text-foreground hover:bg-white backdrop-blur-sm font-medium"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick();
+            }}
+          >
+            View Playbook
+          </Button>
+        </div>
       </div>
     </div>
   );
