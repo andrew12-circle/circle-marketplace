@@ -132,19 +132,6 @@ export default function MarketplaceHero({
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            {/* Blue hue background contained to features area */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-lg pointer-events-none" />
-            <motion.div 
-              className="absolute inset-0 bg-primary/5 rounded-lg blur-2xl pointer-events-none"
-              animate={{
-                opacity: [0.3, 0.5, 0.3],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
             
             <div className="relative flex gap-4 group z-10">
               <div className="relative">
