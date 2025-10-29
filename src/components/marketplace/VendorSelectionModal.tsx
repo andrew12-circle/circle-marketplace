@@ -461,7 +461,7 @@ export const VendorSelectionModal = ({
           <div className="flex-1">
             <DialogTitle>Select Circle Match Partner</DialogTitle>
             <p id="vendor-selection-description" className="text-sm text-muted-foreground">
-              Choose a vendor to help with "{service.title}" - they'll cover {service.respa_split_limit}% of the cost
+              Choose a vendor to help with "{service.title}"
             </p>
             {location?.state && (
               <p className="text-xs text-muted-foreground">
