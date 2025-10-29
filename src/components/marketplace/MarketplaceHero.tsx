@@ -121,7 +121,7 @@ export default function MarketplaceHero({
             <div className="mb-3">
               <h2 className="text-xl sm:text-2xl font-bold mb-1.5">AI Marketplace</h2>
               <p className="text-xs sm:text-sm text-foreground/80">
-                Predictive Pathways, driven by AI Intelligence data, on how to close the gap of your competitors
+                Built to learn from every agent on the platform — unlocking data-driven insights on what tools and vendors deliver real results.
               </p>
             </div>
             
