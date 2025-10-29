@@ -133,7 +133,7 @@ export default function MarketplaceHero({
                 </div>
               </div>
               <div>
-                <p className="text-xs sm:text-sm font-medium leading-relaxed">Save up to 20-80% on everything to power your business</p>
+                <p className="text-xs sm:text-sm font-medium leading-relaxed">Save big and shop smarter. Instantly compare CRMs, lead systems, and marketing tools side-by-side — all at insider pricing.</p>
               </div>
             </div>
             <div className="relative flex gap-3 group z-10">
