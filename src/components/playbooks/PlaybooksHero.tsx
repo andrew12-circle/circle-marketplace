@@ -1,8 +1,11 @@
-import { Search } from "lucide-react";
+import { useState } from "react";
+import { Search, Mic } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { BookMockup } from "./BookMockup";
 import { type FilterState } from "./PlaybooksFilters";
+import { AgentSubmissionDialog } from "./AgentSubmissionDialog";
 
 interface PlaybooksHeroProps {
   searchQuery: string;
@@ -15,6 +18,8 @@ export const PlaybooksHero = ({
   searchQuery,
   onSearchChange,
 }: PlaybooksHeroProps) => {
+  const [showSubmissionDialog, setShowSubmissionDialog] = useState(false);
+
   return (
     <section className="relative overflow-hidden">
       {/* Soft radial gradient background */}
@@ -88,6 +93,24 @@ export const PlaybooksHero = ({
             </div>
           </div>
           
+          {/* Agent CTA Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.55 }}
+            className="flex justify-center mb-6"
+          >
+            <Button
+              onClick={() => setShowSubmissionDialog(true)}
+              size="lg"
+              variant="outline"
+              className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-md hover:shadow-xl font-semibold"
+            >
+              <Mic className="mr-2 h-4 w-4" />
+              Share Your Playbook
+            </Button>
+          </motion.div>
+
           {/* BOTTOM: Full-width search bar */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -122,6 +145,11 @@ export const PlaybooksHero = ({
         <span>Powered by</span>
         <span className="font-bold text-primary">Circle Network</span>
       </motion.div>
+
+      <AgentSubmissionDialog 
+        open={showSubmissionDialog} 
+        onOpenChange={setShowSubmissionDialog} 
+      />
     </section>
   );
 };
