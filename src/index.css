@@ -295,6 +295,28 @@ All colors MUST be HSL.
   }
 }
 
+/* 3D Book Mockup Utilities */
+@layer utilities {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .book-3d {
+    transform-style: preserve-3d;
+    position: relative;
+  }
+
+  .vertical-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+  }
+
+  .book-spine {
+    transform: translateZ(-12px);
+  }
+}
+
 /* Hide Sheet overlay for chat to remove grey background */
 [data-radix-dialog-overlay][data-state="open"] {
   background: transparent !important;
