@@ -64,13 +64,13 @@ export const MobilePricingDisplay = ({
         )}
       </div>
 
-      {/* Circle Match Option - Prominent Mobile Display */}
+      {/* Circle Match Option - Compact Mobile Display */}
       {service.copay_allowed && (sspAgentPays !== null || nonSspAgentPays !== null) && (
         <div 
-          className="bg-green-50 border-2 border-green-200 rounded-lg p-3 cursor-pointer hover:bg-green-100 transition-colors"
+          className="bg-green-50 border-2 border-green-200 rounded-lg p-2.5 cursor-pointer hover:bg-green-100 transition-colors"
           onClick={onCoPayClick}
         >
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-center gap-2 text-sm font-bold text-green-700">
               <span>Circle Match Available</span>
               <Tooltip>
@@ -83,27 +83,29 @@ export const MobilePricingDisplay = ({
               </Tooltip>
             </div>
             
-            {sspAgentPays !== null && (
-              <div className="bg-white p-2 rounded border border-green-300">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-600">SSP (Lenders/Title):</span>
-                  <span className="font-bold text-green-700 text-base">
-                    {formatPrice(sspAgentPays, service.price_duration || 'mo')}
-                  </span>
+            <div className="space-y-1">
+              {sspAgentPays !== null && (
+                <div className="bg-white p-1.5 rounded border border-green-300">
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-gray-600">SSP (Lenders/Title):</span>
+                    <span className="font-bold text-green-700 text-sm">
+                      {formatPrice(sspAgentPays, service.price_duration || 'mo')}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
-            
-            {nonSspAgentPays !== null && (
-              <div className="bg-white p-2 rounded border border-blue-300">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-600">Non-SSP (Others):</span>
-                  <span className="font-bold text-blue-700 text-base">
-                    {formatPrice(nonSspAgentPays, service.price_duration || 'mo')}
-                  </span>
+              )}
+              
+              {nonSspAgentPays !== null && (
+                <div className="bg-white p-1.5 rounded border border-blue-300">
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-gray-600">Non-SSP (Others):</span>
+                    <span className="font-bold text-blue-700 text-sm">
+                      {formatPrice(nonSspAgentPays, service.price_duration || 'mo')}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}
