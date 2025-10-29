@@ -133,9 +133,6 @@ const TopDealsManager = React.lazy(() =>
   import('./TopDealsManager').then(module => ({ default: module.TopDealsManager })).catch(() => ({ default: () => <PlaceholderCard title="Top Deals Configuration" /> }))
 );
 
-const BulkServiceResearch = React.lazy(() => 
-  import('./BulkServiceResearch').then(module => ({ default: module.default })).catch(() => ({ default: () => <PlaceholderCard title="Bulk Service Research" /> }))
-);
 
 const VendorImportPanel = React.lazy(() => 
   import('./VendorImportPanel').then(module => ({ default: module.VendorImportPanel })).catch(() => ({ default: () => <PlaceholderCard title="Vendor Import" /> }))
@@ -217,10 +214,7 @@ export function AdminContentRouter() {
         
         <Route path="/services" element={
           <Suspense fallback={<LoadingFallback title="Service Management" />}>
-            <div className="space-y-6">
-              <ServiceManagementPanelWrapper />
-              <BulkServiceResearch />
-            </div>
+            <ServiceManagementPanelWrapper />
           </Suspense>
         } />
         
