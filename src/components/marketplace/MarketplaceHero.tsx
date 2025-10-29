@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, Percent, DollarSign, ArrowRight, Clock, Star } from "lucide-react";
 import marketplacePreview from "@/assets/marketplace-preview.png";
+import brainLightbulb from "@/assets/brain-lightbulb.png";
 import { motion } from "framer-motion";
 interface MarketplaceHeroProps {
   onExploreClick?: () => void;
@@ -41,7 +42,7 @@ export default function MarketplaceHero({
   const handleCreateAccount = () => {
     navigate('/pricing');
   };
-  return <section className="relative bg-background py-12 sm:py-20 px-4 sm:px-6 overflow-hidden w-full">
+  return <section className="relative bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 dark:from-blue-950 dark:via-purple-950 dark:to-pink-950 py-12 sm:py-20 px-4 sm:px-6 overflow-hidden w-full">
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Three Column Grid */}
@@ -55,14 +56,11 @@ export default function MarketplaceHero({
             transition={{ duration: 0.6 }}
           >
             <div>
-              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight mb-4 lg:text-3xl">
-                Find the <span className="text-primary bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">perfect tool</span> for your <span className="text-primary bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">real estate</span> business
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight mb-4">
+                Tools for your real estate business
               </h1>
-              <p className="text-lg sm:text-xl font-semibold mb-2 text-foreground">
+              <p className="text-base sm:text-lg text-foreground/90 mb-4">
                 The one-stop marketplace for agents to find the tools top producers actually use — at wholesale prices.
-              </p>
-              <p className="text-muted-foreground text-base sm:text-lg">
-                Every tool you need—faster, cheaper, without the awkward sales calls.
               </p>
             </div>
             <div className="space-y-3">
@@ -95,6 +93,22 @@ export default function MarketplaceHero({
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <div className="relative mx-auto max-w-md lg:max-w-none">
+              {/* Brain Lightbulb - positioned above the laptop */}
+              <motion.div
+                className="absolute -top-16 left-1/2 -translate-x-1/2 z-20 w-32 h-32"
+                animate={{
+                  y: [0, -10, 0],
+                  rotate: [0, 5, -5, 0],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <img src={brainLightbulb} alt="AI Brain" className="w-full h-full object-contain drop-shadow-2xl" />
+              </motion.div>
+              
               {/* Floating Shadow Effect */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg blur-2xl"
@@ -127,16 +141,22 @@ export default function MarketplaceHero({
 
           {/* Right Column - Benefits with Enhanced Design */}
           <motion.div 
-            className="relative space-y-6 p-6 rounded-lg"
+            className="relative space-y-6"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
+            <div className="mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-2">AI Marketplace</h2>
+              <p className="text-sm sm:text-base text-foreground/80">
+                Predictive Pathways, driven by AI Intelligence data, on how to close the gap of your competitors
+              </p>
+            </div>
             
             <div className="relative flex gap-4 group z-10">
               <div className="relative">
-                <div className="absolute inset-0 bg-primary/10 rounded-full blur-md group-hover:blur-lg transition-all" />
-                <div className="relative text-4xl font-bold text-primary flex-shrink-0 w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center">
+                <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-md group-hover:blur-lg transition-all" />
+                <div className="relative text-4xl font-bold text-blue-600 dark:text-blue-400 flex-shrink-0 w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center">
                   01
                 </div>
               </div>
@@ -146,8 +166,8 @@ export default function MarketplaceHero({
             </div>
             <div className="relative flex gap-4 group z-10">
               <div className="relative">
-                <div className="absolute inset-0 bg-primary/10 rounded-full blur-md group-hover:blur-lg transition-all" />
-                <div className="relative text-4xl font-bold text-primary flex-shrink-0 w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center">
+                <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-md group-hover:blur-lg transition-all" />
+                <div className="relative text-4xl font-bold text-blue-600 dark:text-blue-400 flex-shrink-0 w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center">
                   02
                 </div>
               </div>
@@ -159,8 +179,8 @@ export default function MarketplaceHero({
             </div>
             <div className="relative flex gap-4 group z-10">
               <div className="relative">
-                <div className="absolute inset-0 bg-primary/10 rounded-full blur-md group-hover:blur-lg transition-all" />
-                <div className="relative text-4xl font-bold text-primary flex-shrink-0 w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center">
+                <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-md group-hover:blur-lg transition-all" />
+                <div className="relative text-4xl font-bold text-blue-600 dark:text-blue-400 flex-shrink-0 w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center">
                   03
                 </div>
               </div>
