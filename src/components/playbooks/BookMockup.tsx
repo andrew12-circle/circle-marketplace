@@ -2,9 +2,17 @@ import { motion } from "framer-motion";
 import playbookCover from "@/assets/agent-playbook-cover.png";
 
 export const BookMockup = () => {
+  const handleClick = () => {
+    const playbooksSection = document.getElementById('playbooks-section');
+    if (playbooksSection) {
+      playbooksSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <motion.div
-      className="relative w-full max-w-[280px] mx-auto"
+      onClick={handleClick}
+      className="relative w-full max-w-[280px] mx-auto cursor-pointer"
       initial={{ opacity: 0, x: -50 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.8, ease: "easeOut" }}

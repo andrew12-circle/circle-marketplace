@@ -23,7 +23,7 @@ export const PlaybooksLibrary = () => {
         onFiltersChange={setFilters}
       />
       
-      <div className="container mx-auto px-4 py-8 md:py-12">
+      <div id="playbooks-section" className="container mx-auto px-4 py-8 md:py-12">
         <div className="max-w-7xl mx-auto">
           <PlaybooksFilters
             filters={filters}
