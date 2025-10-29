@@ -56,7 +56,7 @@ export default function MarketplaceHero({
           >
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight leading-tight mb-3">
-                Tools for your real estate business
+                The Smart Marketplace for Real Estate Pros
               </h1>
               <p className="text-sm sm:text-base text-foreground/90 mb-3">
                 The one-stop marketplace for agents to find the tools top producers actually use — at wholesale prices.
