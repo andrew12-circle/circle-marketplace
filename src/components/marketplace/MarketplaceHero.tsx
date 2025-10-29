@@ -4,8 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, Percent, DollarSign, ArrowRight, Clock, Star } from "lucide-react";
-import marketplacePreview from "@/assets/marketplace-preview.png";
-import brainLightbulb from "@/assets/brain-lightbulb.png";
+import circlePitchDeck from "@/assets/circle-pitch-deck.jpg";
 import { motion } from "framer-motion";
 interface MarketplaceHeroProps {
   onExploreClick?: () => void;
@@ -85,7 +84,7 @@ export default function MarketplaceHero({
             </div>
           </motion.div>
 
-          {/* Center Column - Visual Mockup with Enhanced Card */}
+          {/* Center Column - Visual Mockup */}
           <motion.div 
             className="relative"
             initial={{ opacity: 0, scale: 0.95 }}
@@ -93,22 +92,6 @@ export default function MarketplaceHero({
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <div className="relative mx-auto max-w-md lg:max-w-none">
-              {/* Brain Lightbulb - positioned above the laptop */}
-              <motion.div
-                className="absolute -top-16 left-1/2 -translate-x-1/2 z-20 w-32 h-32"
-                animate={{
-                  y: [0, -10, 0],
-                  rotate: [0, 5, -5, 0],
-                }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              >
-                <img src={brainLightbulb} alt="AI Brain" className="w-full h-full object-contain drop-shadow-2xl" />
-              </motion.div>
-              
               {/* Floating Shadow Effect */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg blur-2xl"
@@ -123,18 +106,15 @@ export default function MarketplaceHero({
                 }}
               />
               
-              {/* Laptop Frame with Hover Effect */}
+              {/* Laptop with Brain Image */}
               <motion.div 
-                className="relative rounded-lg border-4 border-border bg-background shadow-2xl overflow-hidden"
+                className="relative"
                 whileHover={{ 
                   scale: 1.02,
-                  rotateY: 2,
-                  rotateX: -2,
                   transition: { duration: 0.3 }
                 }}
-                style={{ transformStyle: "preserve-3d" }}
               >
-                <img src={marketplacePreview} alt="Circle Marketplace Preview showing vendor cards" className="w-full h-auto object-cover" loading="lazy" />
+                <img src={circlePitchDeck} alt="Circle Marketplace with AI Intelligence" className="w-full h-auto object-contain drop-shadow-2xl" loading="lazy" />
               </motion.div>
             </div>
           </motion.div>
