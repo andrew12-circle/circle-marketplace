@@ -144,8 +144,8 @@ export default function MarketplaceHero({
                 </div>
               </div>
               <div>
-                <p className="text-xs sm:text-sm font-medium leading-relaxed">
-                  Gain a real edge. See what's actually working for top agents nationwide and cut through the noise.
+                <p className="text-xs sm:text-sm leading-relaxed">
+                  <span className="font-bold">Gain a real edge.</span> See what's actually working for top agents nationwide and cut through the noise.
                 </p>
               </div>
             </div>
