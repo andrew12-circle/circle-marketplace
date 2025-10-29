@@ -145,7 +145,7 @@ export default function MarketplaceHero({
               </div>
               <div>
                 <p className="text-xs sm:text-sm font-medium leading-relaxed">
-                  Agent advice backed by nationwide data on what top realtors use
+                  Gain a real edge. See what's actually working for top agents nationwide and cut through the noise.
                 </p>
               </div>
             </div>
