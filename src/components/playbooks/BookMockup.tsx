@@ -18,7 +18,6 @@ export const BookMockup = () => {
       transition={{ duration: 0.8, ease: "easeOut" }}
       style={{ perspective: "1000px" }}
     >
-      {/* Playbook Cover with 3D rotation and floating animation */}
       <motion.div
         className="relative"
         style={{
@@ -28,14 +27,6 @@ export const BookMockup = () => {
         animate={{
           rotateY: -15,
           rotateX: 5,
-          y: [0, -15, 0],
-        }}
-        transition={{
-          y: {
-            duration: 3,
-            repeat: Infinity,
-            ease: "easeInOut",
-          },
         }}
         whileHover={{
           rotateY: -5,
@@ -50,19 +41,10 @@ export const BookMockup = () => {
       />
       </motion.div>
       
-      {/* Animated shadow that moves with floating */}
-      <motion.div
+      {/* Shadow */}
+      <div
         className="absolute inset-0 blur-3xl bg-black/30 -z-10 rounded-full"
-        animate={{
-          scale: [1, 0.9, 1],
-          opacity: [0.3, 0.2, 0.3],
-        }}
-        transition={{
-          duration: 3,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        style={{ transform: "translateY(80%)" }}
+        style={{ transform: "translateY(80%)", opacity: 0.3 }}
       />
     </motion.div>
   );
