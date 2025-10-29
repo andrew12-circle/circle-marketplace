@@ -762,18 +762,6 @@ export const ServiceCard = ({
                       </div>
                     </div>
                   )}
-
-                  {/* Savings Badge */}
-                  {(() => {
-                    const savingsInfo = getSavingsInfo(service);
-                    return savingsInfo && (
-                      <div className="text-center">
-                        <div className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs font-medium px-2 py-1 rounded-full">
-                          <span>Save {formatPrice(savingsInfo.amount, service.price_duration || 'mo')} ({savingsInfo.percentage}%)</span>
-                        </div>
-                      </div>
-                    );
-                  })()}
                 </>
               ) : (
                 <>
