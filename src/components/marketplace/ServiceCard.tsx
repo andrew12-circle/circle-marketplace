@@ -228,14 +228,7 @@ export const ServiceCard = ({
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // If co-pay/circle match is not allowed for this service, add directly to cart
-    if (service.copay_allowed === false) {
-      // Add directly to cart with pro pricing if available, otherwise retail
-      addDirectlyToCart('pro');
-      return;
-    }
-    
-    // Show payment choice modal for services that allow circle match/co-pay
+    // Always show payment choice modal first - this is the unified flow
     setIsPricingChoiceModalOpen(true);
   };
 
