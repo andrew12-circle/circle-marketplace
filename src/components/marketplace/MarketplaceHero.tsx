@@ -121,7 +121,9 @@ export default function MarketplaceHero({
             <div className="mb-3">
               <h2 className="text-xl sm:text-2xl font-bold mb-1.5">AI Marketplace</h2>
               <p className="text-xs sm:text-sm text-foreground/80">
-                What if you could see exactly what top agents are using — and know it works? That's smarter, safer, faster growth. The AI Marketplace is powered by real insights from agents, vendors, and verified results — continuously learning from every action on the platform to guide you toward better outcomes.
+                What if you could see exactly what top agents are using — and know it works?
+                <br />
+                Smarter, safer, faster growth — powered by AI insights from agents, vendors, and real results that keep learning to guide you toward better outcomes.
               </p>
             </div>
             
