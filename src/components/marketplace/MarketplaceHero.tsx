@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, Percent, DollarSign, ArrowRight, Clock, Star } from "lucide-react";
-import circlePitchDeck from "@/assets/circle-pitch-deck.jpg";
+import circlePitchDeck from "@/assets/circle-pitch-deck.png";
 import { motion } from "framer-motion";
 interface MarketplaceHeroProps {
   onExploreClick?: () => void;
@@ -86,15 +86,15 @@ export default function MarketplaceHero({
 
           {/* Center Column - Visual Mockup */}
           <motion.div 
-            className="relative"
+            className="relative lg:col-span-1"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <div className="relative mx-auto max-w-md lg:max-w-none">
+            <div className="relative mx-auto w-full max-w-2xl">
               {/* Floating Shadow Effect */}
               <motion.div
-                className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg blur-2xl"
+                className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg blur-3xl"
                 animate={{
                   scale: [1, 1.05, 1],
                   opacity: [0.5, 0.7, 0.5],
@@ -108,9 +108,9 @@ export default function MarketplaceHero({
               
               {/* Laptop with Brain Image */}
               <motion.div 
-                className="relative"
+                className="relative scale-110"
                 whileHover={{ 
-                  scale: 1.02,
+                  scale: 1.15,
                   transition: { duration: 0.3 }
                 }}
               >
