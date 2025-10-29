@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, Mic } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { BookMockup } from "./BookMockup";
 import { type FilterState } from "./PlaybooksFilters";
@@ -40,14 +41,19 @@ export const PlaybooksHero = ({
             {/* RIGHT: Text Content */}
             <div className="text-content space-y-4 max-w-[420px] mx-auto lg:mx-0 text-center lg:text-left">
               {/* Headline */}
-              <motion.h1
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0 }}
-                className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold tracking-tight text-foreground leading-tight"
+                className="flex items-center gap-3 justify-center lg:justify-start flex-wrap"
               >
-                Agent Playbooks
-              </motion.h1>
+                <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold tracking-tight text-foreground leading-tight">
+                  Agent Playbooks
+                </h1>
+                <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 font-semibold">
+                  BETA
+                </Badge>
+              </motion.div>
 
               {/* Subheadline */}
               <motion.h2
@@ -90,6 +96,18 @@ export const PlaybooksHero = ({
               >
                 Built for agents who want real answers, not recycled advice.
               </motion.p>
+
+              {/* Beta Notice */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.55 }}
+                className="bg-muted/50 border border-border rounded-lg p-4 mt-4"
+              >
+                <p className="text-sm text-muted-foreground">
+                  <strong className="text-foreground">Coming Soon:</strong> We're currently interviewing top agents and will have our first 10 playbooks for sale shortly. Check back soon!
+                </p>
+              </motion.div>
             </div>
           </div>
           
