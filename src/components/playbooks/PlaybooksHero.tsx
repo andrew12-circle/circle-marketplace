@@ -39,7 +39,7 @@ export const PlaybooksHero = ({
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50" />
             <Input
               type="text"
-              placeholder="Search playbooks"
+              placeholder="Search by title, agent, or market (e.g., Beverly Hills, CA)"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               className="pl-14 h-12 text-base bg-background/80 backdrop-blur-sm border-border/40 rounded-full hover:bg-background transition-colors focus:bg-background shadow-lg"
