@@ -53,21 +53,28 @@ export const UserMenu = () => {
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
-    const { error } = await signOut();
-    
-    if (error) {
-      toast({
-        title: "Sign out failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Signed out",
-        description: "You've been signed out successfully.",
-      });
+    try {
+      const { error } = await signOut();
+      
+      if (error) {
+        toast({
+          title: "Sign out failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Signed out",
+          description: "You've been signed out successfully.",
+        });
+      }
+    } catch (error) {
+      console.error('Sign out error:', error);
+    } finally {
+      setIsSigningOut(false);
+      // Always redirect to auth page after sign out
+      window.location.href = '/auth';
     }
-    setIsSigningOut(false);
   };
 
   if (!user) {

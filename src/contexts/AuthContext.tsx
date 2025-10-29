@@ -649,9 +649,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       logger.log('Sign out initiated...');
       
-      // End session management tracking
-      await sessionManagement.endSession();
+      // End session management tracking first
+      try {
+        await sessionManagement.endSession();
+      } catch (sessionError) {
+        logger.warn('Session end error (non-blocking):', sessionError);
+      }
       
+      // Clear all state immediately BEFORE calling signOut
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setProvisionalProfile(null);
+      
+      // Clear caches
+      queryClient.clear();
+      setProfileCache(new Map());
+      setInFlightFetches(new Set());
+      
+      // Call Supabase signOut
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -659,18 +675,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { error };
       }
       
-      logger.log('Sign out successful, clearing state...');
-      // Clear all state immediately
-      setUser(null);
-      setSession(null);
-      setProfile(null);
-      
-      // Clear React Query cache
-      queryClient.clear();
-      
+      logger.log('Sign out successful');
       return { error: null };
     } catch (error) {
       logger.error('Sign out exception:', error);
+      // Still clear state on error
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setProvisionalProfile(null);
+      queryClient.clear();
       return { error: error as Error };
     }
   };

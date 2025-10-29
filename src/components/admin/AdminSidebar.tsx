@@ -116,9 +116,11 @@ export function AdminSidebar() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      window.location.href = '/';
     } catch (error) {
       console.error('Error signing out:', error);
+    } finally {
+      // Always redirect to home after sign out attempt
+      window.location.href = '/auth';
     }
   };
 
