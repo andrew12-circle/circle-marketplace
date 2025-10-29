@@ -33,6 +33,10 @@ export interface Vendor {
 export const isSSP = (vendor: Vendor): boolean => {
   if (!vendor.vendor_type) return false;
   
+  // Direct SSP designation
+  if (vendor.vendor_type.toLowerCase() === 'ssp') return true;
+  
+  // Legacy type checking for backward compatibility
   const sspTypes = [
     'lender',
     'mortgage_lender', 
@@ -53,6 +57,10 @@ export const isSSP = (vendor: Vendor): boolean => {
 export const isNonSSP = (vendor: Vendor): boolean => {
   if (!vendor.vendor_type) return true; // Default to non-SSP if unknown
   
+  // Direct Non-SSP designation
+  if (vendor.vendor_type.toLowerCase() === 'non_ssp') return true;
+  
+  // Legacy type checking for backward compatibility
   const nonSspTypes = [
     'inspector',
     'contractor',
