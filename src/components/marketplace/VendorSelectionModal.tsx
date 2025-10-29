@@ -476,12 +476,11 @@ export const VendorSelectionModal = ({
               </div>
             )}
           </div>
-          <div className="flex items-center space-x-2 shrink-0 mr-8">
+          <div className="flex items-center space-x-2 shrink-0 mr-16">
             <Button
-              variant="outline"
               size="sm"
               onClick={() => setShowReferralModal(true)}
-              className="border-green-600 text-green-600 hover:bg-green-50 hover:border-green-700 hover:text-green-700"
+              className="bg-green-600 text-white hover:bg-green-700"
             >
               <Plus className="w-4 h-4 mr-2" />
               Request Your Vendors
