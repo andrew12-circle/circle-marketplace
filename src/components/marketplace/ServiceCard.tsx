@@ -891,13 +891,13 @@ export const ServiceCard = ({
                                       </div>
                                      <div className="text-xs bg-green-100 p-2 rounded border border-green-300 flex items-center justify-between">
                                        <span className="text-gray-600">With Vendor Help:</span>
-                                       <span className={`font-bold text-green-700 text-xl ${!isProMember ? 'line-through' : ''}`}>
+                                       <span className="font-bold text-green-700 text-xl">
                                          {sspAgentPays !== null ? formatPrice(sspAgentPays, service.price_duration || 'mo') : 'Not eligible'}
                                        </span>
                                      </div>
                                     <div className="text-xs">
                                       <span className="text-gray-600">Non Settlement Service Provider: </span>
-                                      <span className={`font-medium text-blue-600 ${!isProMember ? 'line-through' : ''}`}>
+                                      <span className="font-medium text-blue-600">
                                         {nonSspAgentPays !== null ? formatPrice(nonSspAgentPays, service.price_duration || 'mo') : 'Not shown'}
                                       </span>
                                     </div>
@@ -939,9 +939,8 @@ export const ServiceCard = ({
 
             {/* Pro Savings Guarantee for non-pro members */}
             {!isProMember && service.is_verified && effectivePricing.pro > 0 && (
-              <p className="text-xs mt-2">
-                <span className="font-bold text-black">Pro Savings Guarantee.</span>
-                <span className="text-gray-500"> If your first month Pro credits and coverage do not equal or exceed your membership fee we credit the difference as marketplace credit.</span>
+              <p className="text-xs text-gray-600 mt-3 pt-3 border-t border-gray-200">
+                <span className="font-bold text-black">Pro Savings Guarantee.</span> If your first month Pro credits and coverage do not equal or exceed your membership fee we credit the difference as marketplace credit.
               </p>
             )}
           </CardContent>
