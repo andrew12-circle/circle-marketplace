@@ -205,11 +205,11 @@ const fetchServices = async (): Promise<Service[]> => {
     supabase
       .from('services')
       .select('*, title_es, title_fr, description_es, description_fr')
-      .eq('is_active', true)
+      .or('is_active.eq.true,is_active.is.null') // Also include null is_active for backward compatibility
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
       .limit(200),
-      60000, // Increased timeout for stability
+      120000, // Increased timeout to 120 seconds for admin panel
       'fetchServices'
     );
 

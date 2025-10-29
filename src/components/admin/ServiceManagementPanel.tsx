@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { Package, Search, Edit, Globe, MapPin, Star, DollarSign, Eye, Building, Tag, ShoppingCart, CheckCircle, Clock, Mail } from 'lucide-react';
 import { ServiceFunnelEditor } from './ServiceFunnelEditor';
 import { ServicePricingTiersEditor } from '@/components/marketplace/ServicePricingTiersEditor';
@@ -217,6 +218,7 @@ const safeParseJSON = (val: string) => {
 
 export const ServiceManagementPanel = () => {
   const { toast } = useToast();
+  const { user, profile, loading: authLoading } = useAuth();
   const { invalidateServices } = useInvalidateMarketplace();
   const queryClient = useQueryClient();
   const [services, setServices] = useState<Service[]>([]);
@@ -440,8 +442,16 @@ export const ServiceManagementPanel = () => {
   });
 
   useEffect(() => {
-    fetchServices();
-  }, []);
+    // Only fetch services after we confirm the user profile is loaded
+    // This ensures RLS policies can properly check admin status
+    if (profile && user) {
+      fetchServices();
+    } else if (!authLoading) {
+      // If loading is complete but no profile, show error
+      setError('Unable to verify admin access. Please refresh the page.');
+      setLoading(false);
+    }
+  }, [profile, user, authLoading]);
   
   useEffect(() => {
     const filtered = services.filter(service => 
@@ -516,13 +526,28 @@ export const ServiceManagementPanel = () => {
       setError(null);
       dlog('📋 ServiceManagementPanel: Fetching services...');
 
+      // For admin panel, we want ALL services (active and inactive)
       const { data, error } = await supabase
         .from('services')
-        .select('*')
+        .select('*,service_providers(name,logo_url)')
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false });
         
-      if (error) throw error;
+      if (error) {
+        // If we get a permission error, it means the user isn't recognized as admin yet
+        if (error.code === 'PGRST116' || error.message?.includes('permission')) {
+          console.warn('Admin permission check failed, profile may not be loaded yet');
+          setError('Admin access not verified. Please refresh the page.');
+          toast({
+            title: 'Admin Access Required',
+            description: 'Your admin privileges are being verified. Please refresh the page.',
+            variant: 'destructive'
+          });
+          return;
+        }
+        throw error;
+      }
+      
       dlog('✅ ServiceManagementPanel: Successfully loaded', data?.length || 0, 'services');
       setServices(data || []);
     } catch (error) {
