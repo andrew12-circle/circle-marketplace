@@ -1244,6 +1244,51 @@ export type Database = {
           },
         ]
       }
+      agent_submissions: {
+        Row: {
+          annual_volume: string
+          brokerage: string | null
+          created_at: string | null
+          email: string
+          full_name: string
+          id: string
+          linkedin_website: string | null
+          market: string
+          phone: string | null
+          system_description: string
+          updated_at: string | null
+          years_in_real_estate: number
+        }
+        Insert: {
+          annual_volume: string
+          brokerage?: string | null
+          created_at?: string | null
+          email: string
+          full_name: string
+          id?: string
+          linkedin_website?: string | null
+          market: string
+          phone?: string | null
+          system_description: string
+          updated_at?: string | null
+          years_in_real_estate: number
+        }
+        Update: {
+          annual_volume?: string
+          brokerage?: string | null
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          linkedin_website?: string | null
+          market?: string
+          phone?: string | null
+          system_description?: string
+          updated_at?: string | null
+          years_in_real_estate?: number
+        }
+        Relationships: []
+      }
       agent_success_path_scores: {
         Row: {
           archetype_id: string | null
