@@ -852,24 +852,24 @@ export const ServiceCard = ({
                       </div>
                     </div>
                   )}
-                   
+                    
                     {service.copay_allowed && service.respa_split_limit && ((service.is_verified && effectivePricing.pro > 0) || (!service.is_verified && effectivePricing.retail > 0)) && (
-                     <div className="space-y-1">
+                     <div className="space-y-2">
                        <Tooltip delayDuration={0}>
                          <TooltipTrigger asChild>
-                            <div className="space-y-2 p-2 bg-green-50 rounded-lg border border-green-200 opacity-75 cursor-pointer hover:opacity-100 transition-opacity" data-tour="copay-badge">
-                              <div className="flex items-center gap-1 mb-2">
-                                <Lock className="w-3 h-3 text-green-600" />
-                                <span className="text-sm font-medium text-green-600">Unlock Circle Match</span>
+                            <div className="space-y-2 p-3 bg-green-50 rounded-lg border-2 border-green-200 cursor-pointer hover:border-green-300 transition-colors" data-tour="copay-badge">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Lock className="w-4 h-4 text-green-600" />
+                                <span className="text-sm font-semibold text-green-700">Unlock Circle Match</span>
                                <button 
-                                 className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors"
+                                 className="w-4 h-4 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors ml-auto"
                                  onMouseEnter={() => {
                                    setShowOverlay(true);
                                    ensureDisclaimerLoaded();
                                  }}
                                  onMouseLeave={() => setShowOverlay(false)}
                                >
-                                 <span className="text-xs text-white">i</span>
+                                 <span className="text-xs text-white font-bold">i</span>
                                </button>
                              </div>
                              
@@ -885,19 +885,21 @@ export const ServiceCard = ({
                                const nonSspAgentPays = nonSspPct > 0 ? basePrice * (1 - nonSspPct / 100) : null;
                                
                                return (
-                                  <div className="space-y-1">
-                                     <div className="text-xs text-gray-600 mb-2">
+                                  <div className="space-y-2">
+                                     <p className="text-xs text-gray-700 leading-relaxed">
                                         Trusted vendors are ready — lenders, title, insurance, and more — or add your own partner with one click.
-                                      </div>
-                                     <div className="text-xs bg-green-100 p-2 rounded border border-green-300 flex items-center justify-between">
-                                       <span className="text-gray-600">With Vendor Help:</span>
-                                       <span className="font-bold text-green-700 text-xl">
-                                         {sspAgentPays !== null ? formatPrice(sspAgentPays, service.price_duration || 'mo') : 'Not eligible'}
-                                       </span>
+                                      </p>
+                                     <div className="bg-white p-2.5 rounded border border-green-300">
+                                       <div className="flex items-center justify-between">
+                                         <span className="text-xs text-gray-600">With Vendor Help:</span>
+                                         <span className="font-bold text-green-700" style={{ fontSize: '1.125rem' }}>
+                                           {sspAgentPays !== null ? formatPrice(sspAgentPays, service.price_duration || 'mo') : 'Not eligible'}
+                                         </span>
+                                       </div>
                                      </div>
-                                    <div className="text-xs">
-                                      <span className="text-gray-600">Non Settlement Service Provider: </span>
-                                      <span className="font-medium text-blue-600">
+                                    <div className="text-xs text-gray-600">
+                                      <span>Non Settlement Service Provider: </span>
+                                      <span className="font-semibold text-blue-600">
                                         {nonSspAgentPays !== null ? formatPrice(nonSspAgentPays, service.price_duration || 'mo') : 'Not shown'}
                                       </span>
                                     </div>
