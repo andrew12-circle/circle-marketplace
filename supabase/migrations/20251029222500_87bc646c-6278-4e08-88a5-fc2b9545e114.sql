@@ -1,0 +1,1 @@
+UPDATE playbooks SET cover_url = '/images/playbook-luxury-50m.jpg' WHERE title LIKE '%50M%';
