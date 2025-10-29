@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { PlaybooksHero } from "./PlaybooksHero";
-import { MarketCarousel } from "./MarketCarousel";
 import { PlaybooksGrid } from "./PlaybooksGrid";
 import { PlaybooksFilters, type FilterState } from "./PlaybooksFilters";
-import { UploadAssetsButton } from "./UploadAssetsButton";
 
 export const PlaybooksLibrary = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -24,7 +22,6 @@ export const PlaybooksLibrary = () => {
         filters={filters}
         onFiltersChange={setFilters}
       />
-      <MarketCarousel />
       
       <div className="container mx-auto px-4 py-8 md:py-12">
         <div className="max-w-7xl mx-auto">
@@ -39,8 +36,6 @@ export const PlaybooksLibrary = () => {
           />
         </div>
       </div>
-      
-      <UploadAssetsButton />
     </div>
   );
 };

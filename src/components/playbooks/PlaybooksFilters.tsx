@@ -62,7 +62,7 @@ export const PlaybooksFilters = ({
     filters.durations.length > 0;
 
   return (
-    <div className="flex flex-wrap items-center gap-2 mb-16">
+    <div className="flex flex-wrap items-center gap-2 mb-12">
       {/* Sort By */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

@@ -34,8 +34,8 @@ export const PlaybooksGrid = ({ searchQuery, filters }: PlaybooksGridProps) => {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 lg:gap-12">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 md:gap-8">
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
           <Skeleton key={i} className="aspect-[2/3] rounded-2xl" />
         ))}
       </div>
@@ -56,7 +56,7 @@ export const PlaybooksGrid = ({ searchQuery, filters }: PlaybooksGridProps) => {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 lg:gap-12">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 md:gap-8">
         {filteredPlaybooks.map((playbook) => (
           <PlaybookCard
             key={playbook.id}
