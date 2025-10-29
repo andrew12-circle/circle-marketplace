@@ -277,7 +277,7 @@ export const VendorSelectionModal = ({
         .in('approval_status', ['approved', 'auto_approved', 'pending'])
         .order('sort_order', { ascending: true })
         .order('rating', { ascending: false })
-        .limit(100);
+        .limit(500);
 
       const vendorTimeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Vendor query timeout')), 8000)
