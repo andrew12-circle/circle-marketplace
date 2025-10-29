@@ -2,6 +2,7 @@ import { useState } from "react";
 import { PlaybooksHero } from "./PlaybooksHero";
 import { PlaybooksGrid } from "./PlaybooksGrid";
 import { PlaybooksFilters, type FilterState } from "./PlaybooksFilters";
+import { UploadAssetsButton } from "./UploadAssetsButton";
 
 export const PlaybooksLibrary = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -36,6 +37,8 @@ export const PlaybooksLibrary = () => {
           />
         </div>
       </div>
+      
+      <UploadAssetsButton />
     </div>
   );
 };
