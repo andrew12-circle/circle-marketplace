@@ -603,10 +603,10 @@ export const VendorSelectionModal = ({
                               <div className="flex gap-3">
                                 <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
                                   {company.logo_url ? (
-                                    <img 
+                                     <img 
                                       src={company.logo_url} 
                                       alt={company.name}
-                                      className="w-full h-full object-cover rounded-lg"
+                                      className="w-full h-auto object-contain rounded-lg"
                                     />
                                   ) : (
                                     <Building className="w-8 h-8 text-muted-foreground" />
