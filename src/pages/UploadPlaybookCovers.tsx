@@ -12,10 +12,14 @@ export default function UploadPlaybookCovers() {
     
     try {
       const images = [
-        { path: '/images/temp-youtube-100k.png', name: 'youtube-100k.png', title: 'YouTube to 100k' },
-        { path: '/images/temp-circle-prospecting.png', name: 'circle-prospecting.png', title: 'The Circle Prospecting' },
-        { path: '/images/temp-luxury-50m.png', name: 'luxury-50m.png', title: '$50M Luxury Production' },
+        { path: '/images/temp-youtube-100k.png', name: 'youtube-100k.png', title: 'YouTube to $100K+/Month' },
+        { path: '/images/temp-circle-prospecting.png', name: 'circle-prospecting.png', title: 'The Circle Prospecting Blueprint' },
+        { path: '/images/temp-luxury-50m.png', name: 'luxury-50m.png', title: 'The $50M Luxury Listing Playbook' },
         { path: '/images/temp-first-time-buyer.png', name: 'first-time-buyer.png', title: 'First-Time Buyer Machine' },
+        { path: '/images/temp-denver-1.png', name: 'expired-listing.png', title: 'The Expired Listing System' },
+        { path: '/images/temp-denver-2.png', name: 'investor-deal-flow.png', title: 'Investor Deal Flow Factory' },
+        { path: '/images/temp-seattle.png', name: 'referral-only.png', title: 'The Referral-Only Agent' },
+        { path: '/images/temp-phoenix.png', name: 'new-construction.png', title: 'New Construction Specialist' },
       ];
 
       const results = [];
