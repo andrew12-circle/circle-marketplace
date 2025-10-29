@@ -871,6 +871,83 @@ export const ServiceManagementPanel = () => {
                           />
                         </div>
                       </div>
+
+                      {/* Circle Match Split Settings */}
+                      <div className="space-y-4 border-t pt-4">
+                        <h4 className="text-sm font-semibold flex items-center gap-2">
+                          Circle Match Coverage Rates
+                          <span className="text-xs text-muted-foreground font-normal">(Vendor Co-Pay Splits)</span>
+                        </h4>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium flex items-center gap-2">
+                              SSP Split % (Lenders/Title)
+                              <span className="text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded">SSP</span>
+                            </label>
+                            <Input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={formData?.respa_split_limit || ''}
+                              onChange={e => {
+                                const value = e.target.value === '' ? null : Number(e.target.value);
+                                handleFieldChange('respa_split_limit', value);
+                              }}
+                              placeholder="50"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              RESPA-regulated vendors (lenders, title, escrow). Typically 50%.
+                            </p>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium flex items-center gap-2">
+                              Non-SSP Split % (All Others)
+                              <span className="text-xs text-blue-700 bg-blue-50 px-2 py-0.5 rounded">Non-SSP</span>
+                            </label>
+                            <Input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={formData?.max_split_percentage_non_ssp || ''}
+                              onChange={e => {
+                                const value = e.target.value === '' ? null : Number(e.target.value);
+                                handleFieldChange('max_split_percentage_non_ssp', value);
+                              }}
+                              placeholder="70"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              Non-regulated vendors (inspectors, contractors, software). Can be higher.
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Calculated Co-Pay Preview */}
+                        {formData?.pro_price && (formData?.respa_split_limit || formData?.max_split_percentage_non_ssp) && (
+                          <div className="bg-muted/50 p-3 rounded-lg space-y-2">
+                            <p className="text-xs font-medium">Calculated Circle Match Prices:</p>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              {formData?.respa_split_limit && (
+                                <div className="flex justify-between">
+                                  <span className="text-green-700">SSP Vendors:</span>
+                                  <span className="font-medium">
+                                    ${(parseFloat(formData.pro_price.replace(/[^\d.]/g, '') || '0') * (1 - (formData.respa_split_limit / 100))).toFixed(2)}
+                                  </span>
+                                </div>
+                              )}
+                              {formData?.max_split_percentage_non_ssp && (
+                                <div className="flex justify-between">
+                                  <span className="text-blue-700">Non-SSP Vendors:</span>
+                                  <span className="font-medium">
+                                    ${(parseFloat(formData.pro_price.replace(/[^\d.]/g, '') || '0') * (1 - (formData.max_split_percentage_non_ssp / 100))).toFixed(2)}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                       
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Estimated ROI (%)</label>
