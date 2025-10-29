@@ -48,7 +48,7 @@ function App() {
                 <Route path="/lobby" element={<Lobby />} />
                 <Route path="/marketplace" element={<Index />} />
                 <Route path="/playbooks" element={<Playbooks />} />
-                <Route path="/lender" element={<LenderMarketplace />} /> {/* Lender marketplace route */}
+                <Route path="/lender" element={<LenderMarketplace />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/health" element={<Health />} />
                 <Route path="/funnel/:serviceId" element={<FunnelPage />} />
