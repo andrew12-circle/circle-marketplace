@@ -264,8 +264,8 @@ export const PaymentChoiceModal = ({
               </CardContent>
             </Card>
 
-            {/* Co-Pay Option - Pro Only */}
-            {(coPayPrice || !isProMember) && (
+            {/* Co-Pay Option - Pro Only - Only show if copay is allowed for this service */}
+            {service.copay_allowed !== false && (coPayPrice || !isProMember) && (
               <Card className={!isProMember ? "opacity-75 border-dashed" : ""}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
