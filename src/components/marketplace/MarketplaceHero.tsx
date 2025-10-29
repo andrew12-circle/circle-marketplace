@@ -41,7 +41,7 @@ export default function MarketplaceHero({
   const handleCreateAccount = () => {
     navigate('/pricing');
   };
-  return <section className="relative bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 dark:from-blue-950 dark:via-purple-950 dark:to-pink-950 py-12 sm:py-20 px-4 sm:px-6 overflow-hidden w-full">
+  return <section className="relative bg-background py-12 sm:py-20 px-4 sm:px-6 overflow-hidden w-full">
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Three Column Grid */}
@@ -92,20 +92,6 @@ export default function MarketplaceHero({
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <div className="relative mx-auto w-full">
-              {/* Floating Shadow Effect */}
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg blur-3xl"
-                animate={{
-                  scale: [1, 1.05, 1],
-                  opacity: [0.5, 0.7, 0.5],
-                }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-              
               {/* Laptop with Brain Image */}
               <motion.div 
                 className="relative scale-125 lg:scale-150"
@@ -114,7 +100,13 @@ export default function MarketplaceHero({
                   transition: { duration: 0.3 }
                 }}
               >
-                <img src={circlePitchDeck} alt="Circle Marketplace with AI Intelligence" className="w-full h-auto object-contain drop-shadow-2xl" loading="lazy" />
+                <img 
+                  src={circlePitchDeck} 
+                  alt="Circle Marketplace with AI Intelligence" 
+                  className="w-full h-auto object-contain" 
+                  loading="lazy"
+                  style={{ imageRendering: 'crisp-edges' }}
+                />
               </motion.div>
             </div>
           </motion.div>
