@@ -89,6 +89,9 @@ const AffiliateDashboardPage = lazy(() => import("./pages/AffiliateDashboardPage
 // DISC Test page
 const DiscTest = lazy(() => import("./pages/DiscTest"));
 
+// Playbooks page
+const Playbooks = lazy(() => import("./pages/Playbooks"));
+
 // Loading component for lazy routes
 const RouteLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -242,6 +245,9 @@ root.render(
                 
                 {/* Lender Marketplace route */}
                 <Route path="/lender" element={<LenderMarketplace />} />
+                
+                {/* Playbooks route */}
+                <Route path="/playbooks" element={<Playbooks />} />
                 
                 {/* Profile settings alternate path */}
                 <Route path="/profile" element={<ProfileSettings />} />
