@@ -157,7 +157,7 @@ export default function MarketplaceHero({
                 </div>
               </div>
               <div>
-                <p className="text-xs sm:text-sm font-medium leading-relaxed">Trusted vendors are ready — lenders, title, insurance, and more — or add your own partner with one click.</p>
+                <p className="text-xs sm:text-sm font-medium leading-relaxed">Fund your marketing. Partner with lenders, title, insurance, and more — or add your own with one click using Circle Matchmaking.</p>
               </div>
             </div>
           </motion.div>
