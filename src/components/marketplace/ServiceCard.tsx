@@ -909,7 +909,7 @@ export const ServiceCard = ({
                                      </div>
                                     <div className="text-xs">
                                       <span className="text-gray-600">Non Settlement Service Provider: </span>
-                                      <span className="font-medium text-blue-600">
+                                      <span className={`font-medium text-blue-600 ${!isProMember ? 'line-through' : ''}`}>
                                         {nonSspAgentPays !== null ? formatPrice(nonSspAgentPays, service.price_duration || 'mo') : 'Not shown'}
                                       </span>
                                     </div>
