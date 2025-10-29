@@ -1229,15 +1229,15 @@ export const ServiceFunnelModal = ({
                                )}
                                {service.copay_allowed && (
                                  <div className={`p-3 rounded-lg border ${isProMember ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
-                                   <div className="flex items-center gap-2 text-sm font-medium mb-2">
-                                     {isProMember ? (
-                                       <>
-                                         <span className="text-green-700">💰 Co-Pay Available</span>
-                                         <CoPayInfoPopover />
-                                       </>
-                                     ) : (
-                                       <>
-                                         <span className="text-gray-500">🔒 Co-Pay Feature</span>
+                                    <div className="flex items-center gap-2 text-sm font-medium mb-2">
+                                      {isProMember ? (
+                                        <>
+                                          <span className="text-green-700">💰 Circle Match Available</span>
+                                          <CoPayInfoPopover />
+                                        </>
+                                      ) : (
+                                        <>
+                                          <span className="text-gray-500">🔒 Circle Match Feature</span>
                                          <CoPayInfoPopover />
                                        </>
                                      )}

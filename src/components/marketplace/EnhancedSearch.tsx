@@ -57,7 +57,7 @@ export interface SearchFilters {
 }
 
 const FEATURE_OPTIONS = [
-  "Co-Pay Available",
+  "Circle Match Available",
   "Instant Quote",
   "Featured Service",
   "Top Pick",

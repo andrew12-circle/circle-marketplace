@@ -731,10 +731,10 @@ export const ServiceCard = ({
                     <div className="bg-green-50 border-2 border-green-200 rounded-lg p-3" data-tour="copay-option">
                       <div className="text-center">
                         <div className="flex items-center justify-center gap-2 text-sm font-medium text-green-700 mb-1">
-                          <span>Co-Pay Available</span>
+                          <span>Circle Match Available</span>
                           <Tooltip delayDuration={0}>
                             <TooltipTrigger asChild>
-                              <button 
+                              <button
                                 className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors"
                                 onMouseEnter={() => {
                                   setShowOverlay(true);

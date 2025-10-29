@@ -275,11 +275,11 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
                           </div>
                         )}
                         
-                        {/* Co-Pay Available */}
+                        {/* Circle Match Available */}
                         {service.copay_allowed && service.respa_split_limit && (
                           <div className="bg-green-50 border border-green-200 rounded p-2 mt-2">
                             <div className="text-xs text-green-700 font-medium mb-1">
-                              Co-Pay Available
+                              Circle Match Available
                             </div>
                             <div className="text-sm font-bold text-green-600">
                               Your cost: {formatPrice(effectivePrice)}

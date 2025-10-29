@@ -248,7 +248,7 @@ export const MarketplaceGrid = () => {
       category: sf.categories.length > 0 ? sf.categories[0] : "all",
       priceRange: sf.priceRange,
       featured: sf.features.includes("Featured Service"),
-      coPayEligible: sf.features.includes("Co-Pay Available")
+      coPayEligible: sf.features.includes("Circle Match Available")
     }));
   }, []);
 

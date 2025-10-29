@@ -69,7 +69,7 @@ export const MobilePricingDisplay = ({
         >
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 text-lg font-bold text-green-700 mb-1">
-              <span>Co-Pay Available</span>
+              <span>Circle Match Available</span>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Info className="w-4 h-4 cursor-help" />
