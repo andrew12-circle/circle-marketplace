@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -63,6 +64,7 @@ export const ServiceCard = ({
   showBundlePrice = true
 }: ServiceCardProps) => {
   const { t, i18n } = useTranslation();
+  const isMobile = useIsMobile();
   const [isHovered, setIsHovered] = useState(false);
   const [isClosingModal, setIsClosingModal] = useState(false);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
@@ -489,6 +491,195 @@ export const ServiceCard = ({
     return service.description; // fallback to English
   };
 
+  // Mobile horizontal layout
+  if (isMobile) {
+    return (
+      <TooltipProvider>
+        <div className="relative">
+          <Card 
+            className="group relative overflow-hidden transition-all bg-card border border-border/50 cursor-pointer touch-friendly flex flex-row"
+            onClick={handleViewDetails}
+          >
+            {/* LEFT: Image */}
+            <div className="w-24 h-24 flex-shrink-0 bg-white p-2">
+              <img
+                src={service.image_url || "/lovable-uploads/placeholder.svg"}
+                alt={getLocalizedTitle()}
+                className="w-full h-full object-contain"
+              />
+            </div>
+
+            {/* RIGHT: Content */}
+            <div className="flex-1 flex flex-col p-2 min-w-0">
+              {/* Profile + Title */}
+              <div className="flex items-start gap-2 mb-1">
+                {service.profile_image_url ? (
+                  <img 
+                    src={service.profile_image_url} 
+                    alt={service.vendor?.name || service.title}
+                    className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <span className="text-primary font-semibold text-xs">
+                      {getLocalizedTitle().charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                <h3 className="font-semibold text-foreground text-sm leading-tight line-clamp-1 flex-1">
+                  {getLocalizedTitle().split(' - ').pop() || getLocalizedTitle().split(': ').pop() || getLocalizedTitle()}
+                </h3>
+              </div>
+
+              {/* Rating */}
+              {shouldShowRating && totalReviews > 0 && (
+                <div className="flex items-center gap-1 mb-1">
+                  <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                  <span className="text-xs font-medium">{averageRating.toFixed(1)}</span>
+                  <span className="text-xs text-muted-foreground">({totalReviews})</span>
+                </div>
+              )}
+
+              {/* Description (1 line) */}
+              <p className="text-xs text-muted-foreground line-clamp-1 mb-2">
+                {getLocalizedDescription()}
+              </p>
+
+              {/* Price (Simple) */}
+              <div className="mb-2">
+                {isProMember && service.is_verified && effectivePricing.pro > 0 ? (
+                  <div className="flex items-center gap-1">
+                    <Crown className="w-3 h-3 text-blue-600" />
+                    <span className="text-sm font-bold text-blue-600">
+                      {formatPrice(effectivePricing.pro, service.price_duration || 'mo')}
+                    </span>
+                  </div>
+                ) : effectivePricing.retail > 0 ? (
+                  <span className="text-sm font-bold text-foreground">
+                    {formatPrice(effectivePricing.retail, service.price_duration || 'mo')}
+                  </span>
+                ) : service.requires_quote ? (
+                  <span className="text-xs font-medium text-primary">Quote Required</span>
+                ) : null}
+              </div>
+
+              {/* Buttons (Horizontal) */}
+              <div className="flex gap-2 mt-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs px-2 flex-1"
+                  onClick={handleAddToCart}
+                >
+                  <ShoppingCart className="w-3 h-3 mr-1" />
+                  Add
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs px-2"
+                  onClick={handleViewDetailsButton}
+                >
+                  More
+                </Button>
+              </div>
+            </div>
+
+            {/* Save Button (top right) */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-1 right-1 h-7 w-7 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background"
+              onClick={handleSave}
+            >
+              <Heart 
+                className={`h-3 w-3 transition-colors ${
+                  isSaved ? "fill-red-500 text-red-500" : "text-muted-foreground"
+                }`} 
+              />
+            </Button>
+          </Card>
+
+          {/* Modals */}
+          {isFunnelModalOpen && (
+            <ServiceFunnelModal
+              isOpen={isFunnelModalOpen}
+              onClose={() => {
+                setIsClosingModal(true);
+                setIsFunnelModalOpen(false);
+                setTimeout(() => setIsClosingModal(false), 100);
+              }}
+              service={service}
+            />
+          )}
+
+          {isVendorSelectionModalOpen && (
+            <VendorSelectionModal
+              isOpen={isVendorSelectionModalOpen}
+              onClose={() => setIsVendorSelectionModalOpen(false)}
+              onVendorSelect={(vendor) => {
+                console.log('Selected vendor:', vendor);
+              }}
+              service={{
+                id: service.id,
+                title: service.title,
+                co_pay_price: service.co_pay_price,
+                respa_split_limit: service.respa_split_limit,
+              }}
+            />
+          )}
+
+          <PaymentChoiceModal
+            isOpen={isPricingChoiceModalOpen}
+            onClose={() => setIsPricingChoiceModalOpen(false)}
+            service={service}
+            onProChoice={(service) => {
+              addDirectlyToCart('pro');
+              setTimeout(() => {
+                const cartEvent = new CustomEvent('openCart');
+                window.dispatchEvent(cartEvent);
+              }, 500);
+            }}
+            onPointsChoice={(service) => {
+              addDirectlyToCart('pro');
+              setTimeout(() => {
+                const cartEvent = new CustomEvent('openCart');
+                window.dispatchEvent(cartEvent);
+              }, 500);
+            }}
+            onCoPayChoice={(service, vendor) => {
+              addDirectlyToCart('copay', vendor);
+              setTimeout(() => {
+                const cartEvent = new CustomEvent('openCart');
+                window.dispatchEvent(cartEvent);
+              }, 500);
+            }}
+          />
+
+          <DirectPurchaseModal
+            isOpen={isDirectPurchaseModalOpen}
+            onClose={() => setIsDirectPurchaseModalOpen(false)}
+            service={service}
+            onPurchaseComplete={() => {
+              toast({
+                title: t('serviceCard.purchaseSuccessful'),
+                description: t('serviceCard.purchaseSuccessfulDescription'),
+              });
+              setIsConsultationFlowOpen(true);
+            }}
+          />
+
+          <ConsultationFlow
+            isOpen={isConsultationFlowOpen}
+            onClose={() => setIsConsultationFlowOpen(false)}
+            service={service}
+          />
+        </div>
+      </TooltipProvider>
+    );
+  }
+
+  // Desktop vertical layout (original)
   return (
     <TooltipProvider>
       <div className="relative">
@@ -635,344 +826,43 @@ export const ServiceCard = ({
 
             {/* Mobile-Optimized Pricing for Launch */}
             <div className="space-y-3 mb-3 mt-6">
-              {isProMember ? (
-                <>
-                  {/* Pro Member View: Show pro price prominently or discount pending */}
-                  {service.requires_quote && !effectivePricing.hasValidPricing ? (
-                    /* Quote-only service fallback */
-                    <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-lg p-4">
-                      <div className="flex items-center justify-center gap-2 mb-2">
-                        <MessageCircle className="w-5 h-5 text-primary" />
-                        <div className="text-lg font-semibold text-primary">Contact for Quote</div>
-                      </div>
-                      <div className="text-sm text-muted-foreground mb-2">Custom pricing available</div>
-                      <div className="text-xs text-primary/70 font-medium">Tailored to your specific needs</div>
-                    </div>
-                  ) : showDiscountPending ? (
-                    <div className="text-center space-y-3">
-                      {/* Discount Pending Status */}
-                      <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 text-sm font-medium px-3 py-1 rounded-full hidden">
-                        <span>{t('serviceCard.discountPending')}</span>
-                      </div>
-                      
-                       {/* Interest CTA */}
-                       <div className="space-y-2 hidden">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            demandSignals.likeService();
-                          }}
-                          disabled={demandSignals.hasLiked}
-                        >
-                          <ThumbsUp className={`w-4 h-4 mr-2 ${demandSignals.hasLiked ? 'fill-current' : ''}`} />
-                          {demandSignals.hasLiked ? t('serviceCard.thanksSeeYouPosted') : t('serviceCard.useWithDiscount')}
-                        </Button>
-                        
-                        {/* Social proof counter */}
-                        {demandSignals.totalLikes > 0 && (
-                          <div className="text-xs text-muted-foreground">
-                            {demandSignals.totalLikes} agent{demandSignals.totalLikes === 1 ? '' : 's'} interested
-                          </div>
-                        )}
-                        
-                        {/* Tooltip info */}
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
-                              <Info className="w-3 h-3" />
-                              How this works
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent className="w-64 p-3">
-                            <p className="text-sm leading-relaxed">
-                              Vendors unlock Pro discounts when enough agents show interest. Every like notifies the vendor and increases the chance of Circle securing a discount.
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                      
-                      {/* Show retail price as fallback */}
-                      {effectivePricing.retail > 0 && (
-                        <div className="text-xl font-bold text-foreground">
-                          {formatPrice(effectivePricing.retail, service.price_duration || 'mo')}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-center">
-                      {service.is_verified && effectivePricing.pro > 0 ? (
-                        <>
-                          {effectivePricing.retail > 0 && (
-                            <div className="text-xs text-muted-foreground mb-1">
-                              <span className="line-through">
-                                Retail: {formatPrice(effectivePricing.retail, service.price_duration || 'mo')}
-                              </span>
-                            </div>
-                          )}
-                          <div className="flex items-center justify-center gap-2 text-xl font-bold text-blue-600">
-                            <Crown className="w-4 h-4" />
-                            <span>{formatPrice(effectivePricing.pro, service.price_duration || 'mo')}</span>
-                          </div>
-                          <div className="text-xs text-blue-600 font-medium">Circle Pro Price</div>
-                        </>
-                      ) : (
-                        <div className="text-xl font-bold text-foreground">
-                          {formatPrice(effectivePricing.retail, service.price_duration || 'mo')}
-                        </div>
-                      )}
-                    </div>
-                  )}
+...
+                     )}
+                 </>
+               )}
+             </div>
 
-                  {/* Circle Match Section - Pro Member View (Detailed Benefits) */}
-                  {service.copay_allowed && service.respa_split_limit && ((service.is_verified && effectivePricing.pro > 0) || (!service.is_verified && effectivePricing.retail > 0)) && (
-                    <div className="space-y-2">
-                      <Tooltip delayDuration={0}>
-                        <TooltipTrigger asChild>
-                          <div className="space-y-2 p-3 bg-green-50 rounded-lg border-2 border-green-200 cursor-pointer hover:border-green-300 transition-colors" data-tour="copay-badge">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-sm font-semibold text-green-700">Circle Match Available</span>
-                              <button 
-                                className="w-4 h-4 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors ml-auto"
-                                onMouseEnter={() => {
-                                  setShowOverlay(true);
-                                  ensureDisclaimerLoaded();
-                                }}
-                                onMouseLeave={() => setShowOverlay(false)}
-                              >
-                                <span className="text-xs text-white font-bold">i</span>
-                              </button>
-                            </div>
-                            
-                            {(() => {
-                              const basePrice = service.is_verified 
-                                ? effectivePricing.pro
-                                : effectivePricing.retail;
-                              const sspPct = service.respa_split_limit || 0;
-                              const nonSspPct = service.max_split_percentage_non_ssp || 0;
-                              
-                              const sspAgentPays = sspPct > 0 ? basePrice * (1 - sspPct / 100) : null;
-                              const nonSspAgentPays = nonSspPct > 0 ? basePrice * (1 - nonSspPct / 100) : null;
-                              
-                              return (
-                                <div className="space-y-1.5">
-                                  <p className="text-xs text-gray-700 leading-relaxed">
-                                    Trusted vendors are ready — lenders, title, insurance, and more — or add your own partner with one click.
-                                  </p>
-                                  
-                                  <div className="space-y-1">
-                                    {sspAgentPays !== null && (
-                                      <div className="bg-white p-1.5 rounded border border-green-300">
-                                        <div className="flex items-center justify-between">
-                                          <span className="text-[10px] text-gray-600 flex items-center gap-1">
-                                            SSP:
-                                            <span className="text-[9px] bg-green-100 text-green-700 px-1 py-0.5 rounded">Lenders/Title</span>
-                                          </span>
-                                          <span className="font-bold text-green-700 text-sm">
-                                            {formatPrice(sspAgentPays, service.price_duration || 'mo')}
-                                          </span>
-                                        </div>
-                                      </div>
-                                    )}
-                                    
-                                    {nonSspAgentPays !== null && (
-                                      <div className="bg-white p-1.5 rounded border border-blue-300">
-                                        <div className="flex items-center justify-between">
-                                          <span className="text-[10px] text-gray-600 flex items-center gap-1">
-                                            Non-SSP:
-                                            <span className="text-[9px] bg-blue-100 text-blue-700 px-1 py-0.5 rounded">Others</span>
-                                          </span>
-                                          <span className="font-bold text-blue-700 text-sm">
-                                            {formatPrice(nonSspAgentPays, service.price_duration || 'mo')}
-                                          </span>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                  
-                                  {!sspAgentPays && !nonSspAgentPays && (
-                                    <div className="text-xs text-gray-500 text-center py-1">
-                                      Configure split percentages in admin
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })()}
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent className="w-64 p-3">
-                          <p className="text-sm leading-relaxed">
-                            Your Circle Pro membership includes Circle Match benefits. Partner with trusted vendors or add your own to maximize savings.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  {/* Non-Pro Member View: Show retail as main price, others as incentives */}
-                  {service.requires_quote && !effectivePricing.hasValidPricing ? (
-                    /* Quote-only service fallback */
-                    <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-lg p-4 mt-4">
-                      <div className="flex items-center justify-center gap-2 mb-2">
-                        <MessageCircle className="w-5 h-5 text-primary" />
-                        <div className="text-lg font-semibold text-primary">Contact for Quote</div>
-                      </div>
-                      <div className="text-sm text-muted-foreground mb-2">Custom pricing available</div>
-                      <div className="text-xs text-primary/70 font-medium">Tailored to your specific needs</div>
-                    </div>
-                  ) : effectivePricing.retail > 0 ? (
-                    <div className="flex items-center justify-between mt-4">
-                      <span className="text-sm text-muted-foreground">Retail Price:</span>
-                      <span className="text-xl font-bold text-foreground">
-                         {formatPrice(effectivePricing.retail, service.price_duration || 'month')}
-                      </span>
-                    </div>
-                   ) : null}
-                    
-                   {/* Always show Circle Pro price for verified services with pro pricing */}
-                   {service.is_verified && effectivePricing.pro > 0 && (
-                     <div className="space-y-1">
-                       <Tooltip>
-                         <TooltipTrigger asChild>
-                           <div className="flex items-center justify-between p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20 opacity-75 cursor-pointer">
-                             <div className="flex items-center gap-1">
-                               <Lock className="w-3 h-3 text-circle-primary" />
-                               <span className="text-sm font-medium text-circle-primary">Unlock Wholesale Price</span>
-                               <Crown className="w-4 h-4 text-circle-primary" />
-                             </div>
-                             <span className="text-lg font-bold text-circle-primary line-through">
-                                {formatPrice(effectivePricing.pro, service.price_duration || 'month')}
-                             </span>
-                           </div>
-                         </TooltipTrigger>
-                         <TooltipContent className="w-40 sm:w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
-                           <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
-                           <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
-                         </TooltipContent>
-                       </Tooltip>
-                     </div>
-                   )}
-                  
-                  {/* Show discount pending upvote section only for non-verified services */}
-                  {showDiscountPending && !service.is_verified && service.vendor?.contact_email && (
-                    <div className="p-2 bg-amber-50 rounded-lg border border-amber-200">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-amber-700">
-                          {t('serviceCard.upvoteDiscount')}
-                        </span>
-                        <div className="flex items-center gap-1">
-                          {demandSignals.totalLikes > 0 && (
-                            <span className="text-xs text-amber-700">
-                              {demandSignals.totalLikes}
-                            </span>
-                          )}
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  demandSignals.likeService();
-                                }}
-                                disabled={demandSignals.hasLiked}
-                                className={`p-1 rounded transition-colors ${
-                                  demandSignals.hasLiked 
-                                    ? 'bg-amber-200 text-amber-800' 
-                                    : 'hover:bg-amber-100 text-amber-600'
-                                }`}
-                              >
-                                <ThumbsUp className={`w-4 h-4 ${demandSignals.hasLiked ? 'fill-current' : ''}`} />
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent className="w-64 p-3">
-                              <p className="text-sm leading-relaxed">
-                                {demandSignals.hasLiked 
-                                  ? "Thanks for your interest! We'll notify vendors and work on securing a discount."
-                                  : "Vendors unlock Pro discounts when enough agents show interest. Every upvote notifies the vendor and increases the chance of Circle securing a discount."
-                                }
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                    
-                    {/* Circle Match Section - Non-Pro Member View (Teaser/Locked) */}
-                    {service.copay_allowed && service.respa_split_limit && ((service.is_verified && effectivePricing.pro > 0) || (!service.is_verified && effectivePricing.retail > 0)) && (
-                      <div className="bg-green-50/50 border-2 border-green-200/50 rounded-lg p-3 opacity-75" data-tour="copay-option">
-                        <div className="text-center">
-                          <div className="flex items-center justify-center gap-2 text-sm font-medium text-green-700 mb-1">
-                            <Lock className="w-3 h-3 text-green-600" />
-                            <span>Unlock Circle Match</span>
-                            <Tooltip delayDuration={0}>
-                              <TooltipTrigger asChild>
-                                <button
-                                  className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors"
-                                  onMouseEnter={() => {
-                                    setShowOverlay(true);
-                                    ensureDisclaimerLoaded();
-                                  }}
-                                  onMouseLeave={() => setShowOverlay(false)}
-                                >
-                                  <span className="text-xs text-white">i</span>
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent className="w-64 p-3" onClick={handleUpgradeClick}>
-                                <p className="text-sm leading-relaxed">
-                                  Join Circle Pro to unlock vendor co-marketing and significantly reduce your costs
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </div>
-                          <div className="text-green-600/70 font-medium text-lg line-through">
-                            Potential savings up to {service.respa_split_limit}%
-                          </div>
-                          <div className="text-xs text-green-600/70 mt-1">
-                            Upgrade to Pro to access
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                </>
-              )}
-            </div>
+             {/* Action Buttons - Responsive sizing */}
+             <div className="flex gap-2 mt-auto">
+               {/* Unified Add to Cart Button - all services go through funnel */}
+               <Button
+                 variant="outline"
+                 className="flex-1 h-8 sm:h-9 md:h-10 text-xs sm:text-sm px-2 sm:px-3"
+                 onClick={handleAddToCart}
+               >
+                 <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                 <span className="hidden xs:inline">{t('serviceCard.addToCart')}</span>
+                 <span className="xs:hidden">Add</span>
+               </Button>
+               
+               <Button 
+                 variant="outline" 
+                 className="h-8 sm:h-9 md:h-10 text-xs sm:text-sm px-2 sm:px-3 md:px-4 shrink-0"
+                 onClick={handleViewDetailsButton}
+                 data-tour="view-details-button"
+               >
+                 <span className="hidden sm:inline">{t('serviceCard.learnMore')}</span>
+                 <span className="sm:hidden">More</span>
+               </Button>
+             </div>
 
-            {/* Action Buttons - Responsive sizing */}
-            <div className="flex gap-2 mt-auto">
-              {/* Unified Add to Cart Button - all services go through funnel */}
-              <Button
-                variant="outline"
-                className="flex-1 h-8 sm:h-9 md:h-10 text-xs sm:text-sm px-2 sm:px-3"
-                onClick={handleAddToCart}
-              >
-                <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                <span className="hidden xs:inline">{t('serviceCard.addToCart')}</span>
-                <span className="xs:hidden">Add</span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="h-8 sm:h-9 md:h-10 text-xs sm:text-sm px-2 sm:px-3 md:px-4 shrink-0"
-                onClick={handleViewDetailsButton}
-                data-tour="view-details-button"
-              >
-                <span className="hidden sm:inline">{t('serviceCard.learnMore')}</span>
-                <span className="sm:hidden">More</span>
-              </Button>
-            </div>
-
-            {/* Pro Savings Guarantee for pro members */}
-            {isProMember && service.is_verified && effectivePricing.pro > 0 && (
-              <p className="text-xs text-gray-600 mt-3 pt-3 border-t border-gray-200">
-                <span className="font-bold text-black">Pro Savings Guarantee.</span> If your first month Pro credits and coverage do not equal or exceed your membership fee we credit the difference as marketplace credit.
-              </p>
-            )}
-          </CardContent>
+             {/* Pro Savings Guarantee for pro members */}
+             {isProMember && service.is_verified && effectivePricing.pro > 0 && (
+               <p className="text-xs text-gray-600 mt-3 pt-3 border-t border-gray-200">
+                 <span className="font-bold text-black">Pro Savings Guarantee.</span> If your first month Pro credits and coverage do not equal or exceed your membership fee we credit the difference as marketplace credit.
+               </p>
+             )}
+           </CardContent>
           
           {/* Full Card Overlay for Disclaimer */}
           {showOverlay && disclaimerContent && (
