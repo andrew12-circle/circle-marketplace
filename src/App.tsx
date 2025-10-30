@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { WebAnalyticsTracker } from "@/components/analytics/WebAnalyticsTracker";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 
 // Lazy load pages for better performance
 import { lazy, Suspense } from "react";
@@ -37,33 +38,36 @@ function App() {
         <TooltipProvider>
           <Router>
             <WebAnalyticsTracker />
-            <Suspense
-              fallback={
-                <div className="min-h-screen flex items-center justify-center">
-                  <div className="text-sm text-muted-foreground">Loading...</div>
-                </div>
-              }
-            >
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/lobby" element={<Lobby />} />
-                <Route path="/marketplace" element={<Index />} />
-                <Route path="/playbooks" element={<Playbooks />} />
-                <Route path="/lender" element={<LenderMarketplace />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/health" element={<Health />} />
-                <Route path="/upload-covers" element={<UploadPlaybookCovers />} />
-                <Route path="/funnel/:serviceId" element={<FunnelPage />} />
-                <Route 
-                  path="/admin/*" 
-                  element={
-                    <ProtectedRoute>
-                      <Admin />
-                    </ProtectedRoute>
-                  } 
-                />
-              </Routes>
-            </Suspense>
+            <div className="pb-20 md:pb-0">
+              <Suspense
+                fallback={
+                  <div className="min-h-screen flex items-center justify-center">
+                    <div className="text-sm text-muted-foreground">Loading...</div>
+                  </div>
+                }
+              >
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/lobby" element={<Lobby />} />
+                  <Route path="/marketplace" element={<Index />} />
+                  <Route path="/playbooks" element={<Playbooks />} />
+                  <Route path="/lender" element={<LenderMarketplace />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/health" element={<Health />} />
+                  <Route path="/upload-covers" element={<UploadPlaybookCovers />} />
+                  <Route path="/funnel/:serviceId" element={<FunnelPage />} />
+                  <Route 
+                    path="/admin/*" 
+                    element={
+                      <ProtectedRoute>
+                        <Admin />
+                      </ProtectedRoute>
+                    } 
+                  />
+                </Routes>
+              </Suspense>
+            </div>
+            <MobileBottomNav />
           </Router>
           <Toaster />
           <Sonner />

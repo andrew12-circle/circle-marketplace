@@ -24,40 +24,22 @@ export const Header = ({ showCart = false, showTourButton = false }: HeaderProps
     <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 sticky top-0 z-50">
       <div className="container mx-auto px-3 sm:px-4 py-2 sm:py-3">
         {isMobile ? (
-          // Mobile Header Layout
-          <div className="space-y-3">
-            {/* Top row - Logo and User Actions */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Link to="/">
-                  <img 
-                    src={circleLogoUrl}
-                    alt="Circle Logo" 
-                    className="w-14 h-14 object-contain"
-                    width="56"
-                    height="56"
-                    loading="eager"
-                    decoding="async"
-                    style={{
-                      imageRendering: 'crisp-edges'
-                    }}
-                  />
-                </Link>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                {showCart && <CartDrawer />}
-                
-                {user && profile && (
-                  <Link to="/wallet" className="flex items-center gap-1 text-xs hover:bg-accent hover:text-accent-foreground rounded-md px-1.5 py-1 transition-colors cursor-pointer touch-target">
-                    <Crown className="w-3 h-3 text-yellow-500" />
-                    <span className="font-medium text-xs" key={profile.circle_points}>{profile.circle_points}</span>
-                  </Link>
-                )}
-                
-                <UserMenu />
-              </div>
-            </div>
+          // Mobile Header Layout - Simplified (bottom nav handles user actions)
+          <div className="flex items-center justify-center">
+            <Link to="/">
+              <img 
+                src={circleLogoUrl}
+                alt="Circle Logo" 
+                className="w-14 h-14 object-contain"
+                width="56"
+                height="56"
+                loading="eager"
+                decoding="async"
+                style={{
+                  imageRendering: 'crisp-edges'
+                }}
+              />
+            </Link>
           </div>
         ) : (
           // Desktop Header Layout
