@@ -1,0 +1,1 @@
+UPDATE services SET copay_allowed = false WHERE copay_allowed = true;
